@@ -6,12 +6,7 @@ export const IdeaListPage = () => {
   const [ideas, setIdeas] = useState<IdeaListItem[]>([]);
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('innovatepam.session') ?? 'null')?.token as string | undefined;
-    if (!token) {
-      return;
-    }
-
-    void ideaApi.list(token).then(setIdeas);
+    void ideaApi.list().then(setIdeas);
   }, []);
 
   return (

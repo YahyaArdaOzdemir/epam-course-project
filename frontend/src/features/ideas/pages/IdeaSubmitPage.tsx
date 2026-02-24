@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { ideaApi } from '../services/idea-service';
 
 export const IdeaSubmitPage = () => {
@@ -7,17 +8,16 @@ export const IdeaSubmitPage = () => {
   const [category, setCategory] = useState('');
   const [file, setFile] = useState<File | undefined>();
   const [message, setMessage] = useState('');
-
-  const token = JSON.parse(localStorage.getItem('innovatepam.session') ?? 'null')?.token as string | undefined;
+  const { csrfToken } = useAuth();
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!token) {
+    if (!csrfToken) {
       setMessage('Please login first');
       return;
     }
 
-    await ideaApi.create(token, { title, description, category, file });
+    await ideaApi.create({ title, description, category, file }, csrfToken);
     setMessage('Idea submitted');
   };
 

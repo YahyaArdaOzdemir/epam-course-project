@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { evaluationApi } from '../services/evaluation-service';
 
 export const EvaluationDetailPage = () => {
@@ -8,22 +9,21 @@ export const EvaluationDetailPage = () => {
   const [comment, setComment] = useState('');
   const [rowVersion, setRowVersion] = useState(0);
   const [message, setMessage] = useState('');
-
-  const token = JSON.parse(localStorage.getItem('innovatepam.session') ?? 'null')?.token as string | undefined;
+  const { csrfToken } = useAuth();
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!token) {
+    if (!csrfToken) {
       setMessage('Please login first');
       return;
     }
 
     try {
-      const result = await evaluationApi.updateStatus(ideaId, token, {
+      const result = await evaluationApi.updateStatus(ideaId, {
         toStatus,
         comment,
         rowVersion,
-      });
+      }, csrfToken);
       setRowVersion(result.rowVersion + 1);
       setMessage('Status updated');
     } catch (error) {

@@ -2,9 +2,24 @@ export type Role = 'submitter' | 'evaluator_admin';
 export type IdeaStatus = 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
 
 export type AuthSession = {
-  token: string;
+  authenticated: true;
   userId: string;
   role: Role;
+  expiresAt: string;
+};
+
+export type LoginResponse = {
+  userId: string;
+  role: Role;
+  redirectTo: '/dashboard';
+};
+
+export type CsrfResponse = {
+  csrfToken: string;
+};
+
+export type NeutralResponse = {
+  message: string;
 };
 
 export type RegisterRequest = {

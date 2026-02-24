@@ -1,0 +1,304 @@
+openapi: 3.0.3
+info:
+  title: InnovatEPAM Auth Refinement API
+  version: 0.2.0
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /auth/register:
+    post:
+      summary: Register account with secure password hashing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Validation failure (email/password policy)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Registration-related throttling exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Authenticate and issue cookie session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated, session cookie issued
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: HttpOnly Secure SameSite=Lax session cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Login throttling exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: Revoke active session
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+          description: CSRF token issued by /auth/csrf for authenticated state-changing requests.
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          description: Missing or invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/session:
+    get:
+      summary: Get current authenticated session snapshot
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Active session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No active valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/csrf:
+    get:
+      summary: Issue CSRF token bound to active session
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: CSRF token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfResponse'
+        '401':
+          description: Missing or invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password-reset/request:
+    post:
+      summary: Start one-time email reset link flow (30-minute token lifetime)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestInput'
+      responses:
+        '202':
+          description: Reset request accepted (neutral response)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeutralResponse'
+        '429':
+          description: Password reset throttling exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password-reset/confirm:
+    post:
+      summary: Complete password reset using one-time token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+      responses:
+        '200':
+          description: Password reset completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeutralResponse'
+        '400':
+          description: Invalid token, expired token, reused token, or password policy failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Password reset throttling exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: innovatepam_session
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: Must include uppercase, lowercase, digit, and special character.
+
+    RegisterResponse:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [userId, role, redirectTo]
+      properties:
+        userId:
+          type: string
+        role:
+          type: string
+          enum: [submitter, evaluator_admin]
+        redirectTo:
+          type: string
+          enum: [/dashboard]
+
+    SessionResponse:
+      type: object
+      required: [authenticated, userId, role, expiresAt]
+      properties:
+        authenticated:
+          type: boolean
+          enum: [true]
+        userId:
+          type: string
+        role:
+          type: string
+          enum: [submitter, evaluator_admin]
+        expiresAt:
+          type: string
+          format: date-time
+
+    CsrfResponse:
+      type: object
+      required: [csrfToken]
+      properties:
+        csrfToken:
+          type: string
+
+    PasswordResetRequestInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    PasswordResetConfirmRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+          description: One-time reset token valid for 30 minutes from issuance.
+        newPassword:
+          type: string
+          minLength: 8
+          description: Must include uppercase, lowercase, digit, and special character.
+
+    NeutralResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - AUTH_INVALID_CREDENTIALS
+            - AUTH_SESSION_INVALID
+            - AUTH_EMAIL_EXISTS
+            - AUTH_PASSWORD_POLICY_FAILED
+            - AUTH_RESET_TOKEN_INVALID
+            - AUTH_THROTTLED
+            - AUTH_CSRF_INVALID
+        message:
+          type: string

@@ -3,7 +3,7 @@ import { IdeaCreateRequest, IdeaListItem, ShareIdeaRequest } from '../../../serv
 
 /** API helpers for creating/listing/sharing ideas. */
 export const ideaApi = {
-  async create(token: string, payload: IdeaCreateRequest): Promise<IdeaListItem> {
+  async create(payload: IdeaCreateRequest, csrfToken: string): Promise<IdeaListItem> {
     const formData = new FormData();
     formData.append('title', payload.title);
     formData.append('description', payload.description);
@@ -12,14 +12,14 @@ export const ideaApi = {
       formData.append('file', payload.file);
     }
 
-    return apiClient.post('/ideas', formData, token, true);
+    return apiClient.post('/ideas', formData, true, csrfToken);
   },
 
-  list(token: string): Promise<IdeaListItem[]> {
-    return apiClient.get('/ideas', token);
+  list(): Promise<IdeaListItem[]> {
+    return apiClient.get('/ideas');
   },
 
-  share(ideaId: string, token: string, payload: ShareIdeaRequest): Promise<IdeaListItem> {
-    return apiClient.patch(`/ideas/${ideaId}/share`, { isShared: payload.isShared }, token, payload.rowVersion);
+  share(ideaId: string, payload: ShareIdeaRequest, csrfToken: string): Promise<IdeaListItem> {
+    return apiClient.patch(`/ideas/${ideaId}/share`, { isShared: payload.isShared }, payload.rowVersion, csrfToken);
   },
 };

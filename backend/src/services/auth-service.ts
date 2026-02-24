@@ -1,8 +1,13 @@
-import { ConflictError, UnauthorizedError, ValidationError } from '../lib/errors';
-import { hashToken, signAuthToken } from '../lib/auth-tokens';
+import { AppError, ConflictError, UnauthorizedError, ValidationError } from '../lib/errors';
+import { generateOpaqueToken, hashToken, signAuthToken, verifyAuthToken } from '../lib/auth-tokens';
 import { hashPassword, verifyPassword } from '../lib/passwords';
+import { authThrottleRepository } from '../repositories/auth-throttle-repository';
+import { csrfTokenRepository } from '../repositories/csrf-token-repository';
+import { passwordResetRepository } from '../repositories/password-reset-repository';
 import { sessionRepository } from '../repositories/session-repository';
 import { userRepository } from '../repositories/user-repository';
+
+const resetTokenTtlMinutes = Number(process.env.PASSWORD_RESET_TOKEN_TTL_MINUTES ?? 30);
 
 const getAllowedDomains = (): string[] => {
   return (process.env.ALLOWED_EMAIL_DOMAINS ?? 'epam.com')
@@ -19,7 +24,29 @@ const assertCorporateDomain = (email: string): void => {
   }
 };
 
+const ensureNotThrottled = (input: { actionType: 'login' | 'password_reset'; accountKey: string; sourceIp: string }): void => {
+  if (authThrottleRepository.isBlocked(input)) {
+    throw new AppError('Too many attempts. Please try again later.', 429, 'AUTH_THROTTLED');
+  }
+};
+
+const recordThrottleFailure = (input: { actionType: 'login' | 'password_reset'; accountKey: string; sourceIp: string }): void => {
+  authThrottleRepository.recordFailure(input);
+};
+
+type SessionSnapshot = {
+  authenticated: true;
+  userId: string;
+  role: 'submitter' | 'evaluator_admin';
+  expiresAt: string;
+};
+
+/**
+ * Core authentication domain service for credential login, cookie-backed session lifecycle,
+ * CSRF issuance, and password reset token workflows.
+ */
 export const authService = {
+  /** Registers a new user account with validated email/password and stored bcrypt hash. */
   async register(email: string, password: string): Promise<{ userId: string }> {
     assertCorporateDomain(email);
 
@@ -33,32 +60,128 @@ export const authService = {
     return { userId: user.id };
   },
 
-  async login(email: string, password: string): Promise<{ token: string; userId: string; role: 'submitter' | 'evaluator_admin' }> {
-    const user = userRepository.findByEmail(email);
+  async login(input: {
+    email: string;
+    password: string;
+    sourceIp: string;
+    userAgent?: string;
+  }): Promise<{ token: string; userId: string; role: 'submitter' | 'evaluator_admin'; redirectTo: '/dashboard'; expiresAt: string }> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+    ensureNotThrottled({ actionType: 'login', accountKey: normalizedEmail, sourceIp: input.sourceIp });
+
+    const user = userRepository.findByEmail(normalizedEmail);
     if (!user || user.status !== 'active') {
+      recordThrottleFailure({ actionType: 'login', accountKey: normalizedEmail, sourceIp: input.sourceIp });
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    const isValidPassword = await verifyPassword(password, user.passwordHash);
+    const isValidPassword = await verifyPassword(input.password, user.passwordHash);
     if (!isValidPassword) {
+      recordThrottleFailure({ actionType: 'login', accountKey: normalizedEmail, sourceIp: input.sourceIp });
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    const token = signAuthToken({ userId: user.id, role: user.role });
+    const signed = signAuthToken({ userId: user.id, role: user.role });
+    sessionRepository.revokeByUserId(user.id);
     sessionRepository.create({
       userId: user.id,
-      tokenHash: hashToken(token),
-      ttlHours: 8,
+      jwtId: signed.jti,
+      tokenHash: hashToken(signed.token),
+      ttlHours: Number(process.env.SESSION_TTL_HOURS ?? 24),
+      createdFromIp: input.sourceIp,
+      createdFromUserAgent: input.userAgent ?? null,
     });
 
+    authThrottleRepository.clearWindow({ actionType: 'login', accountKey: normalizedEmail, sourceIp: input.sourceIp });
+
     return {
-      token,
+      token: signed.token,
       userId: user.id,
       role: user.role,
+      redirectTo: '/dashboard',
+      expiresAt: signed.expiresAt,
     };
   },
 
   logout(token: string): void {
     sessionRepository.revokeByTokenHash(hashToken(token));
+  },
+
+  getSession(token: string): SessionSnapshot {
+    const payload = verifyAuthToken(token);
+    const session = sessionRepository.findActiveByTokenHash(hashToken(token));
+
+    if (!session || session.userId !== payload.userId || new Date(session.expiresAt).getTime() <= Date.now()) {
+      throw new UnauthorizedError('Session is invalid');
+    }
+
+    return {
+      authenticated: true,
+      userId: payload.userId,
+      role: payload.role,
+      expiresAt: session.expiresAt,
+    };
+  },
+
+  issueCsrf(token: string): { csrfToken: string } {
+    const session = sessionRepository.findActiveByTokenHash(hashToken(token));
+    if (!session) {
+      throw new UnauthorizedError('Session is invalid');
+    }
+
+    const csrfToken = generateOpaqueToken(24);
+    csrfTokenRepository.issue({
+      sessionId: session.id,
+      tokenHash: hashToken(csrfToken),
+      ttlMinutes: 30,
+    });
+
+    return { csrfToken };
+  },
+
+  requestPasswordReset(input: { email: string; sourceIp: string }): { message: string } {
+    const normalizedEmail = input.email.trim().toLowerCase();
+    ensureNotThrottled({ actionType: 'password_reset', accountKey: normalizedEmail, sourceIp: input.sourceIp });
+
+    const user = userRepository.findByEmail(normalizedEmail);
+    if (!user) {
+      return { message: 'If an account exists, a reset link has been sent.' };
+    }
+
+    const resetToken = generateOpaqueToken(32);
+    passwordResetRepository.create({
+      userId: user.id,
+      tokenHash: hashToken(resetToken),
+      ttlMinutes: resetTokenTtlMinutes,
+      requestedFromIp: input.sourceIp,
+    });
+
+    return {
+      message: 'If an account exists, a reset link has been sent.',
+    };
+  },
+
+  async confirmPasswordReset(input: { token: string; newPassword: string; sourceIp: string }): Promise<{ message: string }> {
+    const tokenHash = hashToken(input.token);
+    const record = passwordResetRepository.findActiveByTokenHash(tokenHash);
+
+    if (!record || new Date(record.expiresAt).getTime() <= Date.now()) {
+      recordThrottleFailure({ actionType: 'password_reset', accountKey: 'token', sourceIp: input.sourceIp });
+      throw new AppError('Reset token is invalid or expired', 400, 'AUTH_RESET_TOKEN_INVALID');
+    }
+
+    const user = userRepository.findById(record.userId);
+    if (!user) {
+      throw new AppError('Reset token is invalid or expired', 400, 'AUTH_RESET_TOKEN_INVALID');
+    }
+
+    const nextPasswordHash = await hashPassword(input.newPassword);
+    userRepository.updatePassword(user.id, nextPasswordHash);
+
+    passwordResetRepository.consume(record.id);
+    passwordResetRepository.consumeAllForUser(user.id);
+    sessionRepository.revokeByUserId(user.id);
+
+    return { message: 'Password reset completed' };
   },
 };

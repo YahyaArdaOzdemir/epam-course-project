@@ -3,7 +3,7 @@ import { EvaluateIdeaRequest, IdeaListItem } from '../../../services/contracts';
 
 /** Updates idea status with optimistic concurrency conflict mapping. */
 export const evaluationApi = {
-  async updateStatus(ideaId: string, token: string, payload: EvaluateIdeaRequest): Promise<IdeaListItem> {
+  async updateStatus(ideaId: string, payload: EvaluateIdeaRequest, csrfToken: string): Promise<IdeaListItem> {
     try {
       return await apiClient.patch(
         `/ideas/${ideaId}/status`,
@@ -11,8 +11,8 @@ export const evaluationApi = {
           toStatus: payload.toStatus,
           comment: payload.comment,
         },
-        token,
         payload.rowVersion,
+        csrfToken,
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

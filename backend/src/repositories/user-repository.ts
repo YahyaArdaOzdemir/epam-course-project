@@ -55,4 +55,8 @@ export const userRepository = {
       updatedAt: now,
     };
   },
+  updatePassword(id: string, passwordHash: string): void {
+    const db = getDb();
+    db.prepare('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?').run(passwordHash, new Date().toISOString(), id);
+  },
 };

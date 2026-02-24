@@ -10,10 +10,11 @@ describe('auth utilities', () => {
   });
 
   it('signs and verifies auth token', () => {
-    const token = signAuthToken({ userId: 'u1', role: 'submitter' });
-    const payload = verifyAuthToken(token);
+    const signed = signAuthToken({ userId: 'u1', role: 'submitter' });
+    const payload = verifyAuthToken(signed.token);
     expect(payload.userId).toBe('u1');
     expect(payload.role).toBe('submitter');
+    expect(payload.jti).toBeTruthy();
   });
 
   it('hashes token deterministically', () => {

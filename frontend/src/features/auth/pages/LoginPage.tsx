@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage = () => {
@@ -7,6 +8,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -14,7 +16,8 @@ export const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      await login({ email, password });
+      const result = await login({ email, password });
+      navigate(result.redirectTo);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to login');
     } finally {
@@ -63,6 +66,9 @@ export const LoginPage = () => {
       >
         Logout
       </button>
+      <p className="mt-3 text-center text-sm text-slate-600">
+        Forgot password? <Link to="/reset-password" className="text-blue-600 hover:text-blue-700">Reset it</Link>
+      </p>
       <p className="mt-4 text-center text-sm text-slate-600">{message}</p>
     </main>
   );

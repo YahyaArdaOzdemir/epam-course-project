@@ -11,6 +11,8 @@ const config: Config = {
   collectCoverageFrom: ['backend/src/**/*.ts', 'frontend/src/**/*.{ts,tsx}'],
   coverageThreshold: {
     global: commonCoverage,
+    './backend/src/{controllers,middleware,routes,services,validators}/auth-*.ts': commonCoverage,
+    './frontend/src/features/auth/**/*.{ts,tsx}': commonCoverage,
   },
   projects: [
     {

@@ -7,11 +7,11 @@ export class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  async get<T>(path: string, token?: string): Promise<T> {
-    return this.request<T>(path, { method: 'GET' }, token);
+  async get<T>(path: string): Promise<T> {
+    return this.request<T>(path, { method: 'GET' });
   }
 
-  async post<T>(path: string, body?: BodyInit | object, token?: string, isFormData = false): Promise<T> {
+  async post<T>(path: string, body?: BodyInit | object, isFormData = false, csrfToken?: string): Promise<T> {
     const headers: HeadersInit = {};
     let payload: BodyInit | undefined;
 
@@ -24,10 +24,14 @@ export class ApiClient {
       payload = body as BodyInit | undefined;
     }
 
-    return this.request<T>(path, { method: 'POST', body: payload, headers }, token);
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return this.request<T>(path, { method: 'POST', body: payload, headers });
   }
 
-  async patch<T>(path: string, body: object, token?: string, ifMatch?: number): Promise<T> {
+  async patch<T>(path: string, body: object, ifMatch?: number, csrfToken?: string): Promise<T> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -36,18 +40,20 @@ export class ApiClient {
       headers['If-Match'] = String(ifMatch);
     }
 
-    return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body), headers }, token);
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body), headers });
   }
 
-  private async request<T>(path: string, init: RequestInit, token?: string): Promise<T> {
+  private async request<T>(path: string, init: RequestInit): Promise<T> {
     const headers = new Headers(init.headers);
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
 
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
       headers,
+      credentials: 'include',
     });
 
     if (!response.ok) {
