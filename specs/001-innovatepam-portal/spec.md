@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Create the InnovatEPAM Portal (internal employee innovation management platform where employees submit ideas and admins evaluate them) with User Management, Idea Submission System, and Evaluation Workflow."
 
+## Clarifications
+
+### Session 2026-02-24
+
+- Q: Which authentication model should be used for MVP? → A: Local account auth with email/password registration restricted to approved corporate email domains.
+- Q: What should idea listing visibility be for submitters? → A: Submitters see their own ideas by default and can optionally share idea visibility with all employees.
+- Q: How should concurrent evaluator updates be handled? → A: Use optimistic concurrency checks and reject stale updates with refresh/retry guidance.
+- Q: What attachment formats and size limit should MVP support? → A: Allow PDF, DOCX, PPTX, PNG, and JPG files up to 10 MB.
+- Q: Who can view evaluation comments? → A: When an idea is shared, evaluation comments are visible to all authenticated employees.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3
@@ -47,6 +57,7 @@ As a submitter, I can create ideas with title, description, category, and one at
 
 1. **Given** an authenticated submitter on the idea form, **When** they provide title, description, category, and optionally one file, **Then** the idea is saved with status `Submitted` and appears in the list.
 2. **Given** an authenticated submitter, **When** they upload more than one file for a single idea, **Then** submission is rejected with a clear validation message.
+3. **Given** an authenticated submitter, **When** they upload an unsupported file type or a file larger than 10 MB, **Then** submission is rejected with a clear validation message.
 
 ---
 
@@ -62,6 +73,8 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 
 1. **Given** an evaluator/admin viewing a `Submitted` idea, **When** they start evaluation, **Then** status changes to `Under Review`.
 2. **Given** an evaluator/admin reviewing an idea, **When** they choose `Accepted` or `Rejected` and provide comments, **Then** the decision and comments are saved and visible to relevant users.
+3. **Given** two evaluators/admins update the same idea concurrently, **When** one update becomes stale, **Then** the stale update is rejected and the user is prompted to refresh and retry.
+4. **Given** an idea is shared by its submitter, **When** an evaluator/admin finalizes with comments, **Then** all authenticated employees can view those evaluation comments in the shared view.
 
 ---
 
@@ -71,7 +84,7 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - Registration is attempted with an email already used by another account.
 - Login is attempted with invalid credentials repeatedly.
 - A submitter tries to submit an idea missing one or more required fields.
-- A submitter attempts to upload an empty, unsupported, or oversized file.
+- A submitter attempts to upload an empty, unsupported, or oversized file (greater than 10 MB).
 - An evaluator/admin tries to evaluate an idea that was already finalized.
 - Concurrent evaluator actions occur on the same idea.
 - A non-admin user attempts to call evaluator-only actions directly.
@@ -82,28 +95,37 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 
 ### Functional Requirements
 
-- **FR-001**: System MUST allow employees to register new accounts with unique identity credentials.
-- **FR-002**: System MUST allow registered users to log in and log out securely.
-- **FR-003**: System MUST support at least two roles: submitter and evaluator/admin.
-- **FR-004**: System MUST restrict evaluator/admin actions to evaluator/admin role only.
-- **FR-005**: System MUST provide an idea submission form containing title, description, and category as required fields.
-- **FR-006**: System MUST allow attaching zero or one file per idea submission.
-- **FR-007**: System MUST reject idea submissions that exceed the single-file attachment limit.
-- **FR-008**: System MUST persist each submitted idea with creator identity, submission timestamp, and initial status `Submitted`.
-- **FR-009**: System MUST provide a listing view of submitted ideas with current status and key metadata.
-- **FR-010**: System MUST support idea statuses `Submitted`, `Under Review`, `Accepted`, and `Rejected`.
-- **FR-011**: System MUST allow evaluator/admin users to change status from `Submitted` to `Under Review`.
-- **FR-012**: System MUST allow evaluator/admin users to finalize ideas as `Accepted` or `Rejected` with a required evaluation comment.
-- **FR-013**: System MUST preserve status history including decision comments and decision timestamps.
-- **FR-014**: System MUST prevent unauthorized users from creating, modifying, or finalizing evaluation decisions.
-- **FR-015**: System MUST show validation and permission errors in user-friendly language.
+- **FR-001**: System MUST allow employees to register new local accounts using email/password credentials with unique corporate email identity.
+- **FR-002**: System MUST allow registration only for approved corporate email domains.
+- **FR-003**: System MUST allow registered users to log in and log out securely.
+- **FR-004**: System MUST support at least two roles: submitter and evaluator/admin.
+- **FR-005**: System MUST restrict evaluator/admin actions to evaluator/admin role only.
+- **FR-006**: System MUST provide an idea submission form containing title, description, and category as required fields.
+- **FR-007**: System MUST allow attaching zero or one file per idea submission.
+- **FR-008**: System MUST reject idea submissions that exceed the single-file attachment limit.
+- **FR-009**: System MUST accept only PDF, DOCX, PPTX, PNG, and JPG attachment formats.
+- **FR-010**: System MUST enforce a maximum attachment size of 10 MB.
+- **FR-011**: System MUST persist each submitted idea with creator identity, submission timestamp, and initial status `Submitted`.
+- **FR-012**: System MUST provide a listing view of submitted ideas with current status and key metadata.
+- **FR-013**: System MUST make submitter idea listings private by default (owner-visible only).
+- **FR-014**: System MUST allow submitters to optionally share individual ideas for visibility to all authenticated employees.
+- **FR-015**: System MUST allow evaluator/admin users to view all ideas regardless of sharing setting.
+- **FR-016**: System MUST support idea statuses `Submitted`, `Under Review`, `Accepted`, and `Rejected`.
+- **FR-017**: System MUST allow evaluator/admin users to change status from `Submitted` to `Under Review`.
+- **FR-018**: System MUST allow evaluator/admin users to finalize ideas as `Accepted` or `Rejected` with a required evaluation comment.
+- **FR-019**: System MUST preserve status history including decision comments and decision timestamps.
+- **FR-020**: System MUST prevent unauthorized users from creating, modifying, or finalizing evaluation decisions.
+- **FR-021**: System MUST show validation and permission errors in user-friendly language.
+- **FR-022**: System MUST enforce optimistic concurrency for evaluation updates by rejecting stale status/decision writes and requiring client refresh before retry.
+- **FR-023**: System MUST make evaluation comments visible to all authenticated employees for ideas that the submitter has shared.
 
 ### Assumptions
 
-- The portal serves internal employees with pre-approved access to the organization environment.
-- Self-registration is allowed for employees, and newly registered users default to submitter role unless elevated by authorized administrators.
+- The portal serves internal employees and enforces corporate-domain registration to ensure internal-only access.
+- Self-registration is allowed for employees with approved corporate email domains, and newly registered users default to submitter role unless elevated by authorized administrators.
 - One attachment per idea is sufficient for initial release.
 - Evaluator/admin users can view and evaluate all submitted ideas.
+- Submitters can choose per idea whether it remains private (default) or becomes visible to all authenticated employees.
 - Finalized ideas (`Accepted` or `Rejected`) are not re-opened in this release.
 
 ### Key Entities *(include if feature involves data)*
