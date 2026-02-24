@@ -1,0 +1,22 @@
+# Node / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+test-results/
+*.log
+.env*
+
+# Runtime / app data
+backend/uploads/
+backend/data/
+*.sqlite
+*.db
+
+# Universal
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

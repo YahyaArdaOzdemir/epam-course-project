@@ -17,16 +17,15 @@
 
 **Purpose**: Initialize monorepo, tooling, strict TypeScript, and baseline test infrastructure.
 
-- [ ] T001 Initialize root workspace scripts and workspaces in package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T002 Create backend package configuration in backend/package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T003 Create frontend package configuration in frontend/package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T004 [P] Configure strict TypeScript for backend in backend/tsconfig.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T005 [P] Configure strict TypeScript for frontend in frontend/tsconfig.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T006 [P] Configure Jest projects and coverage thresholds in jest.config.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T007 [P] Configure Playwright E2E project in playwright.config.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T008 [P] Configure Tailwind and PostCSS in frontend/tailwind.config.ts and frontend/postcss.config.js (Trace: US2/US3, AC: US2-1, US3-1, FR: FR-006..FR-024)
+- [X] T001 Initialize root workspace scripts and workspaces in package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T002 Create backend package configuration in backend/package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T003 Create frontend package configuration in frontend/package.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T004 [P] Configure strict TypeScript for backend in backend/tsconfig.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T005 [P] Configure strict TypeScript for frontend in frontend/tsconfig.json (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T006 [P] Configure Jest projects and coverage thresholds in jest.config.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T007 [P] Configure Playwright E2E project in playwright.config.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T008 [P] Configure Tailwind and PostCSS in frontend/tailwind.config.ts and frontend/postcss.config.js (Trace: US2/US3, AC: US2-1, US3-1, FR: FR-006..FR-024)
 
----
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
@@ -34,16 +33,16 @@
 
 **⚠️ CRITICAL**: No user story implementation starts until this phase is complete.
 
-- [ ] T009 Create Express app bootstrap and middleware wiring in backend/src/app.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T010 [P] Create SQLite connection and migration runner in backend/src/lib/db.ts and backend/src/lib/migrate.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T011 [P] Create base schema migrations for User/Session/Idea/Attachment/EvaluationDecision/StatusHistoryEntry in backend/src/lib/migrations/001_init.sql (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T012 [P] Implement shared error types and error middleware in backend/src/lib/errors.ts and backend/src/middleware/error-handler.ts (Trace: US1/US2/US3, AC: US1-2, US2-3, US3-3, FR: FR-021)
-- [ ] T013 [P] Implement auth token utilities and password hashing utilities in backend/src/lib/auth-tokens.ts and backend/src/lib/passwords.ts (Trace: US1, AC: US1-1, US1-3, FR: FR-001..FR-003)
-- [ ] T014 [P] Implement role/auth guards middleware in backend/src/middleware/auth-guard.ts (Trace: US1/US2/US3, AC: US1-2, US3-1, FR: FR-004, FR-005, FR-015, FR-020, FR-024)
-- [ ] T015 [P] Implement global request validation helpers (Zod) in backend/src/validators/common.ts (Trace: US1/US2/US3, AC: US1-1, US2-3, US3-2, FR: FR-001..FR-024)
-- [ ] T016 [P] Configure multer upload storage and file policy guard in backend/src/lib/upload-policy.ts (Trace: US2, AC: US2-2, US2-3, FR: FR-007..FR-010)
-- [ ] T017 [P] Create API router composition in backend/src/routes/index.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T018 Define shared API client and typed DTO contracts for frontend in frontend/src/services/api-client.ts and frontend/src/services/contracts.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T009 Create Express app bootstrap and middleware wiring in backend/src/app.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T010 [P] Create SQLite connection and migration runner in backend/src/lib/db.ts and backend/src/lib/migrate.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T011 [P] Create base schema migrations for User/Session/Idea/Attachment/EvaluationDecision/StatusHistoryEntry in backend/src/lib/migrations/001_init.sql (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T012 [P] Implement shared error types and error middleware in backend/src/lib/errors.ts and backend/src/middleware/error-handler.ts (Trace: US1-2, US2-3, US3-3, FR: FR-021)
+- [X] T013 [P] Implement auth token utilities and password hashing utilities in backend/src/lib/auth-tokens.ts and backend/src/lib/passwords.ts (Trace: US1, AC: US1-1, US1-3, FR: FR-001..FR-003)
+- [X] T014 [P] Implement role/auth guards middleware in backend/src/middleware/auth-guard.ts (Trace: US1/US2/US3, AC: US1-2, US3-1, FR: FR-004, FR-005, FR-015, FR-020, FR-024)
+- [X] T015 [P] Implement global request validation helpers (Zod) in backend/src/validators/common.ts (Trace: US1/US2/US3, AC: US1-1, US2-3, US3-2, FR: FR-001..FR-024)
+- [X] T016 [P] Configure multer upload storage and file policy guard in backend/src/lib/upload-policy.ts (Trace: US2, AC: US2-2, US2-3, FR: FR-007..FR-010)
+- [X] T017 [P] Create API router composition in backend/src/routes/index.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T018 Define shared API client and typed DTO contracts for frontend in frontend/src/services/api-client.ts and frontend/src/services/contracts.ts (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
 
 **Checkpoint**: Foundation complete; user stories can now proceed.
 
@@ -57,21 +56,21 @@
 
 ### Tests for User Story 1 (MANDATORY)
 
-- [ ] T019 [P] [US1] Add unit tests for auth domain/password/token utilities in backend/tests/unit/auth-utils.test.ts
-- [ ] T020 [P] [US1] Add integration tests for register/login/logout and role denial in backend/tests/integration/auth-routes.test.ts
-- [ ] T021 [US1] Add E2E auth journey test (register-login-logout + role restriction) in e2e/tests/us1-auth.spec.ts
-- [ ] T022 [US1] Record failing-first evidence for US1 test set in specs/001-innovatepam-portal/checklists/us1-test-proof.md
+- [X] T019 [P] [US1] Add unit tests for auth domain/password/token utilities in backend/tests/unit/auth-utils.test.ts
+- [X] T020 [P] [US1] Add integration tests for register/login/logout and role denial in backend/tests/integration/auth-routes.test.ts
+- [X] T021 [US1] Add E2E auth journey test (register-login-logout + role restriction) in e2e/tests/us1-auth.spec.ts
+- [X] T022 [US1] Record failing-first evidence for US1 test set in specs/001-innovatepam-portal/checklists/us1-test-proof.md
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Implement User and Session repositories in backend/src/repositories/user-repository.ts and backend/src/repositories/session-repository.ts (Trace: AC US1-1, US1-3; FR-001, FR-003, FR-004)
-- [ ] T024 [US1] Implement authentication service in backend/src/services/auth-service.ts (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003, FR-024)
-- [ ] T025 [US1] Implement auth validators for register/login in backend/src/validators/auth-validator.ts (Trace: AC US1-1; FR-001, FR-002, FR-003)
-- [ ] T026 [US1] Implement auth controller endpoints in backend/src/controllers/auth-controller.ts (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003)
-- [ ] T027 [US1] Register auth routes in backend/src/routes/auth-routes.ts and backend/src/routes/index.ts (Trace: AC US1-1, US1-2, US1-3; FR-003, FR-005)
-- [ ] T028 [US1] Implement frontend auth pages and forms in frontend/src/features/auth/pages/RegisterPage.tsx and frontend/src/features/auth/pages/LoginPage.tsx (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003)
-- [ ] T029 [US1] Implement frontend auth state/session handling with JSDoc in frontend/src/features/auth/hooks/useAuth.ts and frontend/src/features/auth/services/auth-service.ts (Trace: AC US1-3; FR-003, FR-021)
-- [ ] T030 [US1] Verify US1 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us1-coverage.md (Trace: AC US1-1, US1-2, US1-3; FR-001..FR-005, FR-021, FR-024)
+- [X] T023 [P] [US1] Implement User and Session repositories in backend/src/repositories/user-repository.ts and backend/src/repositories/session-repository.ts (Trace: AC US1-1, US1-3; FR-001, FR-003, FR-004)
+- [X] T024 [US1] Implement authentication service in backend/src/services/auth-service.ts (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003, FR-024)
+- [X] T025 [US1] Implement auth validators for register/login in backend/src/validators/auth-validator.ts (Trace: AC US1-1; FR-001, FR-002, FR-003)
+- [X] T026 [US1] Implement auth controller endpoints in backend/src/controllers/auth-controller.ts (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003)
+- [X] T027 [US1] Register auth routes in backend/src/routes/auth-routes.ts and backend/src/routes/index.ts (Trace: AC US1-1, US1-2, US1-3; FR-003, FR-005)
+- [X] T028 [US1] Implement frontend auth pages and forms in frontend/src/features/auth/pages/RegisterPage.tsx and frontend/src/features/auth/pages/LoginPage.tsx (Trace: AC US1-1, US1-3; FR-001, FR-002, FR-003)
+- [X] T029 [US1] Implement frontend auth state/session handling with JSDoc in frontend/src/features/auth/hooks/useAuth.ts and frontend/src/features/auth/services/auth-service.ts (Trace: AC US1-3; FR-003, FR-021)
+- [X] T030 [US1] Verify US1 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us1-coverage.md (Trace: AC US1-1, US1-2, US1-3; FR-001..FR-005, FR-021, FR-024)
 
 **Checkpoint**: US1 is independently functional and testable.
 
@@ -85,24 +84,24 @@
 
 ### Tests for User Story 2 (MANDATORY)
 
-- [ ] T031 [P] [US2] Add unit tests for upload policy and idea visibility rules in backend/tests/unit/idea-policy.test.ts
-- [ ] T032 [P] [US2] Add integration tests for create/list/share idea endpoints in backend/tests/integration/idea-routes.test.ts
-- [ ] T033 [US2] Add E2E submit-and-list journey with attachment constraints in e2e/tests/us2-idea-submission.spec.ts
-- [ ] T034 [US2] Record failing-first evidence for US2 test set in specs/001-innovatepam-portal/checklists/us2-test-proof.md
-- [ ] T035 [P] [US2] Add unit tests for attachment MIME-and-extension enforcement and 10 MiB boundary in backend/tests/unit/attachment-validation.test.ts
-- [ ] T036 [P] [US2] Add unit tests for shared-visibility and comment-audience policy in backend/tests/unit/visibility-policy.test.ts
+- [X] T031 [P] [US2] Add unit tests for upload policy and idea visibility rules in backend/tests/unit/idea-policy.test.ts
+- [X] T032 [P] [US2] Add integration tests for create/list/share idea endpoints in backend/tests/integration/idea-routes.test.ts
+- [X] T033 [US2] Add E2E submit-and-list journey with attachment constraints in e2e/tests/us2-idea-submission.spec.ts
+- [X] T034 [US2] Record failing-first evidence for US2 test set in specs/001-innovatepam-portal/checklists/us2-test-proof.md
+- [X] T035 [P] [US2] Add unit tests for attachment MIME-and-extension enforcement and 10 MiB boundary in backend/tests/unit/attachment-validation.test.ts
+- [X] T036 [P] [US2] Add unit tests for shared-visibility and comment-audience policy in backend/tests/unit/visibility-policy.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T037 [P] [US2] Implement Idea and Attachment repositories in backend/src/repositories/idea-repository.ts and backend/src/repositories/attachment-repository.ts (Trace: AC US2-1; FR-007..FR-012)
-- [ ] T038 [US2] Implement idea creation/list/share business service in backend/src/services/idea-service.ts (Trace: AC US2-1; FR-006..FR-015, FR-023)
-- [ ] T039 [US2] Implement idea validators (payload, upload constraints, share toggle) in backend/src/validators/idea-validator.ts (Trace: AC US2-2, US2-3; FR-006..FR-010, FR-014)
-- [ ] T040 [US2] Implement idea controllers for create/list/share in backend/src/controllers/idea-controller.ts (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015)
-- [ ] T041 [US2] Register idea routes in backend/src/routes/idea-routes.ts and backend/src/routes/index.ts (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015)
-- [ ] T042 [US2] Implement submitter idea form and list pages in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and frontend/src/features/ideas/pages/IdeaListPage.tsx (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-014)
-- [ ] T043 [US2] Implement frontend idea API/service layer in frontend/src/features/ideas/services/idea-service.ts (Trace: AC US2-1, US2-2, US2-3; FR-007..FR-015)
-- [ ] T044 [US2] Add/Update JSDoc for exported idea API interfaces in backend/src/services/idea-service.ts and frontend/src/features/ideas/services/idea-service.ts (Trace: AC US2-1; FR-006..FR-015)
-- [ ] T045 [US2] Verify US2 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us2-coverage.md (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015, FR-023)
+- [X] T037 [P] [US2] Implement Idea and Attachment repositories in backend/src/repositories/idea-repository.ts and backend/src/repositories/attachment-repository.ts (Trace: AC US2-1; FR-007..FR-012)
+- [X] T038 [US2] Implement idea creation/list/share business service in backend/src/services/idea-service.ts (Trace: AC US2-1; FR-006..FR-015, FR-023)
+- [X] T039 [US2] Implement idea validators (payload, upload constraints, share toggle) in backend/src/validators/idea-validator.ts (Trace: AC US2-2, US2-3; FR-006..FR-010, FR-014)
+- [X] T040 [US2] Implement idea controllers for create/list/share in backend/src/controllers/idea-controller.ts (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015)
+- [X] T041 [US2] Register idea routes in backend/src/routes/idea-routes.ts and backend/src/routes/index.ts (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015)
+- [X] T042 [US2] Implement submitter idea form and list pages in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and frontend/src/features/ideas/pages/IdeaListPage.tsx (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-014)
+- [X] T043 [US2] Implement frontend idea API/service layer in frontend/src/features/ideas/services/idea-service.ts (Trace: AC US2-1, US2-2, US2-3; FR-007..FR-015)
+- [X] T044 [US2] Add/Update JSDoc for exported idea API interfaces in backend/src/services/idea-service.ts and frontend/src/features/ideas/services/idea-service.ts (Trace: AC US2-1; FR-006..FR-015)
+- [X] T045 [US2] Verify US2 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us2-coverage.md (Trace: AC US2-1, US2-2, US2-3; FR-006..FR-015, FR-023)
 
 **Checkpoint**: US2 is independently functional and testable.
 
@@ -116,23 +115,23 @@
 
 ### Tests for User Story 3 (MANDATORY)
 
-- [ ] T046 [P] [US3] Add unit tests for status transition and concurrency rules in backend/tests/unit/evaluation-rules.test.ts
-- [ ] T047 [P] [US3] Add integration tests for evaluation status endpoint and conflict handling in backend/tests/integration/evaluation-routes.test.ts
-- [ ] T048 [US3] Add E2E evaluator workflow including stale-update conflict in e2e/tests/us3-evaluation.spec.ts
-- [ ] T049 [US3] Record failing-first evidence for US3 test set in specs/001-innovatepam-portal/checklists/us3-test-proof.md
-- [ ] T050 [P] [US3] Add unit tests for final-comment visibility on shared vs private ideas in backend/tests/unit/evaluation-visibility.test.ts
+- [X] T046 [P] [US3] Add unit tests for status transition and concurrency rules in backend/tests/unit/evaluation-rules.test.ts
+- [X] T047 [P] [US3] Add integration tests for evaluation status endpoint and conflict handling in backend/tests/integration/evaluation-routes.test.ts
+- [X] T048 [US3] Add E2E evaluator workflow including stale-update conflict in e2e/tests/us3-evaluation.spec.ts
+- [X] T049 [US3] Record failing-first evidence for US3 test set in specs/001-innovatepam-portal/checklists/us3-test-proof.md
+- [X] T050 [P] [US3] Add unit tests for final-comment visibility on shared vs private ideas in backend/tests/unit/evaluation-visibility.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T051 [P] [US3] Implement EvaluationDecision and StatusHistory repositories in backend/src/repositories/evaluation-repository.ts and backend/src/repositories/status-history-repository.ts (Trace: AC US3-1, US3-2; FR-016..FR-019)
-- [ ] T052 [US3] Implement evaluation workflow service with optimistic concurrency in backend/src/services/evaluation-service.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-016..FR-020, FR-022, FR-023)
-- [ ] T053 [US3] Implement evaluation validators (status transition/comment requirements) in backend/src/validators/evaluation-validator.ts (Trace: AC US3-2, US3-3; FR-017, FR-018, FR-022)
-- [ ] T054 [US3] Implement evaluation controller endpoint in backend/src/controllers/evaluation-controller.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-017..FR-023)
-- [ ] T055 [US3] Register evaluation route in backend/src/routes/evaluation-routes.ts and backend/src/routes/index.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-017..FR-023)
-- [ ] T056 [US3] Implement evaluator/admin review UI pages in frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx and frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx (Trace: AC US3-1, US3-2, US3-4; FR-015..FR-018, FR-023)
-- [ ] T057 [US3] Implement frontend evaluation API/service layer with conflict UX mapping in frontend/src/features/evaluation/services/evaluation-service.ts (Trace: AC US3-2, US3-3, US3-4; FR-017..FR-023)
-- [ ] T058 [US3] Add/Update JSDoc for exported evaluation APIs in backend/src/services/evaluation-service.ts and frontend/src/features/evaluation/services/evaluation-service.ts (Trace: AC US3-1; FR-017..FR-023)
-- [ ] T059 [US3] Verify US3 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us3-coverage.md (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-015..FR-023)
+- [X] T051 [P] [US3] Implement EvaluationDecision and StatusHistory repositories in backend/src/repositories/evaluation-repository.ts and backend/src/repositories/status-history-repository.ts (Trace: AC US3-1, US3-2; FR-016..FR-019)
+- [X] T052 [US3] Implement evaluation workflow service with optimistic concurrency in backend/src/services/evaluation-service.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-016..FR-020, FR-022, FR-023)
+- [X] T053 [US3] Implement evaluation validators (status transition/comment requirements) in backend/src/validators/evaluation-validator.ts (Trace: AC US3-2, US3-3; FR-017, FR-018, FR-022)
+- [X] T054 [US3] Implement evaluation controller endpoint in backend/src/controllers/evaluation-controller.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-017..FR-023)
+- [X] T055 [US3] Register evaluation route in backend/src/routes/evaluation-routes.ts and backend/src/routes/index.ts (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-017..FR-023)
+- [X] T056 [US3] Implement evaluator/admin review UI pages in frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx and frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx (Trace: AC US3-1, US3-2, US3-4; FR-015..FR-018, FR-023)
+- [X] T057 [US3] Implement frontend evaluation API/service layer with conflict UX mapping in frontend/src/features/evaluation/services/evaluation-service.ts (Trace: AC US3-2, US3-3, US3-4; FR-017..FR-023)
+- [X] T058 [US3] Add/Update JSDoc for exported evaluation APIs in backend/src/services/evaluation-service.ts and frontend/src/features/evaluation/services/evaluation-service.ts (Trace: AC US3-1; FR-017..FR-023)
+- [X] T059 [US3] Verify US3 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us3-coverage.md (Trace: AC US3-1, US3-2, US3-3, US3-4; FR-015..FR-023)
 
 **Checkpoint**: US3 is independently functional and testable.
 
@@ -142,15 +141,15 @@
 
 **Purpose**: Enforce quality gates, documentation, and final validation across all stories.
 
-- [ ] T060 [P] Add unit tests to maintain target test pyramid ratio in backend/tests/unit/pyramid-balance.test.ts and frontend/tests/unit/pyramid-balance.test.ts, enforcing >=70% of automated tests as unit tests (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T061 [P] Add integration test coverage for end-to-end API contracts in backend/tests/integration/contracts-conformance.test.ts, enforcing >=20% of automated tests as integration tests (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T062 [P] Add Playwright regression scenario for role/visibility matrix in e2e/tests/regression-role-visibility.spec.ts, enforcing <=10% of automated tests as E2E tests (Trace: US1/US2/US3, AC: US1-2, US2-1, US3-4, FR: FR-005, FR-013..FR-015, FR-023, FR-024)
-- [ ] T063 [P] Add backend performance benchmark task for p95<300ms under 200 concurrent users in backend/tests/integration/performance-benchmark.test.ts (Trace: US2/US3, AC: US2-1, US3-2, FR: FR-012, FR-016..FR-019)
-- [ ] T064 [P] Add JSDoc compliance audit for exported backend/frontend APIs in specs/001-innovatepam-portal/checklists/jsdoc-audit.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T065 Update API and environment docs in specs/001-innovatepam-portal/quickstart.md and specs/001-innovatepam-portal/contracts/openapi.yaml (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T066 Run and record quickstart validation results in specs/001-innovatepam-portal/checklists/quickstart-validation.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T067 Verify overall changed-code line coverage >=80% and document output in specs/001-innovatepam-portal/checklists/coverage-report.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
-- [ ] T068 Run full lint/test/e2e gate and record final release checklist in specs/001-innovatepam-portal/checklists/release-readiness.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T060 [P] Add unit tests to maintain target test pyramid ratio in backend/tests/unit/pyramid-balance.test.ts and frontend/tests/unit/pyramid-balance.test.ts, enforcing >=70% of automated tests as unit tests (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T061 [P] Add integration test coverage for end-to-end API contracts in backend/tests/integration/contracts-conformance.test.ts, enforcing >=20% of automated tests as integration tests (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T062 [P] Add Playwright regression scenario for role/visibility matrix in e2e/tests/regression-role-visibility.spec.ts, enforcing <=10% of automated tests as E2E tests (Trace: US1/US2/US3, AC: US1-2, US2-1, US3-4, FR: FR-005, FR-013..FR-015, FR-023, FR-024)
+- [X] T063 [P] Add backend performance benchmark task for p95<300ms under 200 concurrent users in backend/tests/integration/performance-benchmark.test.ts (Trace: US2/US3, AC: US2-1, US3-2, FR: FR-012, FR-016..FR-019)
+- [X] T064 [P] Add JSDoc compliance audit for exported backend/frontend APIs in specs/001-innovatepam-portal/checklists/jsdoc-audit.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T065 Update API and environment docs in specs/001-innovatepam-portal/quickstart.md and specs/001-innovatepam-portal/contracts/openapi.yaml (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T066 Run and record quickstart validation results in specs/001-innovatepam-portal/checklists/quickstart-validation.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T067 Verify overall changed-code line coverage >=80% and document output in specs/001-innovatepam-portal/checklists/coverage-report.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
+- [X] T068 Run full lint/test/e2e gate and record final release checklist in specs/001-innovatepam-portal/checklists/release-readiness.md (Trace: US1/US2/US3, AC: US1-1, US2-1, US3-1, FR: FR-001..FR-024)
 
 ---
 

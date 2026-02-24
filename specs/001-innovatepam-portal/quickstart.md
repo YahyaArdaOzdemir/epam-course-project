@@ -32,8 +32,8 @@ mkdir -p backend/uploads
 npm run dev
 ```
 Expected:
-- Backend API starts (Express).
-- Frontend starts (Vite).
+- Backend API starts on `http://localhost:3000` (Express).
+- Frontend starts on `http://localhost:5173` (Vite).
 
 ## 5) TDD-first workflow
 For each story, write tests first and confirm they fail before implementation.
@@ -43,6 +43,12 @@ For each story, write tests first and confirm they fail before implementation.
 npm run test:unit
 npm run test:integration
 npm run test:e2e
+```
+
+Optional build validation:
+```bash
+npm --workspace backend run build
+npm --workspace frontend run build
 ```
 
 ## 7) Validate core flows

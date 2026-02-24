@@ -194,6 +194,9 @@ components:
           enum: [Submitted, Under Review, Accepted, Rejected]
         isShared:
           type: boolean
+        rowVersion:
+          type: integer
+          minimum: 0
         ownerUserId:
           type: string
         latestEvaluationComment:

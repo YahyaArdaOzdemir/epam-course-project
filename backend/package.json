@@ -1,0 +1,30 @@
+{
+  "name": "@innovatepam/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "jest --selectProjects backend-unit backend-integration",
+    "lint": "echo 'lint not configured yet'"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
+    "@types/supertest": "^6.0.3"
+  }
+}
