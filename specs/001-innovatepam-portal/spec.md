@@ -12,7 +12,7 @@
 - Q: Which authentication model should be used for MVP? → A: Local account auth with email/password registration restricted to approved corporate email domains.
 - Q: What should idea listing visibility be for submitters? → A: Submitters see their own ideas by default and can optionally share idea visibility with all employees.
 - Q: How should concurrent evaluator updates be handled? → A: Use optimistic concurrency checks and reject stale updates with refresh/retry guidance.
-- Q: What attachment formats and size limit should MVP support? → A: Allow PDF, DOCX, PPTX, PNG, and JPG files up to 10 MB.
+- Q: What attachment formats and size limit should MVP support? → A: Allow PDF, DOCX, PPTX, PNG, and JPG files up to 10 MiB (10,485,760 bytes), inclusive.
 - Q: Who can view evaluation comments? → A: When an idea is shared, evaluation comments are visible to all authenticated employees.
 
 ## Constitution Alignment *(mandatory)*
@@ -57,7 +57,7 @@ As a submitter, I can create ideas with title, description, category, and one at
 
 1. **Given** an authenticated submitter on the idea form, **When** they provide title, description, category, and optionally one file, **Then** the idea is saved with status `Submitted` and appears in the list.
 2. **Given** an authenticated submitter, **When** they upload more than one file for a single idea, **Then** submission is rejected with a clear validation message.
-3. **Given** an authenticated submitter, **When** they upload an unsupported file type or a file larger than 10 MB, **Then** submission is rejected with a clear validation message.
+3. **Given** an authenticated submitter, **When** they upload an unsupported file type or a file larger than 10 MiB (10,485,760 bytes), **Then** submission is rejected with a clear validation message.
 
 ---
 
@@ -84,7 +84,7 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - Registration is attempted with an email already used by another account.
 - Login is attempted with invalid credentials repeatedly.
 - A submitter tries to submit an idea missing one or more required fields.
-- A submitter attempts to upload an empty, unsupported, or oversized file (greater than 10 MB).
+- A submitter attempts to upload an empty, unsupported, or oversized file (greater than 10 MiB / 10,485,760 bytes).
 - An evaluator/admin tries to evaluate an idea that was already finalized.
 - Concurrent evaluator actions occur on the same idea.
 - A non-admin user attempts to call evaluator-only actions directly.
@@ -95,16 +95,16 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 
 ### Functional Requirements
 
-- **FR-001**: System MUST allow employees to register new local accounts using email/password credentials with unique corporate email identity.
-- **FR-002**: System MUST allow registration only for approved corporate email domains.
+- **FR-001**: System MUST allow employees to register new local accounts using email/password credentials with unique corporate email identity, where email uniqueness is enforced on normalized lowercase address.
+- **FR-002**: System MUST allow registration only for approved corporate email domains sourced from a centrally managed allowlist configured by platform administrators.
 - **FR-003**: System MUST allow registered users to log in and log out securely.
 - **FR-004**: System MUST support at least two roles: submitter and evaluator/admin.
 - **FR-005**: System MUST restrict evaluator/admin actions to evaluator/admin role only.
 - **FR-006**: System MUST provide an idea submission form containing title, description, and category as required fields.
 - **FR-007**: System MUST allow attaching zero or one file per idea submission.
 - **FR-008**: System MUST reject idea submissions that exceed the single-file attachment limit.
-- **FR-009**: System MUST accept only PDF, DOCX, PPTX, PNG, and JPG attachment formats.
-- **FR-010**: System MUST enforce a maximum attachment size of 10 MB.
+- **FR-009**: System MUST accept only PDF, DOCX, PPTX, PNG, and JPG attachment formats using combined MIME-type and extension validation on the server.
+- **FR-010**: System MUST enforce a maximum attachment size of 10 MiB (10,485,760 bytes), inclusive.
 - **FR-011**: System MUST persist each submitted idea with creator identity, submission timestamp, and initial status `Submitted`.
 - **FR-012**: System MUST provide a listing view of submitted ideas with current status and key metadata.
 - **FR-013**: System MUST make submitter idea listings private by default (owner-visible only).
@@ -118,10 +118,12 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - **FR-021**: System MUST show validation and permission errors in user-friendly language.
 - **FR-022**: System MUST enforce optimistic concurrency for evaluation updates by rejecting stale status/decision writes and requiring client refresh before retry.
 - **FR-023**: System MUST make evaluation comments visible to all authenticated employees for ideas that the submitter has shared.
+- **FR-024**: System MUST treat "authenticated employees" as active human employee accounts only (excluding service accounts, suspended users, and non-employee external identities).
 
 ### Assumptions
 
 - The portal serves internal employees and enforces corporate-domain registration to ensure internal-only access.
+- Approved corporate domains are maintained in an administrator-owned configuration allowlist and changed through operational change control.
 - Self-registration is allowed for employees with approved corporate email domains, and newly registered users default to submitter role unless elevated by authorized administrators.
 - One attachment per idea is sufficient for initial release.
 - Evaluator/admin users can view and evaluate all submitted ideas.

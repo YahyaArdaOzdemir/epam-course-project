@@ -17,7 +17,7 @@ Build an internal innovation portal where employees register/login, submit ideas
 **Project Type**: Web application (frontend + backend)  
 **Performance Goals**: p95 API response under 300ms for list/detail/evaluation operations with up to 200 concurrent internal users  
 **Constraints**: TypeScript strict mode, JSDoc on exported APIs, TDD-first, 80% line coverage minimum on changed production code, no business-logic mocking  
-**Scale/Scope**: Internal MVP (single organization), two roles (submitter/evaluator-admin), attachment max 10 MB, moderate traffic
+**Scale/Scope**: Internal MVP (single organization), two roles (submitter/evaluator-admin), attachment max 10 MiB (10,485,760 bytes), moderate traffic
 
 ## Constitution Check
 
@@ -98,7 +98,7 @@ e2e/
 
 ## Post-Design Constitution Re-Check
 
-- **Story/Spec Traceability**: PASS. `data-model.md`, `contracts/openapi.yaml`, and `quickstart.md` map directly to US1-US3 and FR-001..FR-023.
+- **Story/Spec Traceability**: PASS. `data-model.md`, `contracts/openapi.yaml`, and `quickstart.md` map directly to US1-US3 and FR-001..FR-024.
 - **Strict TypeScript**: PASS. Design keeps all interfaces/contracts typed and ready for strict compilation.
 - **Documentation Discipline**: PASS. Public API surfaces in contract are designated for JSDoc during implementation.
 - **TDD First**: PASS. Quickstart and plan require tests-first sequence prior to code implementation.
