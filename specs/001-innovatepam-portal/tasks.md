@@ -153,6 +153,32 @@
 
 ---
 
+## Phase 7: UX Hardening - User Story 4 (Priority: P2)
+
+**Goal**: Introduce a post-login dashboard, global authenticated navigation, and explicit in-page error feedback so the application meets baseline usability expectations.
+
+**Independent Test**: Login redirects to dashboard, protected pages show user email + logout in global header, and failed requests display visible red alerts with loading-safe form behavior.
+
+### Tests for User Story 4 (MANDATORY)
+
+- [ ] T069 [P] [US4] Add unit tests for global error alert rendering and dismissal behavior in frontend/tests/unit/error-alerts.test.tsx
+- [ ] T070 [P] [US4] Add integration tests for post-login dashboard redirect and persistent header shell in frontend/tests/integration/navigation-shell.test.tsx
+- [ ] T071 [US4] Add E2E dashboard + global header + error feedback scenario in e2e/tests/us4-dashboard-navigation.spec.ts
+- [ ] T072 [US4] Record failing-first evidence for US4 test set in specs/001-innovatepam-portal/checklists/us4-test-proof.md
+
+### Implementation for User Story 4
+
+- [ ] T073 [US4] Implement post-login dashboard page with role-appropriate quick actions in frontend/src/features/dashboard/pages/DashboardPage.tsx
+- [ ] T074 [US4] Implement shared authenticated app shell with global navigation (email + logout) in frontend/src/components/AppShell.tsx and frontend/src/App.tsx
+- [ ] T075 [US4] Implement reusable in-page alert component and API-to-UI error mapping in frontend/src/components/Alert.tsx and frontend/src/services/api-client.ts
+- [ ] T076 [US4] Enforce loading/disabled-submit behavior and visible error alerts across auth/idea/evaluation forms in frontend/src/features/auth/pages/LoginPage.tsx, frontend/src/features/auth/pages/RegisterPage.tsx, frontend/src/features/ideas/pages/IdeaSubmitPage.tsx, and frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx
+- [ ] T077 [US4] Update UX validation docs in specs/001-innovatepam-portal/quickstart.md and specs/001-innovatepam-portal/checklists/release-readiness.md
+- [ ] T078 [US4] Verify US4 changed-code coverage >=80% and record in specs/001-innovatepam-portal/checklists/us4-coverage.md
+
+**Checkpoint**: US4 delivers a usable post-login experience and explicit error feedback standards.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -161,12 +187,14 @@
 - **Phase 2 (Foundational)**: Depends on Phase 1; blocks all user stories.
 - **Phase 3-5 (User Stories)**: Depend on Phase 2 completion.
 - **Phase 6 (Polish)**: Depends on completion of selected user stories.
+- **Phase 7 (UX Hardening/US4)**: Depends on foundational work and at least US1 completion; can be delivered incrementally after existing MVP flows.
 
 ### User Story Dependencies
 
 - **US1 (P1)**: Starts after Foundational; independent MVP slice.
 - **US2 (P2)**: Starts after Foundational and can proceed after US1 for auth reuse.
 - **US3 (P3)**: Starts after Foundational and after US2 data paths are available.
+- **US4 (P2)**: Starts after Foundational and US1 authentication baseline; integrates with US2/US3 pages for shared shell and error feedback consistency.
 
 ### Within Each User Story
 

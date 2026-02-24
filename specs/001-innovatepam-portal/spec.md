@@ -17,7 +17,7 @@
 
 ## Constitution Alignment *(mandatory)*
 
-- **Referenced User Story IDs**: US1, US2, US3
+- **Referenced User Story IDs**: US1, US2, US3, US4
 - **Spec Approval Evidence**: This specification is the authoritative scope artifact for `001-innovatepam-portal`; implementation starts only after explicit approval in project workflow.
 - **TypeScript Strictness Impact**: Feature behavior and data rules must be expressible under strict typing, with no ungoverned unsafe typing shortcuts.
 - **JSDoc Impact**: All exported APIs introduced for authentication, idea submission, listing, status updates, and evaluation actions require complete JSDoc.
@@ -78,6 +78,23 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 
 ---
 
+### User Story 4 - Post-Login Workspace and Global UX Feedback (Priority: P2)
+
+As an authenticated employee, I can land on a clear dashboard and navigate with persistent account context, while all form/API failures are shown as visible UI alerts.
+
+**Why this priority**: Functional workflows are complete, but usability and clarity are not sufficient for day-to-day adoption without a post-login home and explicit UI feedback.
+
+**Independent Test**: Can be fully tested by logging in, verifying redirect to dashboard, confirming persistent header with signed-in email/logout, and provoking validation failures to confirm visible red alerts.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user successfully authenticates, **When** login completes, **Then** they are redirected to a post-login dashboard with role-appropriate actions.
+2. **Given** an authenticated user is on any protected page, **When** page content loads, **Then** a global header is shown with signed-in email and logout action.
+3. **Given** a form/API request fails validation or authorization, **When** the response returns an error, **Then** a visible red alert with actionable message is shown in-page (not console-only).
+4. **Given** a user submits a form, **When** request is pending, **Then** submit action is disabled and loading state is visible to prevent duplicate submits.
+
+---
+
 ### Edge Cases
 
 
@@ -89,6 +106,9 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - Concurrent evaluator actions occur on the same idea.
 - A non-admin user attempts to call evaluator-only actions directly.
 - Session expires during idea submission or evaluation.
+- Session expires while user navigates from dashboard to feature pages.
+- Global header data is stale after role/session changes and must refresh on re-authentication.
+- Multiple rapid submits occur on the same form and should not create duplicate actions.
 
 ## Requirements *(mandatory)*
 
@@ -119,6 +139,15 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - **FR-022**: System MUST enforce optimistic concurrency for evaluation updates by rejecting stale status/decision writes and requiring client refresh before retry.
 - **FR-023**: System MUST make evaluation comments visible to all authenticated employees for ideas that the submitter has shared.
 - **FR-024**: System MUST treat "authenticated employees" as active human employee accounts only (excluding service accounts, suspended users, and non-employee external identities).
+- **FR-025**: System MUST redirect authenticated users to a post-login dashboard immediately after successful login.
+- **FR-026**: System MUST provide a dashboard that presents role-appropriate primary actions and a concise summary of user-relevant work items.
+- **FR-027**: System MUST render a persistent global navigation header on all protected routes.
+- **FR-028**: System MUST display the authenticated user's email in the global navigation header.
+- **FR-029**: System MUST provide a logout action in the global navigation header that is accessible from all protected routes.
+- **FR-030**: System MUST display API, validation, and permission failures as visible in-page UI alerts.
+- **FR-031**: System MUST present error alerts in clear user language and keep them visible until user retry, dismissal, or successful follow-up action.
+- **FR-032**: System MUST show loading state for form submissions and prevent duplicate submissions while a request is pending.
+- **FR-033**: System MUST enforce a consistent protected-page layout pattern with shared navigation and content container styling.
 
 ### Assumptions
 
@@ -129,6 +158,7 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - Evaluator/admin users can view and evaluate all submitted ideas.
 - Submitters can choose per idea whether it remains private (default) or becomes visible to all authenticated employees.
 - Finalized ideas (`Accepted` or `Rejected`) are not re-opened in this release.
+- Dashboard summaries can use lightweight counts/status highlights and do not require advanced analytics in this release.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -138,6 +168,7 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - **Attachment**: File metadata linked one-to-one with an idea submission when provided.
 - **Evaluation Decision**: Admin/evaluator action record containing decision status (`Accepted` or `Rejected`), required comment, evaluator identity, and timestamp.
 - **Status History Entry**: Immutable audit event capturing each idea status transition and actor.
+- **Dashboard Summary Item**: Aggregated, user-scoped status/count snippet displayed on post-login dashboard.
 
 ## Success Criteria *(mandatory)*
 
@@ -149,3 +180,6 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 - **SC-003**: 100% of finalized ideas contain an evaluator/admin decision (`Accepted` or `Rejected`) and a non-empty decision comment.
 - **SC-004**: 95% of status updates are visible in idea listings to authorized users within 5 seconds.
 - **SC-005**: In user acceptance testing, at least 85% of submitters and evaluators rate the submission/evaluation flow as clear and easy to complete.
+- **SC-006**: In usability testing, at least 90% of authenticated users reach their intended next action from dashboard in two clicks or fewer.
+- **SC-007**: At least 95% of failed form submissions surface a visible actionable error message in-page within 1 second of response.
+- **SC-008**: In user acceptance testing, at least 90% of participants rate global navigation clarity and session awareness at 4/5 or higher.
