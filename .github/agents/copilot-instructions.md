@@ -1,19 +1,16 @@
 # epam-course-project Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-02-24
+Auto-generated from all feature plans. Last updated: 2026-02-25
 
 ## Active Technologies
-- TypeScript 5.8.x in strict mode (backend + frontend) + Express 4, React 18, React Router 6, better-sqlite3, bcryptjs, jsonwebtoken, zod (001-production-user-auth)
-- SQLite (`better-sqlite3`) for user/session/reset data; browser cookie storage for session token; existing filesystem for ancillary storage (001-production-user-auth)
-- TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright (002-innovateepam-portal)
-- SQLite database + local filesystem uploads directory (`/uploads`) (002-innovateepam-portal)
 
-- TypeScript 5.x (strict mode enabled for frontend and backend) + React (latest), Vite, TailwindCSS, Node.js, Express.js, sqlite3/better-sqlite3, multer (upload handling), zod (runtime validation), Playwright, Jest (001-innovatepam-portal)
+- TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright (002-innovateepam-portal)
 
 ## Project Structure
 
 ```text
-src/
+backend/
+frontend/
 tests/
 ```
 
@@ -23,13 +20,53 @@ npm test && npm run lint
 
 ## Code Style
 
-TypeScript 5.x (strict mode enabled for frontend and backend): Follow standard conventions
+TypeScript 5.x strict mode (backend + frontend): Follow standard conventions
 
 ## Recent Changes
-- 002-innovateepam-portal: Added TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright
-- 001-production-user-auth: Added TypeScript 5.8.x in strict mode (backend + frontend) + Express 4, React 18, React Router 6, better-sqlite3, bcryptjs, jsonwebtoken, zod
 
-- 001-innovatepam-portal: Added TypeScript 5.x (strict mode enabled for frontend and backend) + React (latest), Vite, TailwindCSS, Node.js, Express.js, sqlite3/better-sqlite3, multer (upload handling), zod (runtime validation), Playwright, Jest
+- 002-innovateepam-portal: Added TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright
 
 <!-- MANUAL ADDITIONS START -->
+## Project-Specific Guardrails (Preserved)
+
+- Scope authority is limited to:
+	- `specs/002-innovateepam-portal/spec.md`
+	- `specs/002-innovateepam-portal/plan.md`
+	- `specs/002-innovateepam-portal/tasks.md`
+	- `.specify/memory/constitution.md`
+- Do not invent constraints, requirements, or UX behavior beyond those artifacts.
+- If a conflict appears between generated guidance and the files above, follow the files above.
+
+## Actual Monorepo Structure
+
+```text
+backend/
+	src/
+	tests/
+frontend/
+	src/
+	tests/
+e2e/
+	tests/
+specs/002-innovateepam-portal/
+```
+
+## Commands to Trust in This Repo
+
+- `npm run dev`
+- `npm test`
+- `npm run test:unit`
+- `npm run test:integration`
+- `npm run test:coverage`
+- `npm run test:e2e`
+- `npm run lint`
+- `npm run build`
+
+## Implementation Safety Notes
+
+- Roles are exactly: `submitter`, `admin`.
+- Delivery order is constitution-driven: Story -> Spec -> Plan -> Tasks -> failing tests -> implementation.
+- Keep strict TypeScript and exported-symbol JSDoc requirements.
+- Keep changed-code coverage at least 80%.
+- If a task references a missing script (for example `lint:openapi`), add it during setup tasks rather than assuming it already exists.
 <!-- MANUAL ADDITIONS END -->

@@ -25,3 +25,9 @@ This directory stores Architecture Decision Records (ADRs) for InnovatEPAM Porta
 - [0006 - Idea Details Audit Timeline for Evaluation Traceability](0006-idea-details-audit-timeline.md) — Accepted
 - [0007 - Standardized Alerts and Interaction Safety Controls](0007-standardized-alerts-and-interaction-safety.md) — Accepted
 - [0008 - Accessibility Baseline for Keyboard, ARIA, and Focus Management](0008-accessibility-baseline-keyboard-aria-focus.md) — Accepted
+
+## Implementation Traceability (2026-02-25)
+
+- Spec/task implementation evidence is tracked in [../../specs/002-innovateepam-portal/tasks.md](../../specs/002-innovateepam-portal/tasks.md) (all tasks marked complete).
+- Release readiness evidence is tracked in [../../specs/002-innovateepam-portal/checklists/release-readiness.md](../../specs/002-innovateepam-portal/checklists/release-readiness.md).
+- Coverage gate evidence is tracked in [../../specs/002-innovateepam-portal/checklists/coverage-report.md](../../specs/002-innovateepam-portal/checklists/coverage-report.md), with latest passing metrics: Statements `82.55%`, Lines `82.06%`.

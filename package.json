@@ -11,15 +11,18 @@
     "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "dev:backend": "npm --workspace backend run dev",
     "dev:frontend": "npm --workspace frontend run dev",
+    "test:ci": "npm run test:unit && npm run test:integration && npm run test:coverage",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest --selectProjects backend-unit frontend-unit",
     "test:integration": "jest --selectProjects backend-integration frontend-integration",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
+    "lint:openapi": "swagger-cli validate specs/002-innovateepam-portal/contracts/openapi.yaml",
     "lint": "npm --workspace backend run lint && npm --workspace frontend run lint",
     "build": "npm --workspace backend run build && npm --workspace frontend run build"
   },
   "devDependencies": {
+    "@apidevtools/swagger-cli": "^4.0.4",
     "@playwright/test": "^1.53.0",
     "@types/express": "^5.0.3",
     "@types/jest": "^29.5.14",
