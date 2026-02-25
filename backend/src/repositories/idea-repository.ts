@@ -92,7 +92,7 @@ export const ideaRepository = {
     const whereParams: Array<string | number> = [];
 
     if (input.role !== 'admin') {
-      whereClauses.push('(ideas.owner_user_id = ? OR ideas.is_shared = 1)');
+      whereClauses.push('ideas.owner_user_id = ?');
       whereParams.push(input.userId);
     }
 

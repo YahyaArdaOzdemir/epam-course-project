@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../../auth/hooks/useAuth';
-import { Alert } from '../../shared/Alert';
 import { IdeaCategory } from '../../shared/domain-types';
 import { focusErrorAlert } from '../../shared/focus-error-alert';
 import { useSubmissionGuard } from '../../shared/useSubmissionGuard';
@@ -63,8 +63,8 @@ export const IdeaSubmitPage = () => {
       <h1 className="text-2xl font-semibold text-slate-900">Submit Idea</h1>
       <p className="mt-2 text-sm text-slate-600">Provide a clear idea summary and choose a valid category before submitting.</p>
 
-      {errorMessage ? <Alert id={IDEA_SUBMIT_ERROR_ALERT_ID} className="mt-4" severity="error" message={errorMessage} /> : null}
-      {successMessage ? <Alert className="mt-4" severity="success" message={successMessage} /> : null}
+      {errorMessage ? <Alert id={IDEA_SUBMIT_ERROR_ALERT_ID} className="mt-4" variant="destructive" message={errorMessage} /> : null}
+      {successMessage ? <Alert className="mt-4" variant="success" message={successMessage} /> : null}
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <label className="block text-sm font-medium text-slate-700">

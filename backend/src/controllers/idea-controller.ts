@@ -32,6 +32,21 @@ export const ideaController = {
     }
   },
 
+  getById(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
+    try {
+      const auth = request.auth!;
+      const idea = ideaService.getIdeaById({
+        ideaId: String(request.params.ideaId),
+        viewerUserId: auth.userId,
+        viewerRole: auth.role,
+      });
+
+      response.status(200).json(idea);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   share(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
     try {
       const auth = request.auth!;

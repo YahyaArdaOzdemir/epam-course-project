@@ -49,6 +49,20 @@ const listIdeas = (viewer: { userId: string; role: 'submitter' | 'admin'; query:
   return ideaRepository.listVisible({ userId: viewer.userId, role: viewer.role, query: viewer.query });
 };
 
+/** Returns single idea details for owner or admin viewer. */
+const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 'submitter' | 'admin' }): IdeaRecord => {
+  const existing = ideaRepository.findById(input.ideaId);
+  if (!existing) {
+    throw new ValidationError('Idea not found');
+  }
+
+  if (input.viewerRole !== 'admin' && existing.ownerUserId !== input.viewerUserId) {
+    throw new ForbiddenError('You do not have access to this idea');
+  }
+
+  return existing;
+};
+
 /** Toggles sharing state for an owner with optimistic concurrency. */
 const toggleShare = (input: {
   ideaId: string;
@@ -82,5 +96,6 @@ const toggleShare = (input: {
 export const ideaService = {
   createIdea,
   listIdeas,
+  getIdeaById,
   toggleShare,
 };

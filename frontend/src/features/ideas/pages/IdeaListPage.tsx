@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Select';
 import { IdeaCategory, IdeaListItem, IdeaStatus, IdeaSortDirection, PaginationMeta } from '../../../services/contracts';
@@ -9,30 +10,97 @@ const statusOptions: Array<IdeaStatus> = ['Submitted', 'Under Review', 'Accepted
 const categoryOptions: Array<IdeaCategory> = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'];
 
 export const IdeaListPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [ideas, setIdeas] = useState<IdeaListItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState<IdeaStatus | 'all'>('all');
-  const [category, setCategory] = useState<IdeaCategory | 'all'>('all');
-  const [sortDirection, setSortDirection] = useState<IdeaSortDirection>('Newest');
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [pagination, setPagination] = useState<PaginationMeta>({ page: 1, pageSize: 10, totalItems: 0, totalPages: 1 });
 
-  useEffect(() => {
-    void ideaApi.list({
-      page,
-      pageSize: 10,
-      status: status === 'all' ? undefined : status,
-      category: category === 'all' ? undefined : category,
-      sortBy: 'date',
-      sortDirection,
-    }).then((result) => {
-      setIdeas(result.items);
-      setPagination(result.pagination);
-    });
-  }, [page, status, category, sortDirection]);
+  const pageParam = Number(searchParams.get('page') ?? '1');
+  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+
+  const statusParam = searchParams.get('status');
+  const status = statusParam && statusOptions.includes(statusParam as IdeaStatus) ? statusParam as IdeaStatus : 'all';
+
+  const categoryParam = searchParams.get('category');
+  const category = categoryParam && categoryOptions.includes(categoryParam as IdeaCategory) ? categoryParam as IdeaCategory : 'all';
+
+  const sortDirectionParam = searchParams.get('sortDirection');
+  const sortDirection = sortDirectionParam === 'Oldest' ? 'Oldest' : 'Newest';
+
+  const updateSearch = (next: {
+    page?: number;
+    status?: IdeaStatus | 'all';
+    category?: IdeaCategory | 'all';
+    sortDirection?: IdeaSortDirection;
+  }): void => {
+    const updated = new URLSearchParams(searchParams);
+
+    const nextPage = next.page ?? page;
+    const nextStatus = next.status ?? status;
+    const nextCategory = next.category ?? category;
+    const nextSortDirection = next.sortDirection ?? sortDirection;
+
+    updated.set('page', String(nextPage));
+
+    if (nextStatus === 'all') {
+      updated.delete('status');
+    } else {
+      updated.set('status', nextStatus);
+    }
+
+    if (nextCategory === 'all') {
+      updated.delete('category');
+    } else {
+      updated.set('category', nextCategory);
+    }
+
+    updated.set('sortDirection', nextSortDirection);
+    setSearchParams(updated);
+  };
 
   useEffect(() => {
-    setPage(1);
-  }, [status, category, sortDirection]);
+    let isMounted = true;
+
+    const loadIdeas = async (): Promise<void> => {
+      setIsLoading(true);
+      setErrorMessage('');
+
+      try {
+        const result = await ideaApi.list({
+          page,
+          pageSize: 10,
+          status: status === 'all' ? undefined : status,
+          category: category === 'all' ? undefined : category,
+          sortBy: 'date',
+          sortDirection,
+        });
+
+        if (!isMounted) {
+          return;
+        }
+
+        setIdeas(result.items);
+        setPagination(result.pagination);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to load ideas');
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadIdeas();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, status, category, sortDirection]);
 
   const hasPreviousPage = pagination.page > 1;
   const hasNextPage = pagination.page < pagination.totalPages;
@@ -43,7 +111,10 @@ export const IdeaListPage = () => {
       <section className="mt-4 grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 md:grid-cols-3">
         <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-600">
           Status
-          <Select value={status} onChange={(event) => setStatus(event.target.value as IdeaStatus | 'all')}>
+          <Select
+            value={status}
+            onChange={(event) => updateSearch({ status: event.target.value as IdeaStatus | 'all', page: 1 })}
+          >
             <option value="all">All</option>
             {statusOptions.map((option) => (
               <option key={option} value={option}>
@@ -55,7 +126,10 @@ export const IdeaListPage = () => {
 
         <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-600">
           Category
-          <Select value={category} onChange={(event) => setCategory(event.target.value as IdeaCategory | 'all')}>
+          <Select
+            value={category}
+            onChange={(event) => updateSearch({ category: event.target.value as IdeaCategory | 'all', page: 1 })}
+          >
             <option value="all">All</option>
             {categoryOptions.map((option) => (
               <option key={option} value={option}>
@@ -67,14 +141,21 @@ export const IdeaListPage = () => {
 
         <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-600">
           Sort
-          <Select value={sortDirection} onChange={(event) => setSortDirection(event.target.value as IdeaSortDirection)}>
+          <Select
+            value={sortDirection}
+            onChange={(event) => updateSearch({ sortDirection: event.target.value as IdeaSortDirection, page: 1 })}
+          >
             <option value="Newest">Newest</option>
             <option value="Oldest">Oldest</option>
           </Select>
         </label>
       </section>
 
-      {ideas.length === 0 ? (
+      {errorMessage ? <Alert severity="error" message={errorMessage} className="mt-4" /> : null}
+
+      {isLoading ? <p className="mt-6 text-sm text-slate-600">Loading ideas...</p> : null}
+
+      {!isLoading && ideas.length === 0 ? (
         <section className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
           <p className="text-sm text-slate-700">No ideas found. Submit your first one!</p>
           <Link
@@ -88,7 +169,9 @@ export const IdeaListPage = () => {
         <ul className="mt-6 space-y-3">
           {ideas.map((idea) => (
             <li key={idea.id} className="rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
-              <p className="font-medium text-slate-900">{idea.title}</p>
+              <Link to={`/ideas/${idea.id}`} className="font-medium text-slate-900 transition hover:text-blue-700">
+                {idea.title}
+              </Link>
               <p className="mt-1 text-xs text-slate-600">
                 {idea.status} · {idea.category} · shared: {String(idea.isShared)}
               </p>
@@ -104,7 +187,7 @@ export const IdeaListPage = () => {
 
       <div className="mt-6 flex items-center justify-between">
         <Button
-          onClick={() => setPage((current) => Math.max(1, current - 1))}
+          onClick={() => updateSearch({ page: Math.max(1, pagination.page - 1) })}
           disabled={!hasPreviousPage}
         >
           Previous
@@ -113,7 +196,7 @@ export const IdeaListPage = () => {
           Page {pagination.page} of {pagination.totalPages} ({pagination.totalItems} total)
         </span>
         <Button
-          onClick={() => setPage((current) => current + 1)}
+          onClick={() => updateSearch({ page: pagination.page + 1 })}
           disabled={!hasNextPage}
         >
           Next

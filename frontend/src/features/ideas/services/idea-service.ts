@@ -1,5 +1,5 @@
 import { apiClient } from '../../../services/api-client';
-import { IdeaCreateRequest, IdeaListItem, IdeaListQuery, IdeaListResponse, ShareIdeaRequest } from '../../../services/contracts';
+import { IdeaCreateRequest, IdeaDetails, IdeaListItem, IdeaListQuery, IdeaListResponse, ShareIdeaRequest } from '../../../services/contracts';
 
 /** API helpers for creating/listing/sharing ideas. */
 export const ideaApi = {
@@ -29,6 +29,10 @@ export const ideaApi = {
 
     const querySuffix = searchParams.toString();
     return apiClient.get(`/ideas${querySuffix ? `?${querySuffix}` : ''}`);
+  },
+
+  getById(ideaId: string): Promise<IdeaDetails> {
+    return apiClient.get(`/ideas/${ideaId}`);
   },
 
   share(ideaId: string, payload: ShareIdeaRequest, csrfToken: string): Promise<IdeaListItem> {

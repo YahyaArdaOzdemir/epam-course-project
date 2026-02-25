@@ -12,8 +12,10 @@ import {
 } from './features/auth/pages';
 import { IdeaSubmitPage } from './features/ideas/pages/IdeaSubmitPage';
 import { IdeaListPage } from './features/ideas/pages/IdeaListPage';
+import { IdeaDetailsPage } from './features/ideas/pages/IdeaDetailsPage';
 import { EvaluationQueuePage, EvaluationDetailPage } from './features/evaluation/pages';
 import { ProtectedLayout } from './features/layout/ProtectedLayout';
+import { Alert } from './components/ui/Alert';
 
 export const App = () => {
   const { session } = useAuth();
@@ -47,6 +49,7 @@ export const App = () => {
               <Route path="/ideas/new" element={<IdeaSubmitPage />} />
               <Route path="/submit" element={<IdeaSubmitPage />} />
               <Route path="/ideas" element={<IdeaListPage />} />
+              <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
               <Route path="/evaluation" element={<EvaluationQueuePage />} />
               <Route path="/evaluate" element={<EvaluationQueuePage />} />
               <Route path="/evaluation/:ideaId" element={<EvaluationDetailPage />} />
@@ -134,9 +137,7 @@ const PublicLandingPage = () => {
 
       <section className="relative rounded-xl border border-slate-200 p-6">
         {successMessage ? (
-          <div className="fixed right-6 top-6 z-50 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm" role="status" aria-live="polite">
-            {successMessage}
-          </div>
+          <Alert severity="success" message={successMessage} className="fixed right-6 top-6 z-50" />
         ) : null}
 
         <div className="mb-4 grid grid-cols-2 gap-2">
@@ -165,7 +166,7 @@ const PublicLandingPage = () => {
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</div>
+          <Alert severity="error" message={errorMessage} className="mb-4" />
         ) : null}
 
         {mode === 'register' ? (

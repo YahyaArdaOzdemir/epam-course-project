@@ -51,6 +51,12 @@ export type IdeaListItem = {
   latestEvaluationComment: string | null;
 };
 
+export type IdeaDetails = IdeaListItem & {
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type PaginationMeta = {
   page: number;
   pageSize: number;
