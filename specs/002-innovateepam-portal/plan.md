@@ -25,7 +25,7 @@ Deliver MVP in four story slices with quality/safety built in: secure local auth
 
 ### Pre-Design Gate
 
-- **Story/Spec Traceability**: PASS — Plan is anchored to US1-US4 and FR-001..FR-062.
+- **Story/Spec Traceability**: PASS — Plan is anchored to US1-US4 and FR-001..FR-075.
 - **Strict TypeScript**: PASS — strict TS explicitly required for API/domain/frontend contracts.
 - **Documentation Discipline**: PASS — exported APIs/types remain JSDoc-documented by constitution rule.
 - **TDD First**: PASS — implementation sequencing remains tests-first per story.

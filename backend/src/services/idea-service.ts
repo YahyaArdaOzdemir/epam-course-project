@@ -3,6 +3,16 @@ import { attachmentRepository } from '../repositories/attachment-repository';
 import { ideaRepository, IdeaRecord, PaginatedIdeaListResult } from '../repositories/idea-repository';
 import { IdeaListQuery } from '../validators/idea-query-validator';
 
+type IdeaDetailsRecord = IdeaRecord & {
+  attachment: {
+    originalFileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    uploadedAt: string;
+    url: string;
+  } | null;
+};
+
 export const canViewIdea = (
   idea: Pick<IdeaRecord, 'ownerUserId' | 'isShared'>,
   viewer: { userId: string; role: 'submitter' | 'admin' },
@@ -50,7 +60,7 @@ const listIdeas = (viewer: { userId: string; role: 'submitter' | 'admin'; query:
 };
 
 /** Returns single idea details for owner or admin viewer. */
-const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 'submitter' | 'admin' }): IdeaRecord => {
+const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 'submitter' | 'admin' }): IdeaDetailsRecord => {
   const existing = ideaRepository.findById(input.ideaId);
   if (!existing) {
     throw new ValidationError('Idea not found');
@@ -60,7 +70,20 @@ const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 
     throw new ForbiddenError('You do not have access to this idea');
   }
 
-  return existing;
+  const attachment = attachmentRepository.findByIdeaId(existing.id);
+
+  return {
+    ...existing,
+    attachment: attachment
+      ? {
+          originalFileName: attachment.originalFileName,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.sizeBytes,
+          uploadedAt: attachment.uploadedAt,
+          url: `/uploads/${attachment.storedFileName}`,
+        }
+      : null,
+  };
 };
 
 /** Toggles sharing state for an owner with optimistic concurrency. */

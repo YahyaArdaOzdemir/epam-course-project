@@ -137,7 +137,7 @@
 
 **Goal**: Shared protected shell, role-aware dashboard, standardized alerts, loading safety, and accessibility behaviors.
 
-**Acceptance References**: US4 scenarios 1-15, FR-038..FR-042, FR-048..FR-053, FR-059..FR-062
+**Acceptance References**: US4 scenarios 1-15, FR-038..FR-042, FR-048..FR-053, FR-059..FR-062, FR-071..FR-075
 
 **Independent Test**: Verify shell/header/nav across protected pages, role-specific dashboard widgets, red/green alert behavior, duplicate-submit prevention, keyboard operation, ARIA semantics, and focus-to-error alert.
 
@@ -167,6 +167,8 @@
 - [X] T078 [US4] Implement protected profile view, header email-link routing, and logout redirect to public landing in frontend/src/App.tsx and frontend/src/features/auth/pages/ProfilePage.tsx
 - [X] T079 [US4] Implement `My Ideas` and `Evaluation Queue` empty-state components and CTA actions in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
 - [X] T080 [US4] Apply visible hover/active feedback styling to primary/secondary controls in frontend/src/styles.css and protected-shell surfaces
+- [X] T081 [US4] Formalize evaluation-detail UI constraints for status badges, Outlook-style attachment cards, relative/absolute submission timestamps, and read-vs-write section separation in frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx
+- [X] T082 [US4] Align idea-details visual treatment with evaluation detail and enhance evaluation queue with status/category filter bar, wait-time metadata, and high-latency visual cues in frontend/src/features/ideas/pages/IdeaDetailsPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
 
 **Checkpoint**: US4 is independently functional and testable.
 

@@ -91,7 +91,8 @@ export const ideaRepository = {
     const whereClauses: string[] = [];
     const whereParams: Array<string | number> = [];
 
-    if (input.role !== 'admin') {
+    const shouldRestrictToOwner = input.query.visibilityScope === 'owner' || input.role !== 'admin';
+    if (shouldRestrictToOwner) {
       whereClauses.push('ideas.owner_user_id = ?');
       whereParams.push(input.userId);
     }

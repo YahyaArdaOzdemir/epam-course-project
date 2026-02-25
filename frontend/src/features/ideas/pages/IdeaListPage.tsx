@@ -70,6 +70,7 @@ export const IdeaListPage = () => {
         const result = await ideaApi.list({
           page,
           pageSize: 10,
+          visibilityScope: 'owner',
           status: status === 'all' ? undefined : status,
           category: category === 'all' ? undefined : category,
           sortBy: 'date',

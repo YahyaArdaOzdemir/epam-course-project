@@ -20,6 +20,7 @@ export const ideaApi = {
 
     if (query.page !== undefined) searchParams.set('page', String(query.page));
     if (query.pageSize !== undefined) searchParams.set('pageSize', String(query.pageSize));
+    if (query.visibilityScope) searchParams.set('visibilityScope', query.visibilityScope);
     if (query.status) searchParams.set('status', query.status);
     if (query.category) searchParams.set('category', query.category);
     if (query.dateFrom) searchParams.set('dateFrom', query.dateFrom);

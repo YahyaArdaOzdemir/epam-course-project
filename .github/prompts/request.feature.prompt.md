@@ -46,6 +46,12 @@ Classify every request into one or more of the following:
 - Constitution Conflict
 - Bug Fix
 
+UI/Design Classification Rule (CRITICAL):
+Any request that introduces specific visual constraints (e.g., "Buttons must be blue", "Status must be a badge", "Layout must use cards") or interaction patterns MUST be classified as a Specification Change.
+
+- Do not treat strict design requirements as "style polish" or "bug fixes".
+- Do not implement UI rules in code (CSS/React) without first codifying them in spec.md (e.g., "FR-UI-XX: System MUST render status as a colored badge").
+
 Classification is required before edits begin.
 
 ### 3) Constitution Compliance Gate (Before Modifications)

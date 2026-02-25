@@ -4,6 +4,7 @@ import { validateOrThrow } from './common';
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  visibilityScope: z.enum(['owner', 'all']).default('owner'),
   status: z.enum(['Submitted', 'Under Review', 'Accepted', 'Rejected']).optional(),
   category: z.enum(['Process Improvement', 'Product Feature', 'Cost Saving', 'Other']).optional(),
   dateFrom: z.string().datetime().optional(),
@@ -15,6 +16,7 @@ const querySchema = z.object({
 export type IdeaListQuery = {
   page: number;
   pageSize: number;
+  visibilityScope: 'owner' | 'all';
   status?: 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
   category?: 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other';
   dateFrom?: string;

@@ -1,10 +1,18 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
+import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
+import { Card } from '../../../components/ui/Card';
 import { Select } from '../../../components/ui/Select';
 import { IdeaDetails } from '../../../services/contracts';
 import { useAuth } from '../../auth/hooks/useAuth';
+import {
+  formatAttachmentSize,
+  formatRelativeTime,
+  getStatusBadgeClassName,
+  hasImageAttachmentPreview,
+} from '../utils/idea-display';
 import { useSubmissionGuard } from '../../shared/useSubmissionGuard';
 import { evaluationApi } from '../../evaluation/services/evaluation-service';
 import { ideaApi } from '../services/idea-service';
@@ -141,10 +149,20 @@ export const IdeaDetailsPage = () => {
   }
 
   const isAdmin = session?.role === 'admin';
+  const submittedAtAbsolute = new Date(idea.createdAt).toLocaleString();
+  const submittedAtRelative = formatRelativeTime(idea.createdAt);
+  const hasImagePreview = hasImageAttachmentPreview(idea);
 
   return (
     <main className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Idea Details</h1>
+      <header>
+        <h1 className="text-2xl font-semibold text-slate-900">Idea Details</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+          <span className="font-medium text-slate-900">{idea.title}</span>
+          <Badge className={getStatusBadgeClassName(idea.status)}>{idea.status}</Badge>
+          <span title={submittedAtAbsolute}>Submitted {submittedAtRelative}</span>
+        </div>
+      </header>
 
       {errorMessage ? (
         <Alert
@@ -158,45 +176,70 @@ export const IdeaDetailsPage = () => {
 
       <section className="mt-6 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
         <div>
-          <span className="font-semibold text-slate-900">Title:</span> {idea.title}
-        </div>
-        <div>
           <span className="font-semibold text-slate-900">Description:</span> {idea.description}
         </div>
         <div>
           <span className="font-semibold text-slate-900">Category:</span> {idea.category}
         </div>
-        <div>
-          <span className="font-semibold text-slate-900">Status:</span> {idea.status}
-        </div>
       </section>
 
+      {idea.attachment ? (
+        <section className="mt-4">
+          <h2 className="mb-2 text-sm font-semibold text-slate-900">Attachments</h2>
+          <a href={idea.attachment.url} download={idea.attachment.originalFileName} className="inline-block">
+            <Card className="flex max-w-[200px] cursor-pointer items-center gap-3 p-2 transition hover:bg-slate-50">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-slate-100 text-slate-500">
+                {hasImagePreview ? (
+                  <img
+                    src={idea.attachment.url}
+                    alt={idea.attachment.originalFileName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span aria-hidden="true">📎</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-slate-900">{idea.attachment.originalFileName}</p>
+                <p className="text-xs text-slate-500">{formatAttachmentSize(idea.attachment.sizeBytes)}</p>
+              </div>
+            </Card>
+          </a>
+        </section>
+      ) : null}
+
+      <hr className="my-6 border-gray-200" />
+
       {isAdmin ? (
-        <form onSubmit={onSubmitEvaluation} className="mt-6 space-y-4">
-          <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-            Next Status
-            <Select value={toStatus} onChange={(event) => setToStatus(event.target.value as 'Under Review' | 'Accepted' | 'Rejected')}>
-              <option value="Under Review">Under Review</option>
-              <option value="Accepted">Accepted</option>
-              <option value="Rejected">Rejected</option>
-            </Select>
-          </label>
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <h2 className="text-base font-semibold text-slate-900">Evaluation Action</h2>
 
-          <label className="block text-sm font-medium text-slate-700">
-            Evaluation Comment
-            <textarea
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-              className="mt-1 min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            />
-          </label>
+          <form onSubmit={onSubmitEvaluation} className="mt-4 space-y-4">
+            <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
+              Next Status
+              <Select value={toStatus} onChange={(event) => setToStatus(event.target.value as 'Under Review' | 'Accepted' | 'Rejected')}>
+                <option value="Under Review">Under Review</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+              </Select>
+            </label>
 
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Loading...' : 'Update Evaluation'}
-          </Button>
-        </form>
+            <label className="block text-sm font-medium text-slate-700">
+              Evaluation Comment
+              <textarea
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                className="mt-1 min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </label>
+
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Loading...' : 'Update Evaluation'}
+            </Button>
+          </form>
+        </section>
       ) : (
-        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
+        <section className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
           This idea is read-only for submitter role.
         </section>
       )}

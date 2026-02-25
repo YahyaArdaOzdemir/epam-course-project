@@ -182,14 +182,14 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-022**: System MUST provide idea submission form with required `title`, `description`, and `category` fields, where `category` is selected via dropdown menu only.
 - **FR-023**: System MUST allow at most one optional attachment per idea submission.
 - **FR-024**: System MUST reject submissions exceeding single-attachment limit.
-- **FR-025**: System MUST accept only PDF, DOCX, PPTX, PNG, and JPG attachments via combined MIME + extension validation.
+- **FR-025**: System MUST accept only PDF, DOCX, PPTX, PNG, and JPG attachments via combined MIME + extension validation. Attachments MUST be rendered as interactive 'Card' elements displaying the file type icon, truncated filename, and file size, distinct from standard text links.
 - **FR-026**: System MUST enforce attachment size limit of 10 MiB (10,485,760 bytes), inclusive.
 - **FR-027**: System MUST persist each submitted idea with owner identity, submission time, and initial status `Submitted`.
 - **FR-028**: System MUST provide idea listing with status and key metadata.
 - **FR-029**: System MUST make submitter listings owner-visible by default.
 - **FR-030**: System MUST allow submitters to share individual ideas for visibility to all authenticated employees.
 - **FR-031**: System MUST allow admin users to view all ideas regardless of sharing setting.
-- **FR-032**: System MUST support statuses `Submitted`, `Under Review`, `Accepted`, `Rejected`.
+- **FR-032**: System MUST support statuses `Submitted`, `Under Review`, `Accepted`, `Rejected`. Status values MUST be visually distinguished using color-coded badges: Submitted (Blue), Under Review (Yellow), Accepted (Green), Rejected (Red).
 - **FR-033**: System MUST allow transition `Submitted -> Under Review` by admin.
 - **FR-034**: System MUST allow finalization to `Accepted` or `Rejected` by admin with required comment.
 - **FR-035**: System MUST preserve immutable status history including actor, timestamp, and decision comment snapshot.
@@ -229,6 +229,10 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-069**: System MUST redirect users to public landing page `/` after successful logout.
 - **FR-070**: System MUST render standardized empty-state content for zero-result `My Ideas` and `Evaluation Queue` views, each with a context-appropriate CTA.
 - **FR-071**: System MUST provide visible hover and active interaction feedback for all primary and secondary button controls across authenticated workflows.
+- **FR-072**: System MUST display idea submission times using relative formatting (e.g., '2 days ago') for readability, while exposing the exact absolute date/time on hover/tooltip.
+- **FR-073**: System MUST visually segregate the read-only 'Idea Details' view from the write-access 'Evaluation Form' using explicit dividers or containment cards.
+- **FR-074**: System MUST render `Evaluation Queue` items with submission recency metadata, including relative submission time and explicit wait-time indication, and MUST visually flag items waiting longer than 3 days for prioritization.
+- **FR-075**: System MUST provide `Evaluation Queue` filter controls for status and category in-page, allowing admins to refine visible queue items without requiring navigation away from the queue view.
 
 ### Assumptions
 

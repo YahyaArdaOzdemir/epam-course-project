@@ -49,12 +49,21 @@ export type IdeaListItem = {
   rowVersion: number;
   ownerUserId: string;
   latestEvaluationComment: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type IdeaDetails = IdeaListItem & {
   description: string;
   createdAt: string;
   updatedAt: string;
+  attachment: {
+    originalFileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    uploadedAt: string;
+    url: string;
+  } | null;
 };
 
 export type PaginationMeta = {
@@ -72,6 +81,7 @@ export type IdeaListResponse = {
 export type IdeaListQuery = {
   page?: number;
   pageSize?: number;
+  visibilityScope?: 'owner' | 'all';
   status?: IdeaStatus;
   category?: IdeaCategory;
   dateFrom?: string;
