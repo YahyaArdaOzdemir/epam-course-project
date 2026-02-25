@@ -1,64 +1,99 @@
 # Implementation Plan: InnovatEPAM Portal (Consolidated Baseline)
 
-**Branch**: `specs/002-innovateepam-portal` | **Date**: 2026-02-25 | **Spec**: `/specs/002-innovateepam-portal/spec.md`  
-**Input**: Consolidated specification from `/specs/002-innovateepam-portal/spec.md`
+**Branch**: `002-innovateepam-portal` | **Date**: 2026-02-25 | **Spec**: `/specs/002-innovateepam-portal/spec.md`
+**Input**: Feature specification from `/specs/002-innovateepam-portal/spec.md`
 
 ## Summary
 
-This plan consolidates all previously split planning threads into one execution baseline: production-ready authentication (secure cookie sessions, CSRF, throttling, password reset), idea submission and visibility rules, evaluator/admin decision workflow with optimistic concurrency, and dashboard/global UX hardening.
+Deliver MVP in four story slices with quality/safety built in: secure local auth and recovery (US1), idea submission and listing with server-side query controls (US2), admin evaluation with optimistic concurrency and timeline auditability (US3), and protected app shell plus robust UX/a11y behavior (US4). Implementation continues test-first under strict TypeScript with explicit API contracts and >=80% changed-code coverage.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.8.x strict mode (frontend and backend)  
-**Primary Dependencies**: Express 4, React 18, React Router 6, better-sqlite3, bcryptjs, jsonwebtoken, zod, multer, Jest, Playwright  
-**Storage**: SQLite for app data + local `/uploads` filesystem storage for attachments + HttpOnly cookie session transport  
-**Testing**: Jest unit/integration + Playwright E2E  
+**Language/Version**: TypeScript 5.x strict mode (backend + frontend)  
+**Primary Dependencies**: Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright  
+**Storage**: SQLite database + local filesystem uploads directory (`/uploads`)  
+**Testing**: Jest unit/integration + Playwright E2E (target 70/20/10)  
 **Target Platform**: Linux-hosted internal web application  
-**Project Type**: Monorepo web app (`backend`, `frontend`, `e2e`)  
-**Constraints**: TDD-first, strict TypeScript, JSDoc on exported APIs, 80% changed-code coverage gate, business logic non-mocking  
-**Scale/Scope**: Internal employee MVP with submitter and evaluator/admin roles
+**Project Type**: Monorepo web application (`backend`, `frontend`, `e2e`)  
+**Performance Goals**: Protected-route auth/session checks and list responses return within practical UAT thresholds; pagination required for large listings  
+**Constraints**: TDD-first, strict TS + JSDoc on exported surfaces, no business-logic mocking, 10 MiB attachment cap, CSRF for authenticated writes, 5/15min auth throttles  
+**Scale/Scope**: Internal employee MVP with two roles (`submitter`, `admin`), four user stories, API + web UI
 
 ## Constitution Check
 
-*GATE: Must pass before active implementation updates.*
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- **Story/Spec Traceability**: PASS. All merged requirements map to US1-US4 in `spec.md`.
-- **Strict TypeScript**: PASS. All new contracts remain strict-typed.
-- **Documentation Discipline**: PASS. Exported APIs are tracked for JSDoc updates.
-- **TDD First**: PASS. Tasks preserve fail-first sequencing per story.
-- **Testing Strategy**: PASS. Unit/Integration/E2E target remains 70/20/10.
-- **Coverage Gate**: PASS. Changed production code coverage minimum remains >=80%.
+### Pre-Design Gate
 
-## Delivery Phases
+- **Story/Spec Traceability**: PASS — Plan is anchored to US1-US4 and FR-001..FR-062.
+- **Strict TypeScript**: PASS — strict TS explicitly required for API/domain/frontend contracts.
+- **Documentation Discipline**: PASS — exported APIs/types remain JSDoc-documented by constitution rule.
+- **TDD First**: PASS — implementation sequencing remains tests-first per story.
+- **Testing Strategy**: PASS — unit/integration/E2E split remains 70/20/10 with business-logic non-mocking.
+- **Coverage Gate**: PASS — changed production code must maintain >=80% line coverage.
 
-### Phase 1 — Foundation (already established)
-- Core monorepo tooling, strict TS, DB migration baseline, API wiring, shared validation/errors.
+## Project Structure
 
-### Phase 2 — US1 Security Baseline (auth hardening)
-- Secure register/login/logout with hashed passwords.
-- Cookie session issuance with 24-hour absolute expiry.
-- Session recovery, protected-route denial for invalid sessions.
-- CSRF token issuance/validation for state-changing authenticated routes.
-- Password reset request/confirm lifecycle with one-time 30-minute token.
-- Login/reset throttling at account+IP boundary.
+### Documentation (this feature)
 
-### Phase 3 — US2 Submission Baseline
-- Idea create/list/share with owner-default visibility.
-- Attachment policy enforcement (single file, allowed types, 10 MiB inclusive).
+```text
+specs/002-innovateepam-portal/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+└── tasks.md
+```
 
-### Phase 4 — US3 Evaluation Baseline
-- Evaluator/admin queue and decision workflow.
-- Status transitions and immutable status history.
-- Optimistic concurrency conflict handling and retry guidance.
+### Source Code (repository root)
 
-### Phase 5 — US4 UX Completion
-- Dashboard redirect and role-aware quick actions.
-- Global protected-route shell (email + logout).
-- Visible red alerts + loading/duplicate-submit protections across flows.
+```text
+backend/
+├── src/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── repositories/
+│   ├── routes/
+│   ├── services/
+│   ├── validators/
+│   └── lib/
+└── tests/
 
-### Phase 6 — Quality Gates
-- Coverage, test pyramid balance, contract conformance, release readiness, and regression validation.
+frontend/
+├── src/
+│   ├── features/
+│   ├── services/
+│   └── App.tsx
+└── tests/
+
+e2e/
+└── tests/
+```
+
+**Structure Decision**: Use existing web monorepo boundaries; keep feature work incremental inside current backend/frontend/e2e layout to minimize churn and preserve test harness continuity.
+
+## Phase 0: Research Plan
+
+- Confirm best-practice choices for cookie-session+CSRF auth, reset token lifecycle, throttling, list pagination/filter/sort design, optimistic concurrency, alert behavior, and accessibility semantics.
+- Resolve technical clarifications for role naming, category enum contract, timeline audit exposure, and anti-duplicate submit behavior.
+
+## Phase 1: Design Plan
+
+- Produce updated `data-model.md` with identity, auth, idea, query, audit, and UI-feedback-relevant entities.
+- Refresh API contract in `contracts/openapi.yaml` to match current FR set (fullName/confirm password/category enum/pagination-filter-sort/timeline endpoints/admin role).
+- Refresh `quickstart.md` with validation scenarios and quality checks for shell/a11y/alert behavior.
+- Update agent context with `.specify/scripts/bash/update-agent-context.sh copilot`.
+
+## Constitution Check (Post-Design Re-check)
+
+- **Story/Spec Traceability**: PASS — design artifacts map back to US1-US4 and acceptance scenarios.
+- **Strict TypeScript**: PASS — contracts and model names retain strict-typing compatibility.
+- **Documentation Discipline**: PASS — API schema surfaces provide explicit contract definitions for generated docs/types.
+- **TDD First**: PASS — no implementation sequencing change; tasks remain fail-first.
+- **Testing Strategy**: PASS — design includes contract/integration/e2e-verifiable behavior across the pyramid.
+- **Coverage Gate**: PASS — no waiver introduced.
 
 ## Complexity Tracking
 
-No constitutional violations identified in consolidated plan baseline.
+No constitution violations or justified exceptions required at plan stage.

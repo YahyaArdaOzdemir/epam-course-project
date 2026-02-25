@@ -5,6 +5,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-24
 ## Active Technologies
 - TypeScript 5.8.x in strict mode (backend + frontend) + Express 4, React 18, React Router 6, better-sqlite3, bcryptjs, jsonwebtoken, zod (001-production-user-auth)
 - SQLite (`better-sqlite3`) for user/session/reset data; browser cookie storage for session token; existing filesystem for ancillary storage (001-production-user-auth)
+- TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright (002-innovateepam-portal)
+- SQLite database + local filesystem uploads directory (`/uploads`) (002-innovateepam-portal)
 
 - TypeScript 5.x (strict mode enabled for frontend and backend) + React (latest), Vite, TailwindCSS, Node.js, Express.js, sqlite3/better-sqlite3, multer (upload handling), zod (runtime validation), Playwright, Jest (001-innovatepam-portal)
 
@@ -24,6 +26,7 @@ npm test && npm run lint
 TypeScript 5.x (strict mode enabled for frontend and backend): Follow standard conventions
 
 ## Recent Changes
+- 002-innovateepam-portal: Added TypeScript 5.x strict mode (backend + frontend) + Express 4, React 18, React Router 6, Zod, bcryptjs, jsonwebtoken, better-sqlite3, multer, Jest, Playwright
 - 001-production-user-auth: Added TypeScript 5.8.x in strict mode (backend + frontend) + Express 4, React 18, React Router 6, better-sqlite3, bcryptjs, jsonwebtoken, zod
 
 - 001-innovatepam-portal: Added TypeScript 5.x (strict mode enabled for frontend and backend) + React (latest), Vite, TailwindCSS, Node.js, Express.js, sqlite3/better-sqlite3, multer (upload handling), zod (runtime validation), Playwright, Jest

@@ -1,49 +1,97 @@
 # Phase 0 Research: InnovatEPAM Portal (Consolidated)
 
-## Decision 1: Authentication model and account scope
-- Decision: Use local email/password auth restricted to approved corporate domains with role-based authorization.
-- Rationale: Preserves internal-only access and supports self-service onboarding without external identity dependency.
+## 1) Authentication model and account scope
 
-## Decision 2: Credential security baseline
-- Decision: Store passwords with bcrypt (`bcryptjs`) using adaptive cost policy and verify only against hashes.
-- Rationale: Production-ready credential handling aligned to auth hardening scope.
+- Decision: Use local email/password authentication with approved corporate-domain allowlist and role model `submitter|admin`.
+- Rationale: Satisfies MVP internal-access needs without adding IdP/OAuth operational complexity.
+- Alternatives considered:
+	- External SSO/OIDC integration: deferred to post-MVP due to setup and environment coupling.
+	- Open self-signup without domain policy: rejected for security/compliance risk.
 
-## Decision 3: Session transport and persistence
-- Decision: Use HttpOnly, Secure, SameSite=Lax cookie sessions with absolute 24-hour lifetime and explicit revoke on logout.
-- Rationale: Refresh persistence is required while reducing XSS token exfiltration risk versus localStorage bearer tokens.
+## 2) Credential and password lifecycle
 
-## Decision 4: CSRF protection
-- Decision: Enforce session-bound CSRF token validation for authenticated state-changing routes.
-- Rationale: Cookie auth requires explicit anti-CSRF defense depth beyond SameSite defaults.
+- Decision: Store passwords as bcrypt hashes (`bcryptjs`); require confirm-password matching on registration and reset-confirm; enforce policy (min 8 + upper/lower/digit/special).
+- Rationale: Meets FR security baseline with explicit anti-mismatch checks and predictable validation.
+- Alternatives considered:
+	- Plain hash without adaptive cost: rejected as insufficient hardening.
+	- Password policy at UI only: rejected because server-side enforcement is mandatory.
 
-## Decision 5: Password reset model
-- Decision: Use one-time email reset link tokens with 30-minute expiration; store token hashes and invalidate all active reset tokens on successful reset.
-- Rationale: Satisfies recovery requirements while limiting replay risk.
+## 3) Session and CSRF model
 
-## Decision 6: Abuse throttling model
-- Decision: Apply throttling at 5 failed attempts per 15-minute window per account and per source IP for login and reset actions.
-- Rationale: Practical brute-force and abuse mitigation for MVP without hard lockout complexity.
+- Decision: Use HttpOnly Secure SameSite=Lax cookie session with absolute 24-hour lifetime + session-bound CSRF tokens for authenticated state-changing routes.
+- Rationale: Enables refresh persistence and robust web security with cookie-based auth.
+- Alternatives considered:
+	- localStorage bearer tokens: rejected due to stronger XSS exposure.
+	- SameSite-only without CSRF token: rejected as incomplete defense for state-changing endpoints.
 
-## Decision 7: Backend architecture
-- Decision: Keep route -> controller -> service -> repository layering with shared validation middleware.
-- Rationale: Maintains strict type boundaries and testability under current codebase style.
+## 4) Password reset mechanism
 
-## Decision 8: Submission storage and upload handling
-- Decision: Persist metadata in SQLite and binaries in local `/uploads`; enforce single-file, MIME+extension, and 10 MiB inclusive boundary at API layer.
-- Rationale: Minimal infrastructure complexity with explicit policy compliance.
+- Decision: One-time email reset link token with 30-minute TTL; token hash storage; invalidate all active reset tokens after successful reset.
+- Rationale: Reduces replay window and ensures account recovery consistency.
+- Alternatives considered:
+	- Reusable reset token: rejected due to replay risk.
+	- OTP-only reset: deferred; link-token flow is already established in API/UI.
 
-## Decision 9: Evaluation concurrency strategy
-- Decision: Use optimistic concurrency (`rowVersion`/If-Match style check) and reject stale writes with refresh/retry guidance.
-- Rationale: Prevents lost updates without pessimistic lock overhead.
+## 5) Abuse throttling strategy
 
-## Decision 10: Frontend protection and UX consistency
-- Decision: Centralize protected-route guard, shared authenticated shell, and standardized visible red error alerts.
-- Rationale: Eliminates per-page auth drift and enforces explicit feedback standards.
+- Decision: Throttle login and password-reset failures to 5 attempts per 15 minutes by account and source IP.
+- Rationale: Practical brute-force mitigation for MVP while avoiding lockout support overhead.
+- Alternatives considered:
+	- Permanent account lockouts: rejected due to high operational burden.
+	- IP-only throttling: rejected because account-level abuse remains possible.
 
-## Decision 11: Test and quality gate strategy
-- Decision: Keep TDD-first with Jest + Playwright and enforce unit/integration/E2E balance plus changed-code >=80% coverage.
-- Rationale: Aligns with project constitution and existing automation layout.
+## 6) Submission storage and upload policy
 
-## Deferred/Follow-up Security Hardening
-- Explicit secret rotation policy and security audit log schema remain tracked as post-baseline hardening items.
-- IP attribution rules for proxied deployments remain an explicit environment assumption that requires operational policy lock.
+- Decision: Store metadata in SQLite and files in local uploads directory; enforce one attachment max, MIME+extension allowlist, and inclusive 10 MiB limit.
+- Rationale: Keeps infrastructure simple while satisfying strict file safety constraints.
+- Alternatives considered:
+	- Object storage (S3/Blob) now: deferred for MVP complexity reasons.
+	- Extension-only validation: rejected due to spoofing risk.
+
+## 7) Listing query model (pagination/filter/sort)
+
+- Decision: Use server-side pagination for idea listings; support filter by `status`, `category`, and date range; support sort by date (`Newest|Oldest`) and status.
+- Rationale: Prevents unbounded list rendering and yields deterministic query behavior for large datasets.
+- Alternatives considered:
+	- Client-side full-list sorting/filtering: rejected for scale and authorization concerns.
+	- Infinite scroll without explicit pagination contract: rejected for predictability and accessibility reasons.
+
+## 8) Evaluation concurrency and traceability
+
+- Decision: Keep optimistic concurrency for share/status updates (stale-write rejection) and expose admin-visible timeline/history entries (status change, actor, timestamp).
+- Rationale: Prevents lost updates and provides auditable UI traceability for evaluation actions.
+- Alternatives considered:
+	- Pessimistic locking: rejected due to operational and UX overhead.
+	- Backend-only audit with no timeline UI: rejected because admins need in-flow traceability.
+
+## 9) Protected shell and dashboard role behavior
+
+- Decision: Require shared protected layout across dashboard/submit/details with fixed header content and active-nav state; dashboard widgets are role-specific.
+- Rationale: Reduces page drift and keeps role context consistently visible.
+- Alternatives considered:
+	- Page-local duplicated headers/nav: rejected for consistency and maintenance risk.
+	- Single generic dashboard for all roles: rejected because it weakens task focus.
+
+## 10) UX feedback safety model
+
+- Decision: Standardize on shared Alert component: red persistent errors (UI-visible, not console-only), green success auto-dismiss within 3–5s, disable-submit/loading/re-enable-on-failure on primary forms.
+- Rationale: Improves recoverability and prevents duplicate submissions.
+- Alternatives considered:
+	- Mixed bespoke alert/toast approaches: rejected for inconsistency.
+	- Console logging as primary error channel: rejected as insufficient UX feedback.
+
+## 11) Accessibility baseline
+
+- Decision: Enforce keyboard-operable primary flows (Tab/Enter/Space), ARIA labels/roles for forms+alerts, and focus transfer to error alert on submit failure.
+- Rationale: Ensures core workflows are accessible and testable in CI/E2E.
+- Alternatives considered:
+	- Best-effort accessibility without explicit requirements: rejected due to high regression risk.
+	- Post-release remediation: rejected due to higher cost and user impact.
+
+## 12) Verification strategy
+
+- Decision: Maintain TDD-first workflow and pyramid target (70/20/10) with >=80% changed-code line coverage.
+- Rationale: Aligns with constitution and existing repository test harness.
+- Alternatives considered:
+	- E2E-heavy strategy: rejected due to speed/maintenance tradeoffs.
+	- Relaxed coverage gate: rejected because it weakens release confidence.

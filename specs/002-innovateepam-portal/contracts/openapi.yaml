@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: InnovatEPAM Portal API (Consolidated)
-  version: 0.3.0
+  version: 0.4.0
 servers:
   - url: http://localhost:3000/api
 
@@ -170,18 +170,67 @@ paths:
 
   /ideas:
     get:
-      summary: List ideas based on role and visibility policy
+      summary: List ideas based on role/visibility and query controls
       security:
         - cookieAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/IdeaStatus'
+        - in: query
+          name: category
+          schema:
+            $ref: '#/components/schemas/IdeaCategory'
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum: [date, status]
+            default: date
+        - in: query
+          name: sortDirection
+          schema:
+            type: string
+            enum: [Newest, Oldest]
+            default: Newest
       responses:
         '200':
-          description: Idea list
+          description: Paginated idea list
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/IdeaListItem'
+                $ref: '#/components/schemas/PaginatedIdeaListResponse'
+        '400':
+          description: Invalid query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     post:
       summary: Submit idea with optional single attachment
       security:
@@ -205,17 +254,48 @@ paths:
                 description:
                   type: string
                 category:
-                  type: string
+                  $ref: '#/components/schemas/IdeaCategory'
                 file:
                   type: string
                   format: binary
       responses:
         '201':
           description: Idea submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaDetailResponse'
         '400':
           description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
+
+  /ideas/{ideaId}:
+    get:
+      summary: Get idea details (admin receives timeline when authorized)
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: ideaId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Idea details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaDetailResponse'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /ideas/{ideaId}/share:
     patch:
@@ -258,7 +338,7 @@ paths:
 
   /ideas/{ideaId}/status:
     patch:
-      summary: Update idea status as evaluator/admin
+      summary: Update idea status as admin
       security:
         - cookieAuth: []
       parameters:
@@ -308,14 +388,32 @@ components:
       name: innovatepam_session
 
   schemas:
+    UserRole:
+      type: string
+      enum: [submitter, admin]
+
+    IdeaStatus:
+      type: string
+      enum: [Submitted, Under Review, Accepted, Rejected]
+
+    IdeaCategory:
+      type: string
+      enum: [Process Improvement, Product Feature, Cost Saving, Other]
+
     RegisterRequest:
       type: object
-      required: [email, password]
+      required: [fullName, email, password, confirmPassword]
       properties:
+        fullName:
+          type: string
+          minLength: 1
         email:
           type: string
           format: email
         password:
+          type: string
+          minLength: 8
+        confirmPassword:
           type: string
           minLength: 8
 
@@ -343,8 +441,7 @@ components:
         userId:
           type: string
         role:
-          type: string
-          enum: [submitter, evaluator_admin]
+          $ref: '#/components/schemas/UserRole'
         redirectTo:
           type: string
           enum: [/dashboard]
@@ -359,8 +456,7 @@ components:
         userId:
           type: string
         role:
-          type: string
-          enum: [submitter, evaluator_admin]
+          $ref: '#/components/schemas/UserRole'
         expiresAt:
           type: string
           format: date-time
@@ -382,13 +478,29 @@ components:
 
     PasswordResetConfirmRequest:
       type: object
-      required: [token, newPassword]
+      required: [token, newPassword, confirmPassword]
       properties:
         token:
           type: string
         newPassword:
           type: string
           minLength: 8
+        confirmPassword:
+          type: string
+          minLength: 8
+
+    PaginationMeta:
+      type: object
+      required: [page, pageSize, totalItems, totalPages]
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
 
     NeutralResponse:
       type: object
@@ -408,16 +520,99 @@ components:
 
     IdeaListItem:
       type: object
+      required: [id, title, category, status, isShared, ownerUserId, createdAt, updatedAt, rowVersion]
       properties:
         id:
           type: string
         title:
           type: string
         category:
-          type: string
+          $ref: '#/components/schemas/IdeaCategory'
         status:
+          $ref: '#/components/schemas/IdeaStatus'
+        isShared:
+          type: boolean
+        ownerUserId:
           type: string
-          enum: [Submitted, Under Review, Accepted, Rejected]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        rowVersion:
+          type: integer
+
+    StatusHistoryItem:
+      type: object
+      required: [id, fromStatus, toStatus, changedBy, changedAt]
+      properties:
+        id:
+          type: string
+        fromStatus:
+          type: string
+          nullable: true
+        toStatus:
+          $ref: '#/components/schemas/IdeaStatus'
+        changedBy:
+          type: string
+          description: Admin actor identity reference
+        changedAt:
+          type: string
+          format: date-time
+        commentSnapshot:
+          type: string
+          nullable: true
+
+    IdeaDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/IdeaListItem'
+        - type: object
+          properties:
+            description:
+              type: string
+            attachment:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: string
+                originalFileName:
+                  type: string
+                mimeType:
+                  type: string
+                sizeBytes:
+                  type: integer
+            evaluation:
+              type: object
+              nullable: true
+              properties:
+                decision:
+                  type: string
+                  enum: [Accepted, Rejected]
+                comment:
+                  type: string
+                decidedBy:
+                  type: string
+                decidedAt:
+                  type: string
+                  format: date-time
+            timeline:
+              type: array
+              description: Present when caller is authorized admin.
+              items:
+                $ref: '#/components/schemas/StatusHistoryItem'
+
+    PaginatedIdeaListResponse:
+      type: object
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdeaListItem'
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
         isShared:
           type: boolean
         rowVersion:

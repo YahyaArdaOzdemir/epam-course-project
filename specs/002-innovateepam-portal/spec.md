@@ -11,7 +11,7 @@
 
 - Q: Which authentication model should be used for MVP? → A: Local account auth with email/password registration restricted to approved corporate email domains.
 - Q: What should idea listing visibility be for submitters? → A: Submitters see their own ideas by default and can optionally share idea visibility with all employees.
-- Q: How should concurrent evaluator updates be handled? → A: Use optimistic concurrency checks and reject stale updates with refresh/retry guidance.
+- Q: How should concurrent admin updates be handled? → A: Use optimistic concurrency checks and reject stale updates with refresh/retry guidance.
 - Q: What attachment formats and size limit should MVP support? → A: Allow PDF, DOCX, PPTX, PNG, and JPG files up to 10 MiB (10,485,760 bytes), inclusive.
 - Q: Who can view evaluation comments? → A: When an idea is shared, evaluation comments are visible to all authenticated employees.
 - Q: Which session model should be used for persisted authentication? → A: HttpOnly Secure SameSite=Lax cookie session with absolute 24-hour lifetime.
@@ -208,8 +208,8 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-053**: System MUST ensure user double-click or repeated click on an in-flight submit action results in at most one network request for that action.
 - **FR-054**: System MUST provide server-side pagination for idea listings and MUST NOT rely on unbounded infinite scrolling for large result sets.
 - **FR-055**: System MUST support idea-list filters by `status`, `category`, and submission date range.
-- **FR-056**: System MUST support idea-list sorting by date (`Newest`, `Oldest`) and by status.
-- **FR-057**: System MUST provide admin-visible idea-details timeline/history showing status changes, actor identity, and timestamp for each transition.
+- **FR-056**: System MUST support idea-list sorting by date (`Newest`, `Oldest`) and by status, where status sort uses workflow order `Submitted`, `Under Review`, `Accepted`, `Rejected`.
+- **FR-057**: System MUST provide admin-visible idea-details timeline/history showing status changes, actor identity (`userId` plus display email), and timestamp for each transition.
 - **FR-058**: System MUST enforce access control for admin-only timeline/history visibility and MUST NOT expose restricted timeline data to unauthorized roles.
 - **FR-059**: System MUST ensure primary flows (Login, Register, Submit Idea, Evaluate) are fully operable via keyboard using Tab/Enter/Space without pointer interaction.
 - **FR-060**: System MUST provide accessible semantics for forms and alerts, including programmatic input labels and appropriate ARIA roles for alert/status messaging.
@@ -249,7 +249,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **SC-001**: 95% of valid login attempts complete and land on `/dashboard` in under 2 seconds.
 - **SC-002**: 100% of unauthorized attempts to protected routes are redirected to `/login` before protected content renders.
 - **SC-003**: 95% of active users remain authenticated after standard page refresh.
-- **SC-004**: 100% of invalid login/registration/reset attempts show visible red alerts.
+- **SC-004**: 100% of invalid login/registration/reset attempts show visible red in-page alerts in auth flows.
 - **SC-005**: 90% of users who start password reset complete recovery within 10 minutes in UAT.
 - **SC-006**: 95% of submitters successfully submit an idea (optional file included) on first attempt.
 - **SC-007**: 100% of attempts beyond login/reset throttle threshold return throttling responses and visible alerts.

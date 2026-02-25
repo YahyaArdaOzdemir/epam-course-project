@@ -41,9 +41,9 @@ Expected local endpoints:
 ## 5) TDD-first workflow
 For each story, write tests first, run to confirm failure, then implement:
 1. US1 secure auth/session/reset/throttling behavior.
-2. US2 idea submission/list/share with attachment policy.
-3. US3 evaluator workflow and optimistic concurrency handling.
-4. US4 dashboard/global-shell/error-feedback hardening.
+2. US2 idea submission/list/share with attachment policy and server-side pagination/filter/sort.
+3. US3 admin workflow, timeline visibility, and optimistic concurrency handling.
+4. US4 dashboard/global-shell/error-feedback/a11y hardening.
 
 ## 6) Run test suites
 ```bash
@@ -66,9 +66,13 @@ npx playwright test e2e/tests/us1-auth.spec.ts
 5. Request and complete password reset; confirm old password fails/new password works.
 6. Trigger login/reset throttling and verify visible user feedback.
 7. Submit idea with optional attachment (PDF/DOCX/PPTX/PNG/JPG, <=10 MiB).
-8. Confirm owner-default listing and share toggle behavior.
-9. Evaluate idea through `Submitted -> Under Review -> Accepted/Rejected` with required comment.
-10. Validate stale evaluator updates are rejected with refresh/retry guidance.
+8. Confirm owner-default listing, pagination, filters (status/category/date), and sorting (date/status).
+9. Confirm share toggle behavior and employee visibility rules for shared ideas.
+10. Evaluate idea through `Submitted -> Under Review -> Accepted/Rejected` with required comment as admin.
+11. Validate stale admin updates are rejected with refresh/retry guidance.
+12. Open idea details as admin and verify timeline/history rows include status change, actor, and timestamp.
+13. Validate protected shell header (product name, email, role badge, logout) and active-nav indicator.
+14. Validate keyboard-only flow completion and focus-to-error-alert behavior on failed submissions.
 
 ## 8) Coverage and build gates
 ```bash

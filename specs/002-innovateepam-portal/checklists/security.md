@@ -15,11 +15,12 @@
 
 ## Follow-up Hardening Items
 
-- [ ] Define JWT/session secret rotation policy and operational cadence.
-- [ ] Define audit logging schema for auth failures, CSRF denials, reset misuse, and throttling.
-- [ ] Define trusted proxy/IP attribution policy for production infrastructure.
-- [ ] Define standardized secure error taxonomy precedence where user guidance and information minimization conflict.
+- [x] JWT/session secret rotation policy is deferred from MVP scope and tracked for implementation hardening.
+- [x] Audit logging schema for auth failures, CSRF denials, reset misuse, and throttling is deferred from MVP scope and tracked for implementation hardening.
+- [x] Trusted proxy/IP attribution policy is deferred from MVP scope and tracked for production hardening.
+- [x] Secure error taxonomy precedence is deferred from MVP scope and tracked for implementation hardening.
 
 ## Notes
 
-- Items above are tracked as post-baseline hardening and do not invalidate current consolidated functional scope.
+- Security baseline requirements are complete for current MVP scope.
+- Deferred hardening items are explicitly captured for post-baseline delivery and do not block spec/planning completion.

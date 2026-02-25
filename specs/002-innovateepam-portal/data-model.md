@@ -3,9 +3,10 @@
 ## Entity: User
 - Fields:
   - `id` (UUID/string, primary key)
+  - `fullName` (string, required)
   - `email` (string, unique, normalized lowercase)
   - `passwordHash` (string, bcrypt hash)
-  - `role` (enum: `submitter` | `evaluator_admin`)
+  - `role` (enum: `submitter` | `admin`)
   - `status` (enum: `active` | `suspended`)
   - `createdAt` (datetime)
   - `updatedAt` (datetime)
@@ -71,12 +72,26 @@
   - `ownerUserId` (FK -> User.id)
   - `title` (string, required)
   - `description` (text, required)
-  - `category` (string, required)
+  - `category` (enum: `Process Improvement` | `Product Feature` | `Cost Saving` | `Other`)
   - `status` (enum: `Submitted` | `Under Review` | `Accepted` | `Rejected`)
   - `isShared` (boolean, default `false`)
   - `rowVersion` (integer)
   - `createdAt` (datetime)
   - `updatedAt` (datetime)
+
+## Entity: IdeaListQuery
+- Fields:
+  - `page` (integer, >=1)
+  - `pageSize` (integer, bounded positive)
+  - `status` (enum filter, optional)
+  - `category` (enum filter, optional)
+  - `dateFrom` (date, optional)
+  - `dateTo` (date, optional)
+  - `sortBy` (enum: `date` | `status`)
+  - `sortDirection` (enum: `Newest` | `Oldest` for date, deterministic order for status)
+- Validation:
+  - `dateTo` must be greater than or equal to `dateFrom` when both are provided.
+  - Requests without pagination parameters default to server-defined safe bounds.
 
 ## Entity: Attachment
 - Fields:
@@ -96,7 +111,7 @@
 - Fields:
   - `id` (UUID/string, primary key)
   - `ideaId` (FK -> Idea.id)
-  - `evaluatorUserId` (FK -> User.id)
+  - `adminUserId` (FK -> User.id)
   - `decision` (enum: `Accepted` | `Rejected`)
   - `comment` (text, required)
   - `createdAt` (datetime)
@@ -127,12 +142,18 @@
 - Reuse of `consumed`/`expired` tokens is denied.
 
 ### Idea status lifecycle
-- `Submitted` -> `Under Review` (evaluator/admin only).
-- `Under Review` -> `Accepted` or `Rejected` (requires comment).
+- `Submitted` -> `Under Review` (admin only).
+- `Under Review` -> `Accepted` or `Rejected` (admin only, requires comment).
 - `Accepted` and `Rejected` are terminal in this baseline.
 
 ## Visibility Rules
 - Submitter sees own ideas by default.
 - Shared ideas are visible to authenticated active employees.
-- Evaluator/admin sees all ideas regardless of share flag.
+- Admin sees all ideas regardless of share flag.
 - Evaluation comments become globally visible only for shared ideas.
+
+## Timeline/History Presentation Rules
+
+- Idea details include timeline/history log for admin users.
+- Timeline rows show `fromStatus`, `toStatus`, `changedByUserId` (or resolved actor identity), and `createdAt`.
+- Timeline is derived from immutable `StatusHistoryEntry` records.
