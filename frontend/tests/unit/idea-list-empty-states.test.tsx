@@ -21,7 +21,10 @@ describe('idea and evaluation empty states', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
-    mockedIdeaApi.list.mockResolvedValue([]);
+    mockedIdeaApi.list.mockResolvedValue({
+      items: [],
+      pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+    });
   });
 
   afterEach(() => {
@@ -58,5 +61,39 @@ describe('idea and evaluation empty states', () => {
     expect(container.textContent).toContain('No ideas found in the evaluation queue.');
     const dashboardCta = container.querySelector('a[href="/dashboard"]');
     expect(dashboardCta?.textContent).toBe('Back to Dashboard');
+  });
+
+  it('disables previous/next pagination controls on a single-page My Ideas result', async () => {
+    mockedIdeaApi.list.mockResolvedValueOnce({
+      items: [
+        {
+          id: 'idea-1',
+          title: 'Improve onboarding docs',
+          category: 'Process Improvement',
+          status: 'Submitted',
+          isShared: false,
+          rowVersion: 0,
+          ownerUserId: 'owner-1',
+          latestEvaluationComment: null,
+        },
+      ],
+      pagination: { page: 1, pageSize: 10, totalItems: 1, totalPages: 1 },
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter>
+          <IdeaListPage />
+        </MemoryRouter>,
+      );
+    });
+
+    const previousButton = container.querySelector('button[type="button"]:first-of-type') as HTMLButtonElement | null;
+    const nextButton = container.querySelector('button[type="button"]:last-of-type') as HTMLButtonElement | null;
+    expect(previousButton?.textContent).toBe('Previous');
+    expect(nextButton?.textContent).toBe('Next');
+    expect(previousButton?.disabled).toBe(true);
+    expect(nextButton?.disabled).toBe(true);
+    expect(container.textContent).toContain('Page 1 of 1 (1 total)');
   });
 });

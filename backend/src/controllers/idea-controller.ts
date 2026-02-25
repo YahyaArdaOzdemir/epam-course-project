@@ -1,6 +1,7 @@
 import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth-guard';
 import { parseCreateIdeaPayload, parseShareIdeaPayload } from '../validators/idea-validator';
+import { parseIdeaListQuery } from '../validators/idea-query-validator';
 import { ideaService } from '../services/idea-service';
 import { ValidationError } from '../lib/errors';
 
@@ -23,7 +24,8 @@ export const ideaController = {
   list(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
     try {
       const auth = request.auth!;
-      const ideas = ideaService.listIdeas({ userId: auth.userId, role: auth.role });
+      const query = parseIdeaListQuery(request.query);
+      const ideas = ideaService.listIdeas({ userId: auth.userId, role: auth.role, query });
       response.status(200).json(ideas);
     } catch (error) {
       next(error);

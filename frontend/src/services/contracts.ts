@@ -2,6 +2,9 @@ export type Role = 'submitter' | 'admin';
 export type IdeaStatus = 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
 export type IdeaCategory = 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other';
 
+export type IdeaSortBy = 'date' | 'status';
+export type IdeaSortDirection = 'Newest' | 'Oldest';
+
 export type AuthSession = {
   authenticated: true;
   userId: string;
@@ -46,6 +49,29 @@ export type IdeaListItem = {
   rowVersion: number;
   ownerUserId: string;
   latestEvaluationComment: string | null;
+};
+
+export type PaginationMeta = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+export type IdeaListResponse = {
+  items: IdeaListItem[];
+  pagination: PaginationMeta;
+};
+
+export type IdeaListQuery = {
+  page?: number;
+  pageSize?: number;
+  status?: IdeaStatus;
+  category?: IdeaCategory;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: IdeaSortBy;
+  sortDirection?: IdeaSortDirection;
 };
 
 export type IdeaCreateRequest = {

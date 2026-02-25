@@ -41,9 +41,11 @@ export const IdeaSubmitPage = () => {
       return;
     }
 
+    const validatedCategory = category as IdeaCategory;
+
     try {
       await runGuarded(async () => {
-        await ideaApi.create({ title, description, category, file }, csrfToken);
+        await ideaApi.create({ title, description, category: validatedCategory, file }, csrfToken);
       });
 
       setTitle('');

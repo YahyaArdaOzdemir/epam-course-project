@@ -1,6 +1,7 @@
 import { ConflictError, ForbiddenError, ValidationError } from '../lib/errors';
 import { attachmentRepository } from '../repositories/attachment-repository';
-import { ideaRepository, IdeaRecord } from '../repositories/idea-repository';
+import { ideaRepository, IdeaRecord, PaginatedIdeaListResult } from '../repositories/idea-repository';
+import { IdeaListQuery } from '../validators/idea-query-validator';
 
 export const canViewIdea = (
   idea: Pick<IdeaRecord, 'ownerUserId' | 'isShared'>,
@@ -44,8 +45,8 @@ const createIdea = (input: {
   return idea;
 };
 
-const listIdeas = (viewer: { userId: string; role: 'submitter' | 'admin' }) => {
-  return ideaRepository.listVisible(viewer.userId, viewer.role);
+const listIdeas = (viewer: { userId: string; role: 'submitter' | 'admin'; query: IdeaListQuery }): PaginatedIdeaListResult => {
+  return ideaRepository.listVisible({ userId: viewer.userId, role: viewer.role, query: viewer.query });
 };
 
 /** Toggles sharing state for an owner with optimistic concurrency. */

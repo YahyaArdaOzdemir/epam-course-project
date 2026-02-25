@@ -1,5 +1,5 @@
 import { apiClient } from '../../../services/api-client';
-import { IdeaCreateRequest, IdeaListItem, ShareIdeaRequest } from '../../../services/contracts';
+import { IdeaCreateRequest, IdeaListItem, IdeaListQuery, IdeaListResponse, ShareIdeaRequest } from '../../../services/contracts';
 
 /** API helpers for creating/listing/sharing ideas. */
 export const ideaApi = {
@@ -15,8 +15,20 @@ export const ideaApi = {
     return apiClient.post('/ideas', formData, true, csrfToken);
   },
 
-  list(): Promise<IdeaListItem[]> {
-    return apiClient.get('/ideas');
+  list(query: IdeaListQuery = {}): Promise<IdeaListResponse> {
+    const searchParams = new URLSearchParams();
+
+    if (query.page !== undefined) searchParams.set('page', String(query.page));
+    if (query.pageSize !== undefined) searchParams.set('pageSize', String(query.pageSize));
+    if (query.status) searchParams.set('status', query.status);
+    if (query.category) searchParams.set('category', query.category);
+    if (query.dateFrom) searchParams.set('dateFrom', query.dateFrom);
+    if (query.dateTo) searchParams.set('dateTo', query.dateTo);
+    if (query.sortBy) searchParams.set('sortBy', query.sortBy);
+    if (query.sortDirection) searchParams.set('sortDirection', query.sortDirection);
+
+    const querySuffix = searchParams.toString();
+    return apiClient.get(`/ideas${querySuffix ? `?${querySuffix}` : ''}`);
   },
 
   share(ideaId: string, payload: ShareIdeaRequest, csrfToken: string): Promise<IdeaListItem> {

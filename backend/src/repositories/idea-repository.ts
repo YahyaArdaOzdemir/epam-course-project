@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { getDb } from '../lib/db';
+import { IdeaListQuery } from '../validators/idea-query-validator';
 
 export type IdeaRecord = {
   id: string;
@@ -26,6 +27,16 @@ const mapIdea = (row: Record<string, unknown>): IdeaRecord => ({
   createdAt: String(row.created_at),
   updatedAt: String(row.updated_at),
 });
+
+export type PaginatedIdeaListResult = {
+  items: IdeaRecord[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+};
 
 export const ideaRepository = {
   create(input: { ownerUserId: string; title: string; description: string; category: string }): IdeaRecord {
@@ -58,16 +69,66 @@ export const ideaRepository = {
     return row ? mapIdea(row as Record<string, unknown>) : null;
   },
 
-  listVisible(userId: string, role: 'submitter' | 'admin'): IdeaRecord[] {
+  listVisible(input: { userId: string; role: 'submitter' | 'admin'; query: IdeaListQuery }): PaginatedIdeaListResult {
     const db = getDb();
-    const rows =
-      role === 'admin'
-        ? db.prepare('SELECT * FROM ideas ORDER BY created_at DESC').all()
-        : db
-            .prepare('SELECT * FROM ideas WHERE owner_user_id = ? OR is_shared = 1 ORDER BY created_at DESC')
-            .all(userId);
+    const whereClauses: string[] = [];
+    const whereParams: Array<string | number> = [];
 
-    return (rows as Record<string, unknown>[]).map(mapIdea);
+    if (input.role !== 'admin') {
+      whereClauses.push('owner_user_id = ?');
+      whereParams.push(input.userId);
+    }
+
+    if (input.query.status) {
+      whereClauses.push('status = ?');
+      whereParams.push(input.query.status);
+    }
+
+    if (input.query.category) {
+      whereClauses.push('category = ?');
+      whereParams.push(input.query.category);
+    }
+
+    if (input.query.dateFrom) {
+      whereClauses.push('created_at >= ?');
+      whereParams.push(input.query.dateFrom);
+    }
+
+    if (input.query.dateTo) {
+      whereClauses.push('created_at <= ?');
+      whereParams.push(input.query.dateTo);
+    }
+
+    const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const totalRow = db
+      .prepare(`SELECT COUNT(*) as total_count FROM ideas ${whereSql}`)
+      .get(...whereParams) as { total_count: number };
+    const totalItems = Number(totalRow.total_count ?? 0);
+
+    const orderBySql =
+      input.query.sortBy === 'status'
+        ? `ORDER BY CASE status
+              WHEN 'Submitted' THEN 1
+              WHEN 'Under Review' THEN 2
+              WHEN 'Accepted' THEN 3
+              WHEN 'Rejected' THEN 4
+            END ASC, created_at DESC`
+        : `ORDER BY created_at ${input.query.sortDirection === 'Oldest' ? 'ASC' : 'DESC'}`;
+
+    const offset = (input.query.page - 1) * input.query.pageSize;
+    const rows = db
+      .prepare(`SELECT * FROM ideas ${whereSql} ${orderBySql} LIMIT ? OFFSET ?`)
+      .all(...whereParams, input.query.pageSize, offset) as Record<string, unknown>[];
+
+    return {
+      items: rows.map(mapIdea),
+      pagination: {
+        page: input.query.page,
+        pageSize: input.query.pageSize,
+        totalItems,
+        totalPages: Math.max(1, Math.ceil(totalItems / input.query.pageSize)),
+      },
+    };
   },
 
   updateShare(id: string, ownerUserId: string, isShared: boolean, expectedRowVersion: number): IdeaRecord | null {

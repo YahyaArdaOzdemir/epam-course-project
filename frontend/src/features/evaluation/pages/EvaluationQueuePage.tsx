@@ -7,7 +7,7 @@ export const EvaluationQueuePage = () => {
   const [ideas, setIdeas] = useState<IdeaListItem[]>([]);
 
   useEffect(() => {
-    void ideaApi.list().then(setIdeas);
+    void ideaApi.list({ page: 1, pageSize: 20, sortBy: 'date', sortDirection: 'Newest' }).then((result) => setIdeas(result.items));
   }, []);
 
   return (
