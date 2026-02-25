@@ -11,6 +11,7 @@ export type IdeaRecord = {
   status: 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
   isShared: boolean;
   rowVersion: number;
+  latestEvaluationComment: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -24,6 +25,7 @@ const mapIdea = (row: Record<string, unknown>): IdeaRecord => ({
   status: row.status as IdeaRecord['status'],
   isShared: Number(row.is_shared) === 1,
   rowVersion: Number(row.row_version),
+  latestEvaluationComment: row.latest_evaluation_comment == null ? null : String(row.latest_evaluation_comment),
   createdAt: String(row.created_at),
   updatedAt: String(row.updated_at),
 });
@@ -58,6 +60,7 @@ export const ideaRepository = {
       status: 'Submitted',
       isShared: false,
       rowVersion: 0,
+      latestEvaluationComment: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -65,7 +68,21 @@ export const ideaRepository = {
 
   findById(id: string): IdeaRecord | null {
     const db = getDb();
-    const row = db.prepare('SELECT * FROM ideas WHERE id = ?').get(id);
+    const row = db
+      .prepare(
+        `SELECT
+            ideas.*,
+            (
+              SELECT decision.comment
+              FROM evaluation_decisions AS decision
+              WHERE decision.idea_id = ideas.id
+              ORDER BY decision.created_at DESC
+              LIMIT 1
+            ) AS latest_evaluation_comment
+         FROM ideas
+         WHERE ideas.id = ?`,
+      )
+      .get(id);
     return row ? mapIdea(row as Record<string, unknown>) : null;
   },
 
@@ -75,27 +92,27 @@ export const ideaRepository = {
     const whereParams: Array<string | number> = [];
 
     if (input.role !== 'admin') {
-      whereClauses.push('owner_user_id = ?');
+      whereClauses.push('(ideas.owner_user_id = ? OR ideas.is_shared = 1)');
       whereParams.push(input.userId);
     }
 
     if (input.query.status) {
-      whereClauses.push('status = ?');
+      whereClauses.push('ideas.status = ?');
       whereParams.push(input.query.status);
     }
 
     if (input.query.category) {
-      whereClauses.push('category = ?');
+      whereClauses.push('ideas.category = ?');
       whereParams.push(input.query.category);
     }
 
     if (input.query.dateFrom) {
-      whereClauses.push('created_at >= ?');
+      whereClauses.push('ideas.created_at >= ?');
       whereParams.push(input.query.dateFrom);
     }
 
     if (input.query.dateTo) {
-      whereClauses.push('created_at <= ?');
+      whereClauses.push('ideas.created_at <= ?');
       whereParams.push(input.query.dateTo);
     }
 
@@ -117,7 +134,21 @@ export const ideaRepository = {
 
     const offset = (input.query.page - 1) * input.query.pageSize;
     const rows = db
-      .prepare(`SELECT * FROM ideas ${whereSql} ${orderBySql} LIMIT ? OFFSET ?`)
+      .prepare(
+        `SELECT
+            ideas.*,
+            (
+              SELECT decision.comment
+              FROM evaluation_decisions AS decision
+              WHERE decision.idea_id = ideas.id
+              ORDER BY decision.created_at DESC
+              LIMIT 1
+            ) AS latest_evaluation_comment
+         FROM ideas
+         ${whereSql}
+         ${orderBySql}
+         LIMIT ? OFFSET ?`,
+      )
       .all(...whereParams, input.query.pageSize, offset) as Record<string, unknown>[];
 
     return {

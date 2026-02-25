@@ -42,10 +42,16 @@ describe('auth validator', () => {
 
   it('parses password reset request and confirm payloads', () => {
     const request = parsePasswordResetRequestPayload({ email: 'reset@epam.com' });
-    const confirm = parsePasswordResetConfirmPayload({ token: 'token-1', newPassword: 'StrongPass123!' });
+    const confirm = parsePasswordResetConfirmPayload({ token: 'token-1', newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' });
 
     expect(request.email).toBe('reset@epam.com');
     expect(confirm.token).toBe('token-1');
     expect(confirm.newPassword).toBe('StrongPass123!');
+  });
+
+  it('rejects password reset confirm when confirm password mismatches', () => {
+    expect(() => {
+      parsePasswordResetConfirmPayload({ token: 'token-1', newPassword: 'StrongPass123!', confirmPassword: 'WrongPass123!' });
+    }).toThrow('Password confirmation does not match');
   });
 });

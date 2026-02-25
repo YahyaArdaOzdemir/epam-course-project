@@ -1,53 +1,34 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 import { useAuth } from './features/auth/hooks/useAuth';
-import { RegisterPage } from './features/auth/pages/RegisterPage';
-import { LoginPage } from './features/auth/pages/LoginPage';
-import { DashboardPage } from './features/auth/pages/DashboardPage';
-import { PasswordResetRequestPage } from './features/auth/pages/PasswordResetRequestPage';
-import { PasswordResetConfirmPage } from './features/auth/pages/PasswordResetConfirmPage';
-import { ProfilePage } from './features/auth/pages/ProfilePage';
+import {
+  DashboardPage,
+  LoginPage,
+  PasswordResetConfirmPage,
+  PasswordResetRequestPage,
+  ProfilePage,
+  RegisterPage,
+} from './features/auth/pages';
 import { IdeaSubmitPage } from './features/ideas/pages/IdeaSubmitPage';
 import { IdeaListPage } from './features/ideas/pages/IdeaListPage';
 import { EvaluationQueuePage, EvaluationDetailPage } from './features/evaluation/pages';
+import { ProtectedLayout } from './features/layout/ProtectedLayout';
 
 export const App = () => {
-  const { session, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async (): Promise<void> => {
-    await logout();
-    navigate('/');
-  };
-
-  const navigationLinkClassName = ({ isActive }: { isActive: boolean }): string => (
-    `transition hover:text-blue-600 ${isActive ? 'font-semibold text-blue-700 underline underline-offset-4' : ''}`
-  );
+  const { session } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to={session ? '/dashboard' : '/'} className="text-lg font-semibold text-slate-900 transition hover:text-blue-600">
-            InnovatEPAM Portal
-          </Link>
-          <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
-            {session ? (
-              <>
-                <NavLink to="/dashboard" className={navigationLinkClassName}>Dashboard</NavLink>
-                <NavLink to="/ideas/new" className={navigationLinkClassName}>Submit Idea</NavLink>
-                <NavLink to="/ideas" className={navigationLinkClassName}>My Ideas</NavLink>
-                <NavLink to="/evaluation" className={navigationLinkClassName}>Evaluation Queue</NavLink>
-                <NavLink to="/profile" className={navigationLinkClassName}>{session.email ?? 'Profile'}</NavLink>
-              </>
-            ) : null}
-            {session ? (
-              <button type="button" onClick={handleLogout} className="rounded-md px-2 py-1 transition hover:bg-slate-100 active:scale-[0.98]">Logout</button>
-            ) : null}
-          </nav>
-        </div>
-      </header>
+      {!session ? (
+        <header className="border-b border-slate-200 bg-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <Link to={session ? '/dashboard' : '/'} className="text-lg font-semibold text-slate-900 transition hover:text-blue-600">
+              InnovatEPAM Portal
+            </Link>
+          </div>
+        </header>
+      ) : null}
       <div className="px-6 py-8">
         <Routes>
           <Route
@@ -60,12 +41,17 @@ export const App = () => {
           <Route path="/reset-password/confirm" element={<PasswordResetConfirmPage />} />
 
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/ideas/new" element={<IdeaSubmitPage />} />
-            <Route path="/ideas" element={<IdeaListPage />} />
-            <Route path="/evaluation" element={<EvaluationQueuePage />} />
-            <Route path="/evaluation/:ideaId" element={<EvaluationDetailPage />} />
+            <Route element={<ProtectedLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/ideas/new" element={<IdeaSubmitPage />} />
+              <Route path="/submit" element={<IdeaSubmitPage />} />
+              <Route path="/ideas" element={<IdeaListPage />} />
+              <Route path="/evaluation" element={<EvaluationQueuePage />} />
+              <Route path="/evaluate" element={<EvaluationQueuePage />} />
+              <Route path="/evaluation/:ideaId" element={<EvaluationDetailPage />} />
+              <Route path="/evaluate/:ideaId" element={<EvaluationDetailPage />} />
+            </Route>
           </Route>
 
           <Route path="*" element={<LoginPage />} />

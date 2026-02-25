@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage = () => {
@@ -8,7 +9,16 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const errorAlertRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!errorMessage) {
+      return;
+    }
+
+    errorAlertRef.current?.focus();
+  }, [errorMessage]);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -29,7 +39,12 @@ export const LoginPage = () => {
     <main className="mx-auto mt-12 max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold text-slate-900">Login</h1>
       {errorMessage ? (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</div>
+        <Alert
+          ref={errorAlertRef}
+          variant="destructive"
+          message={errorMessage}
+          className="mb-4"
+        />
       ) : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block text-sm font-medium text-slate-700">

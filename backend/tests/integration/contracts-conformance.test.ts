@@ -68,7 +68,7 @@ describe('contracts conformance', () => {
 
     const resetInvalid = await request(app)
       .post('/api/auth/password-reset/confirm')
-      .send({ token: 'invalid-token', newPassword: 'StrongPass123!' })
+      .send({ token: 'invalid-token', newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(400);
 
     expect(resetInvalid.body.code).toBe('AUTH_RESET_TOKEN_INVALID');

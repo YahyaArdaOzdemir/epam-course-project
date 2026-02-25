@@ -14,7 +14,7 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   passwordResetRequest: (email: string) => Promise<{ message: string }>;
-  passwordResetConfirm: (token: string, newPassword: string) => Promise<{ message: string }>;
+  passwordResetConfirm: (token: string, newPassword: string, confirmPassword: string) => Promise<{ message: string }>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -90,9 +90,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const passwordResetConfirm = async (token: string, newPassword: string): Promise<{ message: string }> => {
+  const passwordResetConfirm = async (token: string, newPassword: string, confirmPassword: string): Promise<{ message: string }> => {
     try {
-      const result = await authApi.passwordResetConfirm(token, newPassword);
+      const result = await authApi.passwordResetConfirm(token, newPassword, confirmPassword);
       return result;
     } catch (error) {
       throw new Error(mapAuthError(error));

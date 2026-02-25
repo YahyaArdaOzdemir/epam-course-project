@@ -297,11 +297,11 @@ describe('authController', () => {
   });
 
   it('handles password reset confirm', async () => {
-    const request = makeRequest({ body: { token: 'token-1', newPassword: 'StrongPass123!' } });
+    const request = makeRequest({ body: { token: 'token-1', newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' } });
     const response = makeResponse();
     const next = jest.fn() as NextFunction;
 
-    mockedParseResetConfirm.mockReturnValue({ token: 'token-1', newPassword: 'StrongPass123!' });
+    mockedParseResetConfirm.mockReturnValue({ token: 'token-1', newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' });
     mockedAuthService.confirmPasswordReset.mockResolvedValue({ message: 'Password reset completed' });
 
     await authController.passwordResetConfirm(request, response, next);
@@ -318,7 +318,7 @@ describe('authController', () => {
   });
 
   it('forwards reset confirm errors', async () => {
-    const request = makeRequest({ body: { token: 'token-1', newPassword: 'StrongPass123!' } });
+    const request = makeRequest({ body: { token: 'token-1', newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' } });
     const response = makeResponse();
     const next = jest.fn() as NextFunction;
 

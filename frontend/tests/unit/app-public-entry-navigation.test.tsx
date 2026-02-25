@@ -3,6 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { App } from '../../src/App';
 import { useAuth } from '../../src/features/auth/hooks/useAuth';
+import { ideaApi } from '../../src/features/ideas/services/idea-service';
 
 jest.mock('../../src/features/auth/pages/RegisterPage', () => ({
   RegisterPage: () => <div>Register Page</div>,
@@ -28,6 +29,12 @@ jest.mock('../../src/features/ideas/pages/IdeaListPage', () => ({
   IdeaListPage: () => <div>Idea List Page</div>,
 }));
 
+jest.mock('../../src/features/ideas/services/idea-service', () => ({
+  ideaApi: {
+    list: jest.fn(),
+  },
+}));
+
 jest.mock('../../src/features/evaluation/pages', () => ({
   EvaluationQueuePage: () => <div>Evaluation Queue Page</div>,
   EvaluationDetailPage: () => <div>Evaluation Detail Page</div>,
@@ -38,6 +45,7 @@ jest.mock('../../src/features/auth/hooks/useAuth', () => ({
 }));
 
 const mockedUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockedIdeaApi = ideaApi as jest.Mocked<typeof ideaApi>;
 
 describe('App public entry and auth-aware navigation', () => {
   let container: HTMLDivElement;
@@ -68,6 +76,10 @@ describe('App public entry and auth-aware navigation', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
+    mockedIdeaApi.list.mockResolvedValue({
+      items: [],
+      pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+    });
   });
 
   afterEach(() => {
@@ -121,8 +133,67 @@ describe('App public entry and auth-aware navigation', () => {
 
     expect(container.textContent).toContain('Dashboard');
     expect(container.textContent).toContain('Signed in as Alice Employee');
+    expect(container.textContent).toContain('Submitter');
     const profileLink = container.querySelector('header a[href="/profile"]');
-    expect(profileLink?.textContent).toBe('alice@epam.com');
+    expect(profileLink?.textContent).toBe('Alice Employee');
+  });
+
+  it('renders admin dashboard widgets and protected header role badge', async () => {
+    mockedIdeaApi.list
+      .mockResolvedValueOnce({ items: [], pagination: { page: 1, pageSize: 1, totalItems: 7, totalPages: 7 } })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 'idea-1',
+            title: 'Accepted idea',
+            category: 'Other',
+            status: 'Accepted',
+            isShared: false,
+            rowVersion: 0,
+            ownerUserId: 'u-2',
+            latestEvaluationComment: 'Good',
+          },
+        ],
+        pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
+      })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 'idea-2',
+            title: 'Rejected idea',
+            category: 'Other',
+            status: 'Rejected',
+            isShared: false,
+            rowVersion: 0,
+            ownerUserId: 'u-2',
+            latestEvaluationComment: 'Not now',
+          },
+        ],
+        pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
+      });
+
+    mockAuthValue({
+      authenticated: true,
+      userId: 'u-2',
+      fullName: 'Admin User',
+      email: 'admin@epam.com',
+      role: 'admin',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/dashboard']}>
+          <App />
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain('Admin');
+    expect(container.textContent).toContain('Evaluation Queue');
+    expect(container.textContent).toContain('Recent Decisions');
+    expect(container.textContent).toContain('Accepted idea');
+    expect(container.textContent).toContain('Rejected idea');
   });
 
   it('uses logo link to / for guests and /dashboard for authenticated users', async () => {

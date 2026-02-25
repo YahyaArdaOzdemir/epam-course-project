@@ -36,14 +36,20 @@ const passwordResetRequestSchema = z.object({
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
 });
 
-const passwordResetConfirmSchema = z.object({
-  token: z.string().min(1),
-  newPassword: z
-    .string()
-    .min(8)
-    .max(128)
-    .regex(passwordPolicy, 'Password must include uppercase, lowercase, digit, and special character'),
-});
+const passwordResetConfirmSchema = z
+  .object({
+    token: z.string().min(1),
+    newPassword: z
+      .string()
+      .min(8)
+      .max(128)
+      .regex(passwordPolicy, 'Password must include uppercase, lowercase, digit, and special character'),
+    confirmPassword: z.string(),
+  })
+  .refine((value) => value.newPassword === value.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Password confirmation does not match',
+  });
 
 export type LoginPayload = {
   email: string;
@@ -64,6 +70,7 @@ export type PasswordResetRequestPayload = {
 export type PasswordResetConfirmPayload = {
   token: string;
   newPassword: string;
+  confirmPassword: string;
 };
 
 export const parseLoginPayload = (input: unknown): LoginPayload => {

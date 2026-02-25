@@ -21,7 +21,7 @@ export const ProfilePage = () => {
       <dl className="mt-6 space-y-4 text-sm text-slate-700">
         <div>
           <dt className="font-medium text-slate-900">Full Name</dt>
-          <dd className="mt-1">{session?.fullName ?? session?.userId ?? 'Unknown user'}</dd>
+          <dd className="mt-1">{session?.fullName ?? session?.email ?? 'Unknown user'}</dd>
         </div>
         <div>
           <dt className="font-medium text-slate-900">Email</dt>

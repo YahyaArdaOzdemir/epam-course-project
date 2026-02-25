@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../hooks/useAuth';
 
 export const PasswordResetRequestPage = () => {
@@ -7,6 +8,15 @@ export const PasswordResetRequestPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const errorAlertRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!errorMessage) {
+      return;
+    }
+
+    errorAlertRef.current?.focus();
+  }, [errorMessage]);
 
   useEffect(() => {
     if (!successMessage) {
@@ -42,11 +52,16 @@ export const PasswordResetRequestPage = () => {
     <main className="mx-auto mt-12 max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold text-slate-900">Reset Password</h1>
       {successMessage ? (
-        <div className="fixed right-6 top-6 z-50 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm" role="status" aria-live="polite">
-          {successMessage}
-        </div>
+        <Alert variant="success" message={successMessage} className="fixed right-6 top-6 z-50" />
       ) : null}
-      {errorMessage ? <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</div> : null}
+      {errorMessage ? (
+        <Alert
+          ref={errorAlertRef}
+          variant="destructive"
+          message={errorMessage}
+          className="mb-4"
+        />
+      ) : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block text-sm font-medium text-slate-700">
           Email

@@ -69,12 +69,13 @@ describe('authApi', () => {
       .mockResolvedValueOnce({ message: 'done' });
 
     const requestResult = await authApi.passwordResetRequest('person@epam.com');
-    const confirmResult = await authApi.passwordResetConfirm('token-123', 'StrongerPass123!');
+    const confirmResult = await authApi.passwordResetConfirm('token-123', 'StrongerPass123!', 'StrongerPass123!');
 
     expect(apiClient.post).toHaveBeenNthCalledWith(1, '/auth/password-reset/request', { email: 'person@epam.com' });
     expect(apiClient.post).toHaveBeenNthCalledWith(2, '/auth/password-reset/confirm', {
       token: 'token-123',
       newPassword: 'StrongerPass123!',
+      confirmPassword: 'StrongerPass123!',
     });
     expect(requestResult.message).toBe('sent');
     expect(confirmResult.message).toBe('done');

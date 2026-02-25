@@ -153,12 +153,12 @@ describe('auth routes', () => {
 
     await request(app)
       .post('/api/auth/password-reset/confirm')
-      .send({ token: resetToken, newPassword })
+      .send({ token: resetToken, newPassword, confirmPassword: newPassword })
       .expect(200);
 
     const reuse = await request(app)
       .post('/api/auth/password-reset/confirm')
-      .send({ token: resetToken, newPassword: 'AnotherStrong123!' })
+      .send({ token: resetToken, newPassword: 'AnotherStrong123!', confirmPassword: 'AnotherStrong123!' })
       .expect(400);
 
     expect(reuse.body.code).toBe('AUTH_RESET_TOKEN_INVALID');

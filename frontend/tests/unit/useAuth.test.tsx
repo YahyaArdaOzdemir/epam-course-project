@@ -187,7 +187,7 @@ describe('useAuth', () => {
     expect(container.querySelector('#message')?.textContent).toBe('');
 
     await act(async () => {
-      await latestAuth?.passwordResetConfirm('token-1', 'StrongPass123!');
+      await latestAuth?.passwordResetConfirm('token-1', 'StrongPass123!', 'StrongPass123!');
     });
     expect(container.querySelector('#message')?.textContent).toBe('');
 
@@ -195,6 +195,6 @@ describe('useAuth', () => {
     await expect(latestAuth?.passwordResetRequest('a@epam.com')).rejects.toThrow('mapped:request failed');
 
     mockedAuthApi.passwordResetConfirm.mockRejectedValueOnce(new Error('confirm failed'));
-    await expect(latestAuth?.passwordResetConfirm('token-1', 'StrongPass123!')).rejects.toThrow('mapped:confirm failed');
+    await expect(latestAuth?.passwordResetConfirm('token-1', 'StrongPass123!', 'StrongPass123!')).rejects.toThrow('mapped:confirm failed');
   });
 });

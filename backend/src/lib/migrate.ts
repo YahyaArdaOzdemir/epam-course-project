@@ -4,6 +4,7 @@ import { getDb } from './db';
 
 export const migrate = (): void => {
   const db = getDb();
+  db.pragma('foreign_keys = ON');
   db.exec(
     `CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT PRIMARY KEY,

@@ -8,6 +8,13 @@ import { sessionRepository } from '../repositories/session-repository';
 import { userRepository } from '../repositories/user-repository';
 
 const resetTokenTtlMinutes = Number(process.env.PASSWORD_RESET_TOKEN_TTL_MINUTES ?? 30);
+const resetLinkBaseUrl = process.env.MOCK_EMAIL_BASE_URL ?? 'http://localhost:3000';
+
+const sendPasswordResetMockEmail = (email: string, token: string): void => {
+  const resetLink = `${resetLinkBaseUrl}/reset-password/confirm?token=${encodeURIComponent(token)}`;
+  console.log(`[MockEmail] To: ${email}`);
+  console.log(`[MockEmail] Reset Link: ${resetLink}`);
+};
 
 const getAllowedDomains = (): string[] => {
   return (process.env.ALLOWED_EMAIL_DOMAINS ?? 'epam.com')
@@ -165,6 +172,8 @@ export const authService = {
       ttlMinutes: resetTokenTtlMinutes,
       requestedFromIp: input.sourceIp,
     });
+
+    sendPasswordResetMockEmail(user.email, resetToken);
 
     return {
       message: 'If an account exists, a reset link has been sent.',

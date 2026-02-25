@@ -29,7 +29,7 @@ export const authApi = {
     return apiClient.post('/auth/password-reset/request', { email });
   },
   /** Confirms a password reset using one-time token and next password payload. */
-  passwordResetConfirm(token: string, newPassword: string): Promise<NeutralResponse> {
-    return apiClient.post('/auth/password-reset/confirm', { token, newPassword });
+  passwordResetConfirm(token: string, newPassword: string, confirmPassword: string): Promise<NeutralResponse> {
+    return apiClient.post('/auth/password-reset/confirm', { token, newPassword, confirmPassword });
   },
 };

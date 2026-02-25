@@ -130,9 +130,12 @@ describe('password reset pages red alerts', () => {
     });
 
     const passwordInput = container.querySelector('input[aria-label="New Password"]') as HTMLInputElement;
+    const confirmPasswordInput = container.querySelector('input[aria-label="Confirm Password"]') as HTMLInputElement;
     await act(async () => {
       passwordInput.value = 'StrongPass123!';
       passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      confirmPasswordInput.value = 'StrongPass123!';
+      confirmPasswordInput.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     const form = container.querySelector('form') as HTMLFormElement;
@@ -168,9 +171,12 @@ describe('password reset pages red alerts', () => {
     });
 
     const passwordInput = container.querySelector('input[aria-label="New Password"]') as HTMLInputElement;
+    const confirmPasswordInput = container.querySelector('input[aria-label="Confirm Password"]') as HTMLInputElement;
     await act(async () => {
       passwordInput.value = 'StrongPass123!';
       passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      confirmPasswordInput.value = 'StrongPass123!';
+      confirmPasswordInput.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     const form = container.querySelector('form') as HTMLFormElement;
@@ -180,4 +186,5 @@ describe('password reset pages red alerts', () => {
 
     expect(container.querySelector('.text-green-700')?.textContent).toContain('Password reset completed');
   });
+
 });

@@ -89,11 +89,27 @@ When implementation already exists, validate whether requested change conflicts 
 If conflict exists, update upstream artifacts first per propagation rules before implementation edits.
 
 ### 8) Compilation & Integrity Gate (CRITICAL FINAL CHECK)
-Before reporting success, you MUST verify file existence and import validity:
-- **No Ghost Imports:** If code imports a module (e.g., `import X from './path/to/X'`), the file `./path/to/X` MUST exist and export `X`.
-- **Creation Validation:** If a new feature requires a new page/component, you MUST explicitly create that file in the file list.
-- **Type Safety:** Verify corresponding type declarations exist for new modules.
-- **Rule:** If `Cannot find module` or similar errors would occur, the execution is a FAILURE. You must backtrack and create the missing file.
+Before reporting success, enforce strict compilation and module integrity:
+- **No Ghost Imports:**  
+  Every imported module (e.g., `import X from './path/to/X'`) MUST physically exist and correctly export the referenced symbol.
+- **Creation Enforcement:**  
+  If a referenced file does not exist, you MUST create it and include it in the file list.
+- **Type Safety Required:**  
+  All new modules MUST have valid type declarations. No unresolved type errors are permitted.
+- **Editor Diagnostics Are Binding:**  
+  Problems panel errors (e.g., `Cannot find module`) are treated as real failures — even if the compiler passes.  
+  Stale TypeScript server explanations are NOT acceptable.
+- **Mandatory Remediation:**  
+  On unresolved import errors, you MUST:
+  - Verify filename casing and extension.
+  - Verify relative path correctness.
+  - Verify default vs named exports.
+  - Verify `tsconfig.json` path/alias configuration.
+  - Create missing files or types if required.
+  - Replace broken imports with verified working alternatives if necessary.
+- **Zero-Tolerance Rule:**  
+  The task is incomplete if any import resolution or type errors remain.  
+  If `Cannot find module` (or similar) persists, execution is a FAILURE and must be backtracked.
 
 ## Required Response Format for `/request.feature`
 All executions must output exactly these sections in order:
