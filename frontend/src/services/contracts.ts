@@ -4,6 +4,8 @@ export type IdeaStatus = 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
 export type AuthSession = {
   authenticated: true;
   userId: string;
+  fullName?: string;
+  email?: string;
   role: Role;
   expiresAt: string;
 };

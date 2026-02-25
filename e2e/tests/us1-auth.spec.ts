@@ -41,7 +41,7 @@ test('register-login-logout and protected role path', async ({ page }) => {
 
   await expect(page.getByText('Dashboard').first()).toBeVisible();
   await page.getByRole('button', { name: 'Logout' }).click();
-  await page.waitForURL('**/login');
+  await page.waitForURL('**/');
 });
 
 test('denies direct protected route access and keeps session across refresh', async ({ page }) => {

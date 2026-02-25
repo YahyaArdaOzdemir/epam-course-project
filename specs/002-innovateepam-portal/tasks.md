@@ -148,6 +148,9 @@
 - [X] T050 [P] [US4] Add end-to-end shell/ux regression in e2e/tests/us4-shell-ux.spec.ts
 - [X] T051 [US4] Capture failing test evidence for US4 in specs/002-innovateepam-portal/checklists/us4-test-proof.md
 - [X] T068 [P] [US4] Add unit tests for ARIA announcement behavior (assertive error, polite success) in frontend/tests/unit/alert-aria-announcement.test.tsx
+- [X] T075 [P] [US4] Add unit tests for profile-view identity rendering and clickable header email navigation in frontend/tests/unit/app-public-entry-navigation.test.tsx
+- [X] T076 [P] [US4] Add unit tests for `My Ideas` and `Evaluation Queue` empty-state CTA rendering in frontend/tests/unit/idea-list-empty-states.test.tsx
+- [X] T077 [P] [US4] Add E2E assertion for logout redirect destination `/` in e2e/tests/us1-auth.spec.ts
 
 ### Implementation for User Story 4
 
@@ -161,6 +164,9 @@
 - [X] T070 [US4] Apply ARIA labels/roles to evaluation forms in frontend/src/features/evaluation/AdminEvaluationPage.tsx
 - [X] T058 [US4] Add/Update JSDoc for exported US4 APIs in frontend/src/features/layout/ProtectedLayout.tsx
 - [X] T071 [US4] Implement alert live-region behavior (`role="alert"` assertive errors, `role="status"` polite success) in frontend/src/features/shared/Alert.tsx
+- [X] T078 [US4] Implement protected profile view, header email-link routing, and logout redirect to public landing in frontend/src/App.tsx and frontend/src/features/auth/pages/ProfilePage.tsx
+- [X] T079 [US4] Implement `My Ideas` and `Evaluation Queue` empty-state components and CTA actions in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
+- [X] T080 [US4] Apply visible hover/active feedback styling to primary/secondary controls in frontend/src/styles.css and protected-shell surfaces
 
 **Checkpoint**: US4 is independently functional and testable.
 

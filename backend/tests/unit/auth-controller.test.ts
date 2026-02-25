@@ -213,6 +213,8 @@ describe('authController', () => {
     mockedAuthService.getSession.mockReturnValue({
       authenticated: true,
       userId: 'u1',
+      fullName: 'Alice Employee',
+      email: 'alice@epam.com',
       role: 'submitter',
       expiresAt: new Date().toISOString(),
     });

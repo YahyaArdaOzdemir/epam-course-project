@@ -88,6 +88,13 @@ If drift is detected:
 When implementation already exists, validate whether requested change conflicts with current spec/plan/tasks.
 If conflict exists, update upstream artifacts first per propagation rules before implementation edits.
 
+### 8) Compilation & Integrity Gate (CRITICAL FINAL CHECK)
+Before reporting success, you MUST verify file existence and import validity:
+- **No Ghost Imports:** If code imports a module (e.g., `import X from './path/to/X'`), the file `./path/to/X` MUST exist and export `X`.
+- **Creation Validation:** If a new feature requires a new page/component, you MUST explicitly create that file in the file list.
+- **Type Safety:** Verify corresponding type declarations exist for new modules.
+- **Rule:** If `Cannot find module` or similar errors would occur, the execution is a FAILURE. You must backtrack and create the missing file.
+
 ## Required Response Format for `/request.feature`
 All executions must output exactly these sections in order:
 

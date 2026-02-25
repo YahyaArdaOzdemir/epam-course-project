@@ -118,6 +118,11 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 13. **Given** a keyboard-only user (Tab/Enter/Space) executes Login, Submit Idea, or Evaluate flows, **When** controls are operated without mouse input, **Then** each flow is fully completable with correct focus order and actionable controls.
 14. **Given** a form submission fails, **When** the error alert is rendered, **Then** keyboard focus moves to the visible alert region so screen-reader and keyboard users are notified immediately.
 15. **Given** form inputs and alerts are rendered, **When** assistive technologies inspect semantics, **Then** inputs expose proper labels and alerts expose appropriate ARIA roles.
+16. **Given** an authenticated user views protected-shell identity context, **When** dashboard and header identity labels render, **Then** user-facing identity uses account `fullName` (not raw internal GUID values) with fallback-safe formatting.
+17. **Given** an authenticated user clicks their header email identity link, **When** profile view opens, **Then** the UI shows full name, email, and role plus a dedicated logout action.
+18. **Given** an authenticated user logs out from shell header or profile view, **When** logout succeeds, **Then** the user is redirected to public landing page `/`.
+19. **Given** `My Ideas` or `Evaluation Queue` has zero results, **When** page content renders, **Then** a visible empty-state message and a context-appropriate CTA are shown.
+20. **Given** users interact with primary/secondary buttons, **When** pointer hover or active press occurs, **Then** controls show visible hover and active feedback states.
 
 ---
 
@@ -219,6 +224,11 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-064**: System MUST make global header navigation authentication-aware: unauthenticated users MUST NOT see protected links (`Dashboard`, `Submit Idea`, and other protected workspace links), and the product logo link MUST target `/` when logged out and `/dashboard` when logged in.
 - **FR-065**: System MUST provide unauthenticated landing-page authentication controls as a right-side panel with explicit `Register` and `Login` toggle buttons that switch the active form in place.
 - **FR-066**: System MUST render registration and password-reset success confirmations as contextual green transient popups scoped to the initiating page/form, and MUST NOT persist or leak those confirmations across unrelated pages.
+- **FR-067**: System MUST present authenticated user identity in protected-shell UI using human-readable account attributes (`fullName`, `email`) and MUST NOT surface raw internal user GUID as the primary visible identity label.
+- **FR-068**: System MUST provide a protected profile view reachable from clickable header email that displays `fullName`, `email`, and role, and includes a dedicated logout action.
+- **FR-069**: System MUST redirect users to public landing page `/` after successful logout.
+- **FR-070**: System MUST render standardized empty-state content for zero-result `My Ideas` and `Evaluation Queue` views, each with a context-appropriate CTA.
+- **FR-071**: System MUST provide visible hover and active interaction feedback for all primary and secondary button controls across authenticated workflows.
 
 ### Assumptions
 

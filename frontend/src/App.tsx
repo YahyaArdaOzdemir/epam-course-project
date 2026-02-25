@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { ProtectedRoute } from './features/auth/components/ProtectedRoute';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
@@ -7,6 +7,7 @@ import { LoginPage } from './features/auth/pages/LoginPage';
 import { DashboardPage } from './features/auth/pages/DashboardPage';
 import { PasswordResetRequestPage } from './features/auth/pages/PasswordResetRequestPage';
 import { PasswordResetConfirmPage } from './features/auth/pages/PasswordResetConfirmPage';
+import { ProfilePage } from './features/auth/pages/ProfilePage';
 import { IdeaSubmitPage } from './features/ideas/pages/IdeaSubmitPage';
 import { IdeaListPage } from './features/ideas/pages/IdeaListPage';
 import { EvaluationQueuePage, EvaluationDetailPage } from './features/evaluation/pages';
@@ -17,8 +18,12 @@ export const App = () => {
 
   const handleLogout = async (): Promise<void> => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
+
+  const navigationLinkClassName = ({ isActive }: { isActive: boolean }): string => (
+    `transition hover:text-blue-600 ${isActive ? 'font-semibold text-blue-700 underline underline-offset-4' : ''}`
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -30,14 +35,15 @@ export const App = () => {
           <nav className="flex items-center gap-4 text-sm font-medium text-slate-700">
             {session ? (
               <>
-                <Link to="/dashboard" className="transition hover:text-blue-600">Dashboard</Link>
-                <Link to="/ideas/new" className="transition hover:text-blue-600">Submit Idea</Link>
-                <Link to="/ideas" className="transition hover:text-blue-600">My Ideas</Link>
-                <Link to="/evaluation" className="transition hover:text-blue-600">Evaluation Queue</Link>
+                <NavLink to="/dashboard" className={navigationLinkClassName}>Dashboard</NavLink>
+                <NavLink to="/ideas/new" className={navigationLinkClassName}>Submit Idea</NavLink>
+                <NavLink to="/ideas" className={navigationLinkClassName}>My Ideas</NavLink>
+                <NavLink to="/evaluation" className={navigationLinkClassName}>Evaluation Queue</NavLink>
+                <NavLink to="/profile" className={navigationLinkClassName}>{session.email ?? 'Profile'}</NavLink>
               </>
             ) : null}
             {session ? (
-              <button type="button" onClick={handleLogout} className="transition hover:text-blue-600">Logout</button>
+              <button type="button" onClick={handleLogout} className="rounded-md px-2 py-1 transition hover:bg-slate-100 active:scale-[0.98]">Logout</button>
             ) : null}
           </nav>
         </div>
@@ -55,6 +61,7 @@ export const App = () => {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/ideas/new" element={<IdeaSubmitPage />} />
             <Route path="/ideas" element={<IdeaListPage />} />
             <Route path="/evaluation" element={<EvaluationQueuePage />} />
@@ -154,7 +161,7 @@ const PublicLandingPage = () => {
               setErrorMessage('');
               setSuccessMessage('');
             }}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${mode === 'register' ? 'bg-blue-600 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'}`}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${mode === 'register' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'}`}
           >
             Register
           </button>
@@ -165,7 +172,7 @@ const PublicLandingPage = () => {
               setErrorMessage('');
               setSuccessMessage('');
             }}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${mode === 'login' ? 'bg-blue-600 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'}`}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${mode === 'login' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'}`}
           >
             Login
           </button>
@@ -218,7 +225,7 @@ const PublicLandingPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-blue-300"
             >
               {isLoading ? 'Loading...' : 'Register'}
             </button>
@@ -247,7 +254,7 @@ const PublicLandingPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-blue-300"
             >
               {isLoading ? 'Loading...' : 'Login'}
             </button>

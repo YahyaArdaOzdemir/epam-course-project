@@ -37,6 +37,8 @@ const recordThrottleFailure = (input: { actionType: 'login' | 'password_reset'; 
 type SessionSnapshot = {
   authenticated: true;
   userId: string;
+  fullName: string;
+  email: string;
   role: 'submitter' | 'evaluator_admin';
   expiresAt: string;
 };
@@ -115,14 +117,17 @@ export const authService = {
   getSession(token: string): SessionSnapshot {
     const payload = verifyAuthToken(token);
     const session = sessionRepository.findActiveByTokenHash(hashToken(token));
+    const user = userRepository.findById(payload.userId);
 
-    if (!session || session.userId !== payload.userId || new Date(session.expiresAt).getTime() <= Date.now()) {
+    if (!session || session.userId !== payload.userId || new Date(session.expiresAt).getTime() <= Date.now() || !user) {
       throw new UnauthorizedError('Session is invalid');
     }
 
     return {
       authenticated: true,
       userId: payload.userId,
+      fullName: user.fullName,
+      email: user.email,
       role: payload.role,
       expiresAt: session.expiresAt,
     };

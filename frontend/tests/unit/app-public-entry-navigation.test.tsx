@@ -44,7 +44,7 @@ describe('App public entry and auth-aware navigation', () => {
   let root: Root;
 
   const mockAuthValue = (
-    session: { authenticated: true; userId: string; role: 'submitter' | 'evaluator_admin'; expiresAt: string } | null,
+    session: { authenticated: true; userId: string; fullName?: string; email?: string; role: 'submitter' | 'evaluator_admin'; expiresAt: string } | null,
     overrides?: {
       register?: jest.Mock;
       login?: jest.Mock;
@@ -105,6 +105,8 @@ describe('App public entry and auth-aware navigation', () => {
     mockAuthValue({
       authenticated: true,
       userId: 'u-1',
+      fullName: 'Alice Employee',
+      email: 'alice@epam.com',
       role: 'submitter',
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
     });
@@ -118,7 +120,9 @@ describe('App public entry and auth-aware navigation', () => {
     });
 
     expect(container.textContent).toContain('Dashboard');
-    expect(container.textContent).toContain('Signed in as submitter');
+    expect(container.textContent).toContain('Signed in as Alice Employee');
+    const profileLink = container.querySelector('header a[href="/profile"]');
+    expect(profileLink?.textContent).toBe('alice@epam.com');
   });
 
   it('uses logo link to / for guests and /dashboard for authenticated users', async () => {
@@ -138,6 +142,8 @@ describe('App public entry and auth-aware navigation', () => {
     mockAuthValue({
       authenticated: true,
       userId: 'u-2',
+      fullName: 'Bob Employee',
+      email: 'bob@epam.com',
       role: 'submitter',
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
     });
