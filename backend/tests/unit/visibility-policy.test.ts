@@ -10,6 +10,6 @@ describe('comment visibility policy', () => {
   });
 
   it('shows comments for evaluator/admin regardless of share', () => {
-    expect(canSeeEvaluationComment({ isShared: false }, 'evaluator_admin')).toBe(true);
+    expect(canSeeEvaluationComment({ isShared: false }, 'admin')).toBe(true);
   });
 });

@@ -12,6 +12,14 @@ export const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
 ]);
 
+const ALLOWED_EXTENSIONS_BY_MIME = new Map<string, Set<string>>([
+  ['application/pdf', new Set(['.pdf'])],
+  ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', new Set(['.docx'])],
+  ['application/vnd.openxmlformats-officedocument.presentationml.presentation', new Set(['.pptx'])],
+  ['image/png', new Set(['.png'])],
+  ['image/jpeg', new Set(['.jpg', '.jpeg'])],
+]);
+
 const uploadDir = path.resolve(process.env.UPLOAD_DIR ?? 'backend/uploads');
 fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -31,6 +39,14 @@ export const singleAttachmentUpload = multer({
       callback(new ValidationError('Unsupported file type'));
       return;
     }
+
+    const normalizedExtension = path.extname(file.originalname).toLowerCase();
+    const allowedExtensions = ALLOWED_EXTENSIONS_BY_MIME.get(file.mimetype);
+    if (!allowedExtensions || !allowedExtensions.has(normalizedExtension)) {
+      callback(new ValidationError('Unsupported file type'));
+      return;
+    }
+
     callback(null, true);
   },
 });

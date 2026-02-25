@@ -39,7 +39,7 @@ type SessionSnapshot = {
   userId: string;
   fullName: string;
   email: string;
-  role: 'submitter' | 'evaluator_admin';
+  role: 'submitter' | 'admin';
   expiresAt: string;
 };
 
@@ -72,7 +72,7 @@ export const authService = {
     password: string;
     sourceIp: string;
     userAgent?: string;
-  }): Promise<{ token: string; userId: string; role: 'submitter' | 'evaluator_admin'; redirectTo: '/dashboard'; expiresAt: string }> {
+  }): Promise<{ token: string; userId: string; role: 'submitter' | 'admin'; redirectTo: '/dashboard'; expiresAt: string }> {
     const normalizedEmail = input.email.trim().toLowerCase();
     ensureNotThrottled({ actionType: 'login', accountKey: normalizedEmail, sourceIp: input.sourceIp });
 

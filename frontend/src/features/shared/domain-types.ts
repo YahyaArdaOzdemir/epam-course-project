@@ -1,4 +1,4 @@
-export type UserRole = 'submitter' | 'evaluator_admin';
+export type UserRole = 'submitter' | 'admin';
 export type UserStatus = 'active' | 'suspended';
 
 export type IdeaCategory = 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other';

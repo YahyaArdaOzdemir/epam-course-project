@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const roleLabelMap: Record<'submitter' | 'evaluator_admin', 'Submitter' | 'Admin'> = {
+const roleLabelMap: Record<'submitter' | 'admin', 'Submitter' | 'Admin'> = {
   submitter: 'Submitter',
-  evaluator_admin: 'Admin',
+  admin: 'Admin',
 };
 
 export const ProfilePage = () => {

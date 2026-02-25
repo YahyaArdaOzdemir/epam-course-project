@@ -44,7 +44,7 @@ describe('App public entry and auth-aware navigation', () => {
   let root: Root;
 
   const mockAuthValue = (
-    session: { authenticated: true; userId: string; fullName?: string; email?: string; role: 'submitter' | 'evaluator_admin'; expiresAt: string } | null,
+    session: { authenticated: true; userId: string; fullName?: string; email?: string; role: 'submitter' | 'admin'; expiresAt: string } | null,
     overrides?: {
       register?: jest.Mock;
       login?: jest.Mock;

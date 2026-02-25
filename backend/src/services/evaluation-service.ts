@@ -13,12 +13,12 @@ export const isValidTransition = (from: IdeaRecord['status'], to: IdeaRecord['st
 const updateIdeaStatus = (input: {
   ideaId: string;
   evaluatorUserId: string;
-  evaluatorRole: 'submitter' | 'evaluator_admin';
+  evaluatorRole: 'submitter' | 'admin';
   toStatus: 'Under Review' | 'Accepted' | 'Rejected';
   comment?: string;
   expectedRowVersion: number;
 }) => {
-  if (input.evaluatorRole !== 'evaluator_admin') {
+  if (input.evaluatorRole !== 'admin') {
     throw new ForbiddenError('Only evaluator/admin can evaluate ideas');
   }
 

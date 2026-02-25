@@ -7,7 +7,7 @@ const defaultSessionTtlHours = 24;
 
 export type AuthTokenPayload = {
   userId: string;
-  role: 'submitter' | 'evaluator_admin';
+  role: 'submitter' | 'admin';
   jti: string;
   exp: number;
 };

@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export const DashboardPage = () => {
   const { session } = useAuth();
-  const roleLabel = session?.role === 'evaluator_admin' ? 'Admin' : 'Submitter';
+  const roleLabel = session?.role === 'admin' ? 'Admin' : 'Submitter';
   const identityLabel = session?.fullName ?? session?.email ?? 'User';
 
   return (

@@ -4,7 +4,7 @@ import { AppError, ForbiddenError, UnauthorizedError } from '../lib/errors';
 import { sessionRepository } from '../repositories/session-repository';
 import { csrfTokenRepository } from '../repositories/csrf-token-repository';
 
-type Role = 'submitter' | 'evaluator_admin';
+type Role = 'submitter' | 'admin';
 
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? 'innovatepam_session';
 

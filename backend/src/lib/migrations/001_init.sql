@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('submitter', 'evaluator_admin')),
+  role TEXT NOT NULL CHECK(role IN ('submitter', 'admin')),
   status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'suspended')),
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL

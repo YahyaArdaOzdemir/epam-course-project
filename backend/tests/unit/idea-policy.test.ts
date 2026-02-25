@@ -8,7 +8,7 @@ describe('idea visibility rules', () => {
   });
 
   it('evaluator/admin can view private idea', () => {
-    expect(canViewIdea(idea, { userId: 'other', role: 'evaluator_admin' })).toBe(true);
+    expect(canViewIdea(idea, { userId: 'other', role: 'admin' })).toBe(true);
   });
 
   it('non-owner submitter cannot view private idea', () => {

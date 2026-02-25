@@ -1,5 +1,6 @@
-export type Role = 'submitter' | 'evaluator_admin';
+export type Role = 'submitter' | 'admin';
 export type IdeaStatus = 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
+export type IdeaCategory = 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other';
 
 export type AuthSession = {
   authenticated: true;
@@ -39,7 +40,7 @@ export type LoginRequest = {
 export type IdeaListItem = {
   id: string;
   title: string;
-  category: string;
+  category: IdeaCategory;
   status: IdeaStatus;
   isShared: boolean;
   rowVersion: number;
@@ -50,7 +51,7 @@ export type IdeaListItem = {
 export type IdeaCreateRequest = {
   title: string;
   description: string;
-  category: string;
+  category: IdeaCategory;
   file?: File;
 };
 

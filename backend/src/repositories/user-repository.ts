@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { getDb } from '../lib/db';
 
-export type UserRole = 'submitter' | 'evaluator_admin';
+export type UserRole = 'submitter' | 'admin';
 
 export type UserRecord = {
   id: string;

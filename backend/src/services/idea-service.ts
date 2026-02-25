@@ -4,9 +4,9 @@ import { ideaRepository, IdeaRecord } from '../repositories/idea-repository';
 
 export const canViewIdea = (
   idea: Pick<IdeaRecord, 'ownerUserId' | 'isShared'>,
-  viewer: { userId: string; role: 'submitter' | 'evaluator_admin' },
+  viewer: { userId: string; role: 'submitter' | 'admin' },
 ): boolean => {
-  if (viewer.role === 'evaluator_admin') {
+  if (viewer.role === 'admin') {
     return true;
   }
 
@@ -15,9 +15,9 @@ export const canViewIdea = (
 
 export const canSeeEvaluationComment = (
   idea: Pick<IdeaRecord, 'isShared'>,
-  role: 'submitter' | 'evaluator_admin',
+  role: 'submitter' | 'admin',
 ): boolean => {
-  return role === 'evaluator_admin' || idea.isShared;
+  return role === 'admin' || idea.isShared;
 };
 
 /** Creates an idea with optional single attachment metadata. */
@@ -44,7 +44,7 @@ const createIdea = (input: {
   return idea;
 };
 
-const listIdeas = (viewer: { userId: string; role: 'submitter' | 'evaluator_admin' }) => {
+const listIdeas = (viewer: { userId: string; role: 'submitter' | 'admin' }) => {
   return ideaRepository.listVisible(viewer.userId, viewer.role);
 };
 

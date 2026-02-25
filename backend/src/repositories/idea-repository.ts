@@ -58,10 +58,10 @@ export const ideaRepository = {
     return row ? mapIdea(row as Record<string, unknown>) : null;
   },
 
-  listVisible(userId: string, role: 'submitter' | 'evaluator_admin'): IdeaRecord[] {
+  listVisible(userId: string, role: 'submitter' | 'admin'): IdeaRecord[] {
     const db = getDb();
     const rows =
-      role === 'evaluator_admin'
+      role === 'admin'
         ? db.prepare('SELECT * FROM ideas ORDER BY created_at DESC').all()
         : db
             .prepare('SELECT * FROM ideas WHERE owner_user_id = ? OR is_shared = 1 ORDER BY created_at DESC')
