@@ -29,6 +29,7 @@
 - **Test Distribution Plan**: This feature targets Unit 70%, Integration 20%, E2E 10%.
 - **Coverage Plan**: Changed production code must maintain at least 80% line coverage before merge.
 - **Mocking Boundaries**: Only external I/O boundaries may be mocked/faked; business logic evaluation and status rules remain unmocked in tests.
+- **Story Coverage Integrity**: Functional requirements map to existing stories with no orphan scope items (US1 auth/recovery, US2 submission/listing query, US3 evaluation/audit, US4 shell/ux/a11y).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -59,7 +60,7 @@ As a submitter, I can create ideas with title, description, category, and one op
 
 **Why this priority**: This is the core business flow that captures employee innovation proposals.
 
-**Independent Test**: Can be fully tested by logging in as submitter, submitting ideas with and without an attachment, and verifying they appear in listing views with correct metadata and initial status.
+**Independent Test**: Can be fully tested by logging in as submitter, submitting ideas with and without an attachment, verifying listing metadata/status, and validating pagination/filter/sort behavior in list views.
 
 **Acceptance Scenarios**:
 
@@ -67,6 +68,9 @@ As a submitter, I can create ideas with title, description, category, and one op
 2. **Given** an authenticated submitter, **When** they upload more than one file for a single idea, **Then** submission is rejected with a clear validation message.
 3. **Given** an authenticated submitter, **When** they upload an unsupported file type or a file larger than 10 MiB (10,485,760 bytes), **Then** submission is rejected with a clear validation message.
 4. **Given** an authenticated submitter, **When** they attempt to submit category input outside the allowed dropdown values (`Process Improvement`, `Product Feature`, `Cost Saving`, `Other`), **Then** submission is rejected with a clear validation message.
+5. **Given** an authenticated submitter with many ideas, **When** they browse listing pages, **Then** results are returned via server-side pagination with deterministic page size and navigation controls.
+6. **Given** an authenticated submitter on idea listing, **When** they apply filters for status, category, and date range, **Then** only matching ideas are returned.
+7. **Given** an authenticated submitter on idea listing, **When** they sort by date (`Newest`/`Oldest`) or status, **Then** list order updates correctly and consistently.
 
 ---
 
@@ -76,7 +80,7 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 
 **Why this priority**: Evaluation workflow converts submissions into actionable outcomes and closes the innovation loop.
 
-**Independent Test**: Can be fully tested by logging in as evaluator/admin, selecting submitted ideas, updating status to `Under Review`, then `Accepted` or `Rejected` with comments, and confirming updates are visible in listings.
+**Independent Test**: Can be fully tested by logging in as evaluator/admin, selecting submitted ideas, updating status to `Under Review`, then `Accepted` or `Rejected` with comments, confirming updates are visible in listings, and validating idea-details timeline entries.
 
 **Acceptance Scenarios**:
 
@@ -84,6 +88,8 @@ As an evaluator/admin, I can review submitted ideas, move them through review st
 2. **Given** an evaluator/admin reviewing an idea, **When** they choose `Accepted` or `Rejected` and provide comments, **Then** the decision and comments are saved and visible to relevant users.
 3. **Given** two evaluators/admins update the same idea concurrently, **When** one update becomes stale, **Then** the stale update is rejected and the user is prompted to refresh and retry.
 4. **Given** an idea is shared by its submitter, **When** an evaluator/admin finalizes with comments, **Then** all authenticated employees can view those evaluation comments in the shared view.
+5. **Given** an evaluator/admin opens idea details, **When** they view the timeline/history log, **Then** they can see status-change entries with actor identity and timestamp.
+6. **Given** a non-evaluator user opens idea details, **When** timeline/history is permissioned for evaluator/admin, **Then** evaluator/admin-only timeline controls/data are not exposed.
 
 ---
 
@@ -93,7 +99,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 
 **Why this priority**: Functional workflows are complete, but usability and clarity are not sufficient for day-to-day adoption without a post-login home and explicit UI feedback.
 
-**Independent Test**: Can be fully tested by logging in, verifying redirect to dashboard, confirming persistent header with signed-in email/logout, and provoking validation failures to confirm visible red alerts.
+**Independent Test**: Can be fully tested by logging in, verifying redirect to dashboard, confirming persistent header with signed-in email/logout, validating keyboard-only flow completion, and provoking validation failures to confirm visible red alerts with managed focus.
 
 **Acceptance Scenarios**:
 
@@ -106,6 +112,12 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 7. **Given** dashboard shell and role widgets are implemented in the frontend, **When** TypeScript strict mode checks component contracts, **Then** props for layout and dashboard widgets are defined with explicit strict TypeScript interfaces/types and pass compilation without unsafe typing shortcuts.
 8. **Given** a form/API request fails validation or authorization, **When** the response returns an error, **Then** a visible red alert with actionable message is shown in-page (not console-only).
 9. **Given** a user submits a form, **When** request is pending, **Then** submit action is disabled and loading state is visible to prevent duplicate submits.
+10. **Given** a user double-clicks a form submit action, **When** the first click starts a pending request, **Then** only one network request is sent and no duplicate action is created.
+11. **Given** a protected-page API call returns HTTP 500, **When** the UI receives the error response, **Then** a visible red error alert is rendered in-page and not only logged to browser console.
+12. **Given** a state-changing action succeeds, **When** the success response is rendered, **Then** a green success alert is displayed using the shared alert component and may auto-dismiss.
+13. **Given** a keyboard-only user (Tab/Enter/Space) executes Login, Submit Idea, or Evaluate flows, **When** controls are operated without mouse input, **Then** each flow is fully completable with correct focus order and actionable controls.
+14. **Given** a form submission fails, **When** the error alert is rendered, **Then** keyboard focus moves to the visible alert region so screen-reader and keyboard users are notified immediately.
+15. **Given** form inputs and alerts are rendered, **When** assistive technologies inspect semantics, **Then** inputs expose proper labels and alerts expose appropriate ARIA roles.
 
 ---
 
@@ -128,6 +140,13 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - Session expires while user navigates from dashboard to feature pages.
 - Global header data is stale after role/session changes and must refresh on re-authentication.
 - Multiple rapid submits occur on the same form and should not create duplicate actions.
+- Protected pages render without role badge in header and must fail shell acceptance checks.
+- Protected-page navigation does not visually mark the active route and causes ambiguous location context.
+- Dashboard widgets are shown to the wrong role (submitter sees evaluator/admin widgets or evaluator/admin misses queue/decision widgets).
+- Listing requests bypass server-side pagination and attempt to render excessive unpaged result sets.
+- Listing date-range filter uses invalid bounds (end before start) and must return actionable validation.
+- Keyboard-only user cannot reach or trigger primary submit/evaluate controls.
+- Failed form submission does not move focus to the error alert region, reducing recoverability for keyboard/screen-reader users.
 
 ## Requirements *(mandatory)*
 
@@ -173,9 +192,9 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-037**: System MUST make evaluation comments visible to all authenticated employees for shared ideas.
 - **FR-038**: System MUST provide a post-login dashboard with role-appropriate primary actions and concise user-relevant summary.
 - **FR-039**: System MUST render all protected pages (`/dashboard`, idea submit, idea details) inside a shared protected layout component (global app shell).
-- **FR-040**: System MUST display validation/auth/permission/conflict/throttle failures as visible in-page red alerts.
-- **FR-041**: System MUST keep error alerts actionable and visible until dismissal, retry, or successful follow-up action.
-- **FR-042**: System MUST show loading state and prevent duplicate submissions while requests are pending.
+- **FR-040**: System MUST use a shared standardized Alert component for user feedback, and MUST render validation/auth/permission/conflict/throttle/API failures (including 4xx/5xx) as visible in-page red error alerts rather than console-only logging.
+- **FR-041**: System MUST keep red error alerts persistent and actionable until dismissal, retry, or successful follow-up action, and MUST render success alerts using the same standardized Alert component in green with auto-dismiss support.
+- **FR-042**: System MUST, for all Login/Register/Submit-Idea/Evaluate forms, disable submit immediately when request starts, show visible loading indicator (e.g., `Loading...` or spinner), prevent duplicate in-flight submits, and re-enable controls when request fails.
 - **FR-043**: System MUST treat authenticated employees as active human employee accounts only (excluding service accounts, suspended users, external identities).
 - **FR-044**: System MUST deny non-owners from accessing owner-only listing/detail routes in user-facing idea views.
 - **FR-045**: System MUST preserve submitted title/description/category/owner/time and attachment metadata when attachment is present.
@@ -186,6 +205,16 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-050**: System MUST provide submitter dashboard view with a prominent `Submit New Idea` CTA and a `My Ideas` summary widget scoped to the current user.
 - **FR-051**: System MUST provide evaluator/admin dashboard view with `Evaluation Queue` summary count and `Recent Decisions` quick links.
 - **FR-052**: System MUST define strict TypeScript interfaces/types for props of protected layout and role-specific dashboard components, compatible with strict compiler settings and without ungoverned unsafe typing shortcuts.
+- **FR-053**: System MUST ensure user double-click or repeated click on an in-flight submit action results in at most one network request for that action.
+- **FR-054**: System MUST provide server-side pagination for idea listings and MUST NOT rely on unbounded infinite scrolling for large result sets.
+- **FR-055**: System MUST support idea-list filters by `status`, `category`, and submission date range.
+- **FR-056**: System MUST support idea-list sorting by date (`Newest`, `Oldest`) and by status.
+- **FR-057**: System MUST provide evaluator/admin-visible idea-details timeline/history showing status changes, actor identity, and timestamp for each transition.
+- **FR-058**: System MUST enforce access control for evaluator/admin-only timeline/history visibility and MUST NOT expose restricted timeline data to unauthorized roles.
+- **FR-059**: System MUST ensure primary flows (Login, Register, Submit Idea, Evaluate) are fully operable via keyboard using Tab/Enter/Space without pointer interaction.
+- **FR-060**: System MUST provide accessible semantics for forms and alerts, including programmatic input labels and appropriate ARIA roles for alert/status messaging.
+- **FR-061**: System MUST move focus to the visible error alert region when a form submission fails and preserve logical focus recovery for retry.
+- **FR-062**: System MUST expose error alerts with assertive announcement behavior and success alerts with polite announcement behavior to improve assistive-technology feedback consistency.
 
 ### Assumptions
 
@@ -227,3 +256,8 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **SC-008**: 100% of finalized ideas contain evaluator/admin decision (`Accepted`/`Rejected`) with non-empty comment.
 - **SC-009**: 95% of status updates are visible to authorized users within 5 seconds.
 - **SC-010**: At least 90% of authenticated users reach intended next action from dashboard in two clicks or fewer.
+- **SC-011**: 100% of API 500/auth/validation failures in protected workflows render a visible in-page red alert (not console-only), and 95% render within 1 second of error response receipt.
+- **SC-012**: 100% of tested rapid double-click submit attempts across Login, Register, Submit Idea, and Evaluate flows produce at most one network request per user action.
+- **SC-013**: 95% of green success alerts in protected workflows auto-dismiss between 3 and 5 seconds after render while remaining visible long enough to be perceived by users.
+- **SC-014**: 100% of keyboard-only test runs for Login/Register/Submit-Idea/Evaluate flows complete without mouse interaction.
+- **SC-015**: 100% of failed form submissions move focus to the visible error alert region, and 100% of tested alerts expose valid ARIA role semantics.
