@@ -72,6 +72,14 @@ Apply strict propagation rules:
 
 Downstream-only edits (implementation/task/plan changes without required upstream updates) are blocked.
 
+### 4.5) TDD Protocol Enforcement (MANDATORY)
+If the request involves writing or modifying logic (JS/TS/Python code):
+1. **Test First:** You MUST generate/update the corresponding Test File (`.test.ts` or `.spec.ts`) first.
+2. **Red State:** The test must explicitly target the new requirement.
+3. **Implementation Second:** Only AFTER the test is defined may you generate the implementation code.
+
+**Violation Check:** If the response contains implementation code but no corresponding test update, it is a critical process failure.
+
 ### 5) Drift Detection (Mandatory Before and After Edits)
 Detect and report drift across all required links:
 - Constitution <-> Spec alignment
@@ -116,6 +124,8 @@ Before reporting success, enforce strict compilation and module integrity:
 - **Zero-Tolerance Rule:**  
   The task is incomplete if any import resolution or type errors remain.  
   If `Cannot find module` (or similar) persists, execution is a FAILURE and must be backtracked.
+- **TDD verification:**
+  Confim that a corresponding test file exists for every modified logic file.
 
 ## Required Response Format for `/request.feature`
 All executions must output exactly these sections in order:
