@@ -1,0 +1,430 @@
+openapi: 3.0.3
+info:
+  title: InnovatEPAM Portal API (Consolidated)
+  version: 0.3.0
+servers:
+  - url: http://localhost:3000/api
+
+paths:
+  /auth/register:
+    post:
+      summary: Register employee account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Login and issue cookie session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: HttpOnly Secure SameSite=Lax session cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Throttled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: Logout current session
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          description: Unauthorized
+
+  /auth/session:
+    get:
+      summary: Get active session snapshot
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Session active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No valid session
+
+  /auth/csrf:
+    get:
+      summary: Issue CSRF token for active session
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: CSRF token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfResponse'
+        '401':
+          description: No valid session
+
+  /auth/password-reset/request:
+    post:
+      summary: Start password reset flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestInput'
+      responses:
+        '202':
+          description: Accepted (neutral response)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeutralResponse'
+        '429':
+          description: Throttled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password-reset/confirm:
+    post:
+      summary: Complete password reset with one-time token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+      responses:
+        '200':
+          description: Password reset complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NeutralResponse'
+        '400':
+          description: Invalid/expired/reused token or policy failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Throttled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ideas:
+    get:
+      summary: List ideas based on role and visibility policy
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Idea list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IdeaListItem'
+    post:
+      summary: Submit idea with optional single attachment
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, description, category]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Idea submitted
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+  /ideas/{ideaId}/share:
+    patch:
+      summary: Toggle sharing visibility for owned idea
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: ideaId
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: If-Match
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isShared]
+              properties:
+                isShared:
+                  type: boolean
+      responses:
+        '200':
+          description: Sharing updated
+        '403':
+          description: Forbidden
+        '409':
+          description: Stale update conflict
+
+  /ideas/{ideaId}/status:
+    patch:
+      summary: Update idea status as evaluator/admin
+      security:
+        - cookieAuth: []
+      parameters:
+        - in: path
+          name: ideaId
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-CSRF-Token
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: If-Match
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toStatus]
+              properties:
+                toStatus:
+                  type: string
+                  enum: [Under Review, Accepted, Rejected]
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+        '400':
+          description: Invalid transition
+        '403':
+          description: Forbidden
+        '409':
+          description: Stale update conflict
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: innovatepam_session
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    RegisterResponse:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [userId, role, redirectTo]
+      properties:
+        userId:
+          type: string
+        role:
+          type: string
+          enum: [submitter, evaluator_admin]
+        redirectTo:
+          type: string
+          enum: [/dashboard]
+
+    SessionResponse:
+      type: object
+      required: [authenticated, userId, role, expiresAt]
+      properties:
+        authenticated:
+          type: boolean
+          enum: [true]
+        userId:
+          type: string
+        role:
+          type: string
+          enum: [submitter, evaluator_admin]
+        expiresAt:
+          type: string
+          format: date-time
+
+    CsrfResponse:
+      type: object
+      required: [csrfToken]
+      properties:
+        csrfToken:
+          type: string
+
+    PasswordResetRequestInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    PasswordResetConfirmRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+
+    NeutralResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+    IdeaListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [Submitted, Under Review, Accepted, Rejected]
+        isShared:
+          type: boolean
+        rowVersion:
+          type: integer
+          minimum: 0
+        ownerUserId:
+          type: string
+        latestEvaluationComment:
+          type: string
+          nullable: true
