@@ -47,7 +47,7 @@ As an employee, I can securely register, log in, recover my password, and stay a
 1. **Given** a new employee without an account, **When** they submit valid approved-domain registration details, **Then** an account is created with default submitter role and they can authenticate.
 2. **Given** a new employee without an account, **When** they submit registration details with `fullName`, approved-domain email, password, and matching confirm password, **Then** registration succeeds and the account stores the provided full name.
 3. **Given** valid credentials, **When** login succeeds, **Then** a secure cookie session is issued and the user is redirected to `/dashboard`.
-4. **Given** an authenticated submitter, **When** they attempt evaluator-only actions, **Then** access is denied and no evaluator action is performed.
+4. **Given** an authenticated submitter, **When** they attempt admin-only actions, **Then** access is denied and no admin action is performed.
 5. **Given** an authenticated user refreshes a protected page, **When** the session remains valid, **Then** they remain authenticated without manual re-login.
 6. **Given** a user with invalid or expired session, **When** they navigate to protected routes, **Then** they are redirected to `/login` before protected content renders.
 7. **Given** a user requests password reset, **When** they complete reset with a valid one-time token, new password, and matching confirm password, **Then** they can log in with the new password and not the old password.
@@ -76,20 +76,20 @@ As a submitter, I can create ideas with title, description, category, and one op
 
 ### User Story 3 - Evaluate and Decide Ideas (Priority: P3)
 
-As an evaluator/admin, I can review submitted ideas, move them through review states, and issue accept/reject decisions with comments.
+As an admin, I can review submitted ideas, move them through review states, and issue accept/reject decisions with comments.
 
 **Why this priority**: Evaluation workflow converts submissions into actionable outcomes and closes the innovation loop.
 
-**Independent Test**: Can be fully tested by logging in as evaluator/admin, selecting submitted ideas, updating status to `Under Review`, then `Accepted` or `Rejected` with comments, confirming updates are visible in listings, and validating idea-details timeline entries.
+**Independent Test**: Can be fully tested by logging in as admin, selecting submitted ideas, updating status to `Under Review`, then `Accepted` or `Rejected` with comments, confirming updates are visible in listings, and validating idea-details timeline entries.
 
 **Acceptance Scenarios**:
 
-1. **Given** an evaluator/admin viewing a `Submitted` idea, **When** they start evaluation, **Then** status changes to `Under Review`.
-2. **Given** an evaluator/admin reviewing an idea, **When** they choose `Accepted` or `Rejected` and provide comments, **Then** the decision and comments are saved and visible to relevant users.
-3. **Given** two evaluators/admins update the same idea concurrently, **When** one update becomes stale, **Then** the stale update is rejected and the user is prompted to refresh and retry.
-4. **Given** an idea is shared by its submitter, **When** an evaluator/admin finalizes with comments, **Then** all authenticated employees can view those evaluation comments in the shared view.
-5. **Given** an evaluator/admin opens idea details, **When** they view the timeline/history log, **Then** they can see status-change entries with actor identity and timestamp.
-6. **Given** a non-evaluator user opens idea details, **When** timeline/history is permissioned for evaluator/admin, **Then** evaluator/admin-only timeline controls/data are not exposed.
+1. **Given** an admin viewing a `Submitted` idea, **When** they start evaluation, **Then** status changes to `Under Review`.
+2. **Given** an admin reviewing an idea, **When** they choose `Accepted` or `Rejected` and provide comments, **Then** the decision and comments are saved and visible to relevant users.
+3. **Given** two admins update the same idea concurrently, **When** one update becomes stale, **Then** the stale update is rejected and the user is prompted to refresh and retry.
+4. **Given** an idea is shared by its submitter, **When** an admin finalizes with comments, **Then** all authenticated employees can view those evaluation comments in the shared view.
+5. **Given** an admin opens idea details, **When** they view the timeline/history log, **Then** they can see status-change entries with actor identity and timestamp.
+6. **Given** a non-admin user opens idea details, **When** timeline/history is permissioned for admins, **Then** admin-only timeline controls/data are not exposed.
 
 ---
 
@@ -108,7 +108,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 3. **Given** an authenticated user is on any protected page, **When** page content loads, **Then** the global header displays product name, signed-in user email, user role badge (`Submitter` or `Admin`), and logout action.
 4. **Given** an authenticated user navigates using protected-page navigation, **When** the current route is active, **Then** the matching navigation item is visually indicated as active.
 5. **Given** an authenticated user with `submitter` role opens `/dashboard`, **When** dashboard widgets load, **Then** they see a prominent `Submit New Idea` CTA and a `My Ideas` summary widget showing counts for their own ideas.
-6. **Given** an authenticated user with evaluator/admin role opens `/dashboard`, **When** dashboard widgets load, **Then** they see an `Evaluation Queue` summary count and `Recent Decisions` quick links.
+6. **Given** an authenticated user with admin role opens `/dashboard`, **When** dashboard widgets load, **Then** they see an `Evaluation Queue` summary count and `Recent Decisions` quick links.
 7. **Given** dashboard shell and role widgets are implemented in the frontend, **When** TypeScript strict mode checks component contracts, **Then** props for layout and dashboard widgets are defined with explicit strict TypeScript interfaces/types and pass compilation without unsafe typing shortcuts.
 8. **Given** a form/API request fails validation or authorization, **When** the response returns an error, **Then** a visible red alert with actionable message is shown in-page (not console-only).
 9. **Given** a user submits a form, **When** request is pending, **Then** submit action is disabled and loading state is visible to prevent duplicate submits.
@@ -133,16 +133,16 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - A submitter tries to submit an idea missing one or more required fields.
 - A submitter attempts to upload an empty, unsupported, or oversized file (greater than 10 MiB / 10,485,760 bytes).
 - A submitter uploads a file exactly 10 MiB and it is accepted.
-- An evaluator/admin tries to evaluate an idea that was already finalized.
-- Concurrent evaluator actions occur on the same idea.
-- A non-admin user attempts to call evaluator-only actions directly.
+- An admin tries to evaluate an idea that was already finalized.
+- Concurrent admin actions occur on the same idea.
+- A non-admin user attempts to call admin-only actions directly.
 - Session expires during idea submission or evaluation.
 - Session expires while user navigates from dashboard to feature pages.
 - Global header data is stale after role/session changes and must refresh on re-authentication.
 - Multiple rapid submits occur on the same form and should not create duplicate actions.
 - Protected pages render without role badge in header and must fail shell acceptance checks.
 - Protected-page navigation does not visually mark the active route and causes ambiguous location context.
-- Dashboard widgets are shown to the wrong role (submitter sees evaluator/admin widgets or evaluator/admin misses queue/decision widgets).
+- Dashboard widgets are shown to the wrong role (submitter sees admin widgets or admin misses queue/decision widgets).
 - Listing requests bypass server-side pagination and attempt to render excessive unpaged result sets.
 - Listing date-range filter uses invalid bounds (end before start) and must return actionable validation.
 - Keyboard-only user cannot reach or trigger primary submit/evaluate controls.
@@ -172,8 +172,8 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-017**: System MUST reject invalid, expired, or already-used reset tokens.
 - **FR-018**: System MUST throttle failed login attempts to 5 per 15 minutes per account and per source IP.
 - **FR-019**: System MUST throttle failed password-reset attempts to 5 per 15 minutes per account and per source IP.
-- **FR-020**: System MUST support at least two roles: `submitter` and `evaluator/admin`.
-- **FR-021**: System MUST restrict evaluator/admin actions to evaluator/admin role only.
+- **FR-020**: System MUST support at least two roles: `submitter` and `admin`.
+- **FR-021**: System MUST restrict admin evaluation actions to admin role only.
 - **FR-022**: System MUST provide idea submission form with required `title`, `description`, and `category` fields, where `category` is selected via dropdown menu only.
 - **FR-023**: System MUST allow at most one optional attachment per idea submission.
 - **FR-024**: System MUST reject submissions exceeding single-attachment limit.
@@ -183,10 +183,10 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-028**: System MUST provide idea listing with status and key metadata.
 - **FR-029**: System MUST make submitter listings owner-visible by default.
 - **FR-030**: System MUST allow submitters to share individual ideas for visibility to all authenticated employees.
-- **FR-031**: System MUST allow evaluator/admin users to view all ideas regardless of sharing setting.
+- **FR-031**: System MUST allow admin users to view all ideas regardless of sharing setting.
 - **FR-032**: System MUST support statuses `Submitted`, `Under Review`, `Accepted`, `Rejected`.
-- **FR-033**: System MUST allow transition `Submitted -> Under Review` by evaluator/admin.
-- **FR-034**: System MUST allow finalization to `Accepted` or `Rejected` by evaluator/admin with required comment.
+- **FR-033**: System MUST allow transition `Submitted -> Under Review` by admin.
+- **FR-034**: System MUST allow finalization to `Accepted` or `Rejected` by admin with required comment.
 - **FR-035**: System MUST preserve immutable status history including actor, timestamp, and decision comment snapshot.
 - **FR-036**: System MUST enforce optimistic concurrency for share/status updates and reject stale writes with refresh/retry guidance.
 - **FR-037**: System MUST make evaluation comments visible to all authenticated employees for shared ideas.
@@ -203,14 +203,14 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-048**: System MUST render a persistent protected-layout header containing product name, authenticated user email, role badge (`Submitter` or `Admin`), and logout action.
 - **FR-049**: System MUST visually indicate the active protected-page navigation item corresponding to the current route.
 - **FR-050**: System MUST provide submitter dashboard view with a prominent `Submit New Idea` CTA and a `My Ideas` summary widget scoped to the current user.
-- **FR-051**: System MUST provide evaluator/admin dashboard view with `Evaluation Queue` summary count and `Recent Decisions` quick links.
+- **FR-051**: System MUST provide admin dashboard view with `Evaluation Queue` summary count and `Recent Decisions` quick links.
 - **FR-052**: System MUST define strict TypeScript interfaces/types for props of protected layout and role-specific dashboard components, compatible with strict compiler settings and without ungoverned unsafe typing shortcuts.
 - **FR-053**: System MUST ensure user double-click or repeated click on an in-flight submit action results in at most one network request for that action.
 - **FR-054**: System MUST provide server-side pagination for idea listings and MUST NOT rely on unbounded infinite scrolling for large result sets.
 - **FR-055**: System MUST support idea-list filters by `status`, `category`, and submission date range.
 - **FR-056**: System MUST support idea-list sorting by date (`Newest`, `Oldest`) and by status.
-- **FR-057**: System MUST provide evaluator/admin-visible idea-details timeline/history showing status changes, actor identity, and timestamp for each transition.
-- **FR-058**: System MUST enforce access control for evaluator/admin-only timeline/history visibility and MUST NOT expose restricted timeline data to unauthorized roles.
+- **FR-057**: System MUST provide admin-visible idea-details timeline/history showing status changes, actor identity, and timestamp for each transition.
+- **FR-058**: System MUST enforce access control for admin-only timeline/history visibility and MUST NOT expose restricted timeline data to unauthorized roles.
 - **FR-059**: System MUST ensure primary flows (Login, Register, Submit Idea, Evaluate) are fully operable via keyboard using Tab/Enter/Space without pointer interaction.
 - **FR-060**: System MUST provide accessible semantics for forms and alerts, including programmatic input labels and appropriate ARIA roles for alert/status messaging.
 - **FR-061**: System MUST move focus to the visible error alert region when a form submission fails and preserve logical focus recovery for retry.
@@ -222,7 +222,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - Approved corporate domains are maintained in an administrator-owned configuration allowlist and changed through operational change control.
 - Self-registration is allowed for employees with approved corporate email domains, and newly registered users default to submitter role unless elevated by authorized administrators.
 - One attachment per idea is sufficient for initial release.
-- Evaluator/admin users can view and evaluate all submitted ideas.
+- Admin users can view and evaluate all submitted ideas.
 - Submitters can choose per idea whether it remains private (default) or becomes visible to all authenticated employees.
 - Finalized ideas (`Accepted` or `Rejected`) are not re-opened in this release.
 - Dashboard summaries can use lightweight counts/status highlights and do not require advanced analytics in this release.
@@ -237,7 +237,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **Auth Throttle Window**: Account/IP rate-limit window tracking failed login/reset attempts.
 - **Idea**: Innovation proposal containing required fields, optional attachment reference, owner, sharing flag, and status.
 - **Attachment**: Single optional metadata record linked one-to-one to an idea submission.
-- **Evaluation Decision**: Evaluator/admin decision record containing final status and required comment.
+- **Evaluation Decision**: Admin decision record containing final status and required comment.
 - **Status History Entry**: Immutable audit event for each idea status transition.
 - **Dashboard Summary Item**: User-scoped status/count snippet shown on post-login dashboard.
 
@@ -253,7 +253,7 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **SC-005**: 90% of users who start password reset complete recovery within 10 minutes in UAT.
 - **SC-006**: 95% of submitters successfully submit an idea (optional file included) on first attempt.
 - **SC-007**: 100% of attempts beyond login/reset throttle threshold return throttling responses and visible alerts.
-- **SC-008**: 100% of finalized ideas contain evaluator/admin decision (`Accepted`/`Rejected`) with non-empty comment.
+- **SC-008**: 100% of finalized ideas contain admin decision (`Accepted`/`Rejected`) with non-empty comment.
 - **SC-009**: 95% of status updates are visible to authorized users within 5 seconds.
 - **SC-010**: At least 90% of authenticated users reach intended next action from dashboard in two clicks or fewer.
 - **SC-011**: 100% of API 500/auth/validation failures in protected workflows render a visible in-page red alert (not console-only), and 95% render within 1 second of error response receipt.
