@@ -84,6 +84,7 @@
 - [X] T027 [P] [US2] Add submit/list UI unit tests in frontend/tests/unit/idea-submission-listing.test.tsx
 - [X] T028 [US2] Capture failing test evidence for US2 in specs/002-innovateepam-portal/checklists/us2-test-proof.md
 - [X] T066 [P] [US2] Add integration tests for owner-only access denial and metadata preservation in backend/tests/integration/idea-access-metadata.test.ts
+- [X] T072 [P] [US2] Add unit tests for category dropdown enum enforcement and standardized red error alert behavior in frontend/tests/unit/idea-submit-page-refactor.test.tsx
 
 ### Implementation for User Story 2
 
@@ -96,6 +97,8 @@
 - [X] T035 [US2] Implement paginated list UI with filter/sort controls in frontend/src/features/ideas/IdeaListPage.tsx
 - [X] T036 [US2] Add/Update JSDoc for exported US2 APIs in backend/src/services/idea-service.ts
 - [X] T067 [US2] Enforce owner-only listing/detail authorization and metadata persistence checks in backend/src/services/idea-service.ts
+- [X] T073 [US2] Refactor idea submission category input to strict enum dropdown values (`Process Improvement`, `Product Feature`, `Cost Saving`, `Other`) in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx
+- [X] T074 [US2] Apply professional card styling and standardized Alert-component validation feedback to submission form in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and frontend/src/features/shared/Alert.tsx
 
 **Checkpoint**: US2 is independently functional and testable.
 
