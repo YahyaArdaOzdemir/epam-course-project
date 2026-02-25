@@ -94,12 +94,18 @@ describe('auth pages red alerts', () => {
 
     const emailInput = container.querySelector('input[aria-label="Email"]') as HTMLInputElement;
     const passwordInput = container.querySelector('input[aria-label="Password"]') as HTMLInputElement;
+    const fullNameInput = container.querySelector('input[aria-label="Full Name"]') as HTMLInputElement;
+    const confirmPasswordInput = container.querySelector('input[aria-label="Confirm Password"]') as HTMLInputElement;
 
     await act(async () => {
+      fullNameInput.value = 'Alice Employee';
+      fullNameInput.dispatchEvent(new Event('input', { bubbles: true }));
       emailInput.value = 'employee@epam.com';
       emailInput.dispatchEvent(new Event('input', { bubbles: true }));
       passwordInput.value = 'StrongPass123!';
       passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      confirmPasswordInput.value = 'StrongPass123!';
+      confirmPasswordInput.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     const form = container.querySelector('form') as HTMLFormElement;
@@ -109,5 +115,51 @@ describe('auth pages red alerts', () => {
 
     const alert = container.querySelector('.text-red-700');
     expect(alert?.textContent).toContain('An account with this email already exists.');
+  });
+
+  it('renders success popup when register succeeds', async () => {
+    mockedUseAuth.mockReturnValue({
+      session: null,
+      csrfToken: null,
+      message: '',
+      isLoading: false,
+      register: jest.fn().mockResolvedValue({ message: 'Registered successfully. You can now login.' }),
+      login: jest.fn(),
+      logout: jest.fn(),
+      refreshSession: jest.fn(),
+      passwordResetRequest: jest.fn(),
+      passwordResetConfirm: jest.fn(),
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter>
+          <RegisterPage />
+        </MemoryRouter>,
+      );
+    });
+
+    const fullNameInput = container.querySelector('input[aria-label="Full Name"]') as HTMLInputElement;
+    const emailInput = container.querySelector('input[aria-label="Email"]') as HTMLInputElement;
+    const passwordInput = container.querySelector('input[aria-label="Password"]') as HTMLInputElement;
+    const confirmPasswordInput = container.querySelector('input[aria-label="Confirm Password"]') as HTMLInputElement;
+
+    await act(async () => {
+      fullNameInput.value = 'Alice Employee';
+      fullNameInput.dispatchEvent(new Event('input', { bubbles: true }));
+      emailInput.value = 'employee@epam.com';
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+      passwordInput.value = 'StrongPass123!';
+      passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      confirmPasswordInput.value = 'StrongPass123!';
+      confirmPasswordInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(container.querySelector('.text-green-700')?.textContent).toContain('Registered successfully. You can now login.');
   });
 });

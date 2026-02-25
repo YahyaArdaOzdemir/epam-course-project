@@ -101,12 +101,22 @@ describe('useAuth', () => {
     await mount();
 
     await act(async () => {
-      await latestAuth?.register({ email: 'a@epam.com', password: 'StrongPass123!' });
+      await latestAuth?.register({
+        fullName: 'Alice Employee',
+        email: 'a@epam.com',
+        password: 'StrongPass123!',
+        confirmPassword: 'StrongPass123!',
+      });
     });
-    expect(container.querySelector('#message')?.textContent).toContain('Registered successfully');
+    expect(container.querySelector('#message')?.textContent).toBe('');
 
     mockedAuthApi.register.mockRejectedValueOnce(new Error('register failed'));
-    await expect(latestAuth?.register({ email: 'a@epam.com', password: 'StrongPass123!' }))
+    await expect(latestAuth?.register({
+      fullName: 'Alice Employee',
+      email: 'a@epam.com',
+      password: 'StrongPass123!',
+      confirmPassword: 'StrongPass123!',
+    }))
       .rejects.toThrow('mapped:register failed');
     expect(mockedMapAuthError).toHaveBeenCalled();
   });
@@ -119,7 +129,7 @@ describe('useAuth', () => {
         .resolves.toEqual({ redirectTo: '/dashboard' });
       await flush();
     });
-    expect(container.querySelector('#message')?.textContent).toBe('Logged in');
+    expect(container.querySelector('#message')?.textContent).toBe('');
 
     mockedAuthApi.login.mockRejectedValueOnce(new Error('login failed'));
     await expect(latestAuth?.login({ email: 'a@epam.com', password: 'StrongPass123!' }))
@@ -135,7 +145,7 @@ describe('useAuth', () => {
     expect(mockedAuthApi.logout).toHaveBeenCalledWith('csrf-1');
     expect(container.querySelector('#session')?.textContent).toBe('none');
     expect(container.querySelector('#csrf')?.textContent).toBe('none');
-    expect(container.querySelector('#message')?.textContent).toBe('Logged out');
+    expect(container.querySelector('#message')?.textContent).toBe('');
 
     mockedAuthApi.session.mockRejectedValueOnce(new Error('session gone'));
     await act(async () => {
@@ -174,12 +184,12 @@ describe('useAuth', () => {
     await act(async () => {
       await latestAuth?.passwordResetRequest('a@epam.com');
     });
-    expect(container.querySelector('#message')?.textContent).toBe('reset requested');
+    expect(container.querySelector('#message')?.textContent).toBe('');
 
     await act(async () => {
       await latestAuth?.passwordResetConfirm('token-1', 'StrongPass123!');
     });
-    expect(container.querySelector('#message')?.textContent).toBe('reset confirmed');
+    expect(container.querySelector('#message')?.textContent).toBe('');
 
     mockedAuthApi.passwordResetRequest.mockRejectedValueOnce(new Error('request failed'));
     await expect(latestAuth?.passwordResetRequest('a@epam.com')).rejects.toThrow('mapped:request failed');

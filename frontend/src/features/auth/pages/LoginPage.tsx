@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage = () => {
-  const { login, logout, message } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -59,17 +59,9 @@ export const LoginPage = () => {
           {isLoading ? 'Loading...' : 'Login'}
         </button>
       </form>
-      <button
-        type="button"
-        onClick={logout}
-        className="mt-3 w-full rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
-      >
-        Logout
-      </button>
       <p className="mt-3 text-center text-sm text-slate-600">
         Forgot password? <Link to="/reset-password" className="text-blue-600 hover:text-blue-700">Reset it</Link>
       </p>
-      <p className="mt-4 text-center text-sm text-slate-600">{message}</p>
     </main>
   );
 };

@@ -8,4 +8,4 @@
 - [x] `npm run test:unit` passes
 - [x] `npm run test:integration` passes
 - [x] `npm run test:e2e` passes
-- [x] `npm run test:coverage -- --runInBand --silent` passes minimum gate (Statements 82.55%, Lines 82.06%)
+- [x] `npm run test:coverage -- --runInBand --silent` passes minimum gate (Statements 83.12%, Lines 82.55%)

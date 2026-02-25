@@ -33,7 +33,7 @@ describe('auth reset token lifecycle', () => {
 
   it('consumes token once and rejects reused token', async () => {
     const email = `reset+${Date.now()}@epam.com`;
-    await authService.register(email, 'StrongPass123!');
+    await authService.register({ fullName: 'Reset Token User', email, password: 'StrongPass123!' });
 
     const db = getDb();
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string };
@@ -70,7 +70,7 @@ describe('auth reset token lifecycle', () => {
 
   it('rejects expired reset token', async () => {
     const email = `expired+${Date.now()}@epam.com`;
-    await authService.register(email, 'StrongPass123!');
+    await authService.register({ fullName: 'Expired Token User', email, password: 'StrongPass123!' });
 
     const db = getDb();
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as { id: string };

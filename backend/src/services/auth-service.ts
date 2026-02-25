@@ -47,16 +47,21 @@ type SessionSnapshot = {
  */
 export const authService = {
   /** Registers a new user account with validated email/password and stored bcrypt hash. */
-  async register(email: string, password: string): Promise<{ userId: string }> {
-    assertCorporateDomain(email);
+  async register(input: { fullName: string; email: string; password: string }): Promise<{ userId: string }> {
+    assertCorporateDomain(input.email);
 
-    const existing = userRepository.findByEmail(email);
+    const existing = userRepository.findByEmail(input.email);
     if (existing) {
       throw new ConflictError('Account already exists');
     }
 
-    const passwordHash = await hashPassword(password);
-    const user = userRepository.create({ email, passwordHash, role: 'submitter' });
+    const passwordHash = await hashPassword(input.password);
+    const user = userRepository.create({
+      fullName: input.fullName,
+      email: input.email,
+      passwordHash,
+      role: 'submitter',
+    });
     return { userId: user.id };
   },
 

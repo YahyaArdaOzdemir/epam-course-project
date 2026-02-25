@@ -26,20 +26,22 @@ test('register-login-logout and protected role path', async ({ page }) => {
   const uniqueEmail = `employee+${Date.now()}@epam.com`;
 
   await page.goto('/register');
+  await page.getByLabel('Full Name').fill('Auth E2E User');
   await page.getByLabel('Email').fill(uniqueEmail);
-  await page.getByLabel('Password').fill('StrongPass123!');
+  await page.getByLabel(/^Password$/).fill('StrongPass123!');
+  await page.getByLabel('Confirm Password').fill('StrongPass123!');
   await page.getByRole('button', { name: 'Register' }).click();
   await expect(page.getByText('Registered successfully').first()).toBeVisible();
 
   await page.goto('/login');
   await page.getByLabel('Email').fill(uniqueEmail);
-  await page.getByLabel('Password').fill('StrongPass123!');
+  await page.getByLabel(/^Password$/).fill('StrongPass123!');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForURL('**/dashboard');
 
-  await expect(page.getByText('Logged in').first()).toBeVisible();
+  await expect(page.getByText('Dashboard').first()).toBeVisible();
   await page.getByRole('button', { name: 'Logout' }).click();
-  await expect(page.getByText('Logged out').first()).toBeVisible();
+  await page.waitForURL('**/login');
 });
 
 test('denies direct protected route access and keeps session across refresh', async ({ page }) => {
@@ -49,14 +51,16 @@ test('denies direct protected route access and keeps session across refresh', as
   await page.waitForURL('**/login');
 
   await page.goto('/register');
+  await page.getByLabel('Full Name').fill('Session E2E User');
   await page.getByLabel('Email').fill(uniqueEmail);
-  await page.getByLabel('Password').fill('StrongPass123!');
+  await page.getByLabel(/^Password$/).fill('StrongPass123!');
+  await page.getByLabel('Confirm Password').fill('StrongPass123!');
   await page.getByRole('button', { name: 'Register' }).click();
   await expect(page.getByText('Registered successfully').first()).toBeVisible();
 
   await page.goto('/login');
   await page.getByLabel('Email').fill(uniqueEmail);
-  await page.getByLabel('Password').fill('StrongPass123!');
+  await page.getByLabel(/^Password$/).fill('StrongPass123!');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForURL('**/dashboard');
 
@@ -73,7 +77,12 @@ test('supports reset success and rejects expired/reused reset tokens', async ({ 
   const expiredToken = `expired-${Date.now()}`;
 
   await request.post('http://localhost:3000/api/auth/register', {
-    data: { email: uniqueEmail, password: oldPassword },
+    data: {
+      fullName: 'Reset E2E User',
+      email: uniqueEmail,
+      password: oldPassword,
+      confirmPassword: oldPassword,
+    },
   });
 
   insertResetToken(uniqueEmail, validToken, new Date(Date.now() + 20 * 60 * 1000));
@@ -97,11 +106,11 @@ test('supports reset success and rejects expired/reused reset tokens', async ({ 
 
   await page.goto('/login');
   await page.getByLabel('Email').fill(uniqueEmail);
-  await page.getByLabel('Password').fill(oldPassword);
+  await page.getByLabel(/^Password$/).fill(oldPassword);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page.getByText('Email or password is incorrect.').first()).toBeVisible();
 
-  await page.getByLabel('Password').fill(newPassword);
+  await page.getByLabel(/^Password$/).fill(newPassword);
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForURL('**/dashboard');
 });

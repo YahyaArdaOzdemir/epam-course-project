@@ -26,7 +26,7 @@ describe('auth routes', () => {
   it('register/login/logout and role denial baseline', async () => {
     await request(app)
       .post('/api/auth/register')
-      .send({ email: 'a@epam.com', password: 'StrongPass123!' })
+      .send({ fullName: 'Auth Route User', email: 'a@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(201);
 
     const login = await request(app)
@@ -62,12 +62,12 @@ describe('auth routes', () => {
   it('rejects duplicate register and issues secure session cookie on login', async () => {
     await request(app)
       .post('/api/auth/register')
-      .send({ email: 'dup@epam.com', password: 'StrongPass123!' })
+      .send({ fullName: 'Duplicate User', email: 'dup@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(201);
 
     const duplicate = await request(app)
       .post('/api/auth/register')
-      .send({ email: 'dup@epam.com', password: 'StrongPass123!' })
+      .send({ fullName: 'Duplicate User', email: 'dup@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(409);
 
     expect(['AUTH_EMAIL_EXISTS', 'CONFLICT']).toContain(duplicate.body.code);
@@ -101,7 +101,7 @@ describe('auth routes', () => {
   it('returns valid /auth/session and /auth/csrf payloads with active cookie session', async () => {
     await request(app)
       .post('/api/auth/register')
-      .send({ email: 'session@epam.com', password: 'StrongPass123!' })
+      .send({ fullName: 'Session User', email: 'session@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(201);
 
     const login = await request(app)
@@ -138,7 +138,7 @@ describe('auth routes', () => {
 
     await request(app)
       .post('/api/auth/register')
-      .send({ email, password: oldPassword })
+      .send({ fullName: 'Reset User', email, password: oldPassword, confirmPassword: oldPassword })
       .expect(201);
 
     const db = getDb();

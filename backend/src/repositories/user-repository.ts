@@ -5,6 +5,7 @@ export type UserRole = 'submitter' | 'evaluator_admin';
 
 export type UserRecord = {
   id: string;
+  fullName: string;
   email: string;
   passwordHash: string;
   role: UserRole;
@@ -15,6 +16,7 @@ export type UserRecord = {
 
 const mapUser = (row: Record<string, unknown>): UserRecord => ({
   id: String(row.id),
+  fullName: String(row.full_name),
   email: String(row.email),
   passwordHash: String(row.password_hash),
   role: row.role as UserRole,
@@ -34,19 +36,20 @@ export const userRepository = {
     const row = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     return row ? mapUser(row as Record<string, unknown>) : null;
   },
-  create(input: { email: string; passwordHash: string; role?: UserRole }): UserRecord {
+  create(input: { fullName: string; email: string; passwordHash: string; role?: UserRole }): UserRecord {
     const db = getDb();
     const id = uuid();
     const now = new Date().toISOString();
     const role = input.role ?? 'submitter';
 
     db.prepare(
-      `INSERT INTO users (id, email, password_hash, role, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, 'active', ?, ?)`,
-    ).run(id, input.email, input.passwordHash, role, now, now);
+      `INSERT INTO users (id, full_name, email, password_hash, role, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+    ).run(id, input.fullName, input.email, input.passwordHash, role, now, now);
 
     return {
       id,
+      fullName: input.fullName,
       email: input.email,
       passwordHash: input.passwordHash,
       role,

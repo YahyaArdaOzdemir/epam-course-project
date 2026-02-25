@@ -23,7 +23,9 @@ describe('contracts conformance', () => {
   });
 
   it('exposes auth and ideas endpoints from contract', async () => {
-    const register = await request(app).post('/api/auth/register').send({ email: 'contract@epam.com', password: 'StrongPass123!' });
+    const register = await request(app)
+      .post('/api/auth/register')
+      .send({ fullName: 'Contract User', email: 'contract@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' });
     expect([201, 400, 409]).toContain(register.status);
 
     const ideas = await request(app).get('/api/ideas');
@@ -35,7 +37,7 @@ describe('contracts conformance', () => {
 
     await request(app)
       .post('/api/auth/register')
-      .send({ email, password: 'StrongPass123!' })
+      .send({ fullName: 'Contract Session User', email, password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
       .expect(201);
 
     const login = await request(app)

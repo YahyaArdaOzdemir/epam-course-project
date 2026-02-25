@@ -23,11 +23,16 @@ export type NeutralResponse = {
 };
 
 export type RegisterRequest = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export type LoginRequest = {
   email: string;
   password: string;
 };
-
-export type LoginRequest = RegisterRequest;
 
 export type IdeaListItem = {
   id: string;

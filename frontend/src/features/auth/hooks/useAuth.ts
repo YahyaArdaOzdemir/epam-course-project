@@ -9,12 +9,12 @@ type AuthContextValue = {
   csrfToken: string | null;
   message: string;
   isLoading: boolean;
-  register: (payload: RegisterRequest) => Promise<void>;
+  register: (payload: RegisterRequest) => Promise<{ message: string }>;
   login: (payload: LoginRequest) => Promise<{ redirectTo: '/dashboard' }>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
-  passwordResetRequest: (email: string) => Promise<void>;
-  passwordResetConfirm: (token: string, newPassword: string) => Promise<void>;
+  passwordResetRequest: (email: string) => Promise<{ message: string }>;
+  passwordResetConfirm: (token: string, newPassword: string) => Promise<{ message: string }>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -52,10 +52,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (payload: RegisterRequest): Promise<void> => {
+  const register = async (payload: RegisterRequest): Promise<{ message: string }> => {
     try {
       await authApi.register(payload);
-      setMessage('Registered successfully. You can now login.');
+      return { message: 'Registered successfully. You can now login.' };
     } catch (error) {
       throw new Error(mapAuthError(error));
     }
@@ -65,7 +65,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const next = await authApi.login(payload);
       await refreshSession();
-      setMessage('Logged in');
       return { redirectTo: next.redirectTo };
     } catch (error) {
       throw new Error(mapAuthError(error));
@@ -78,23 +77,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await authApi.logout(csrfToken);
       }
     } finally {
-      forceLogout('Logged out');
+      forceLogout('');
     }
   };
 
-  const passwordResetRequest = async (email: string): Promise<void> => {
+  const passwordResetRequest = async (email: string): Promise<{ message: string }> => {
     try {
       const result = await authApi.passwordResetRequest(email);
-      setMessage(result.message);
+      return result;
     } catch (error) {
       throw new Error(mapAuthError(error));
     }
   };
 
-  const passwordResetConfirm = async (token: string, newPassword: string): Promise<void> => {
+  const passwordResetConfirm = async (token: string, newPassword: string): Promise<{ message: string }> => {
     try {
       const result = await authApi.passwordResetConfirm(token, newPassword);
-      setMessage(result.message);
+      return result;
     } catch (error) {
       throw new Error(mapAuthError(error));
     }

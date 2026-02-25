@@ -16,9 +16,19 @@ describe('authApi', () => {
   test('delegates register payload to api client', async () => {
     (apiClient.post as jest.Mock).mockResolvedValue({ userId: 'u-1' });
 
-    const result = await authApi.register({ email: 'person@epam.com', password: 'StrongPass123!' });
+    const result = await authApi.register({
+      fullName: 'Person Employee',
+      email: 'person@epam.com',
+      password: 'StrongPass123!',
+      confirmPassword: 'StrongPass123!',
+    });
 
-    expect(apiClient.post).toHaveBeenCalledWith('/auth/register', { email: 'person@epam.com', password: 'StrongPass123!' });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/register', {
+      fullName: 'Person Employee',
+      email: 'person@epam.com',
+      password: 'StrongPass123!',
+      confirmPassword: 'StrongPass123!',
+    });
     expect(result).toEqual({ userId: 'u-1' });
   });
 

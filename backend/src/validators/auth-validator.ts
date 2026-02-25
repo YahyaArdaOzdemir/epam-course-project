@@ -3,7 +3,7 @@ import { validateOrThrow } from './common';
 
 const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,128}$/;
 
-const authSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
   password: z
     .string()
@@ -11,6 +11,26 @@ const authSchema = z.object({
     .max(128)
     .regex(passwordPolicy, 'Password must include uppercase, lowercase, digit, and special character'),
 });
+
+const registerSchema = z
+  .object({
+    fullName: z
+      .string()
+      .trim()
+      .min(2, 'Full name must contain at least 2 characters')
+      .max(100, 'Full name must contain at most 100 characters'),
+    email: z.string().email().transform((value) => value.trim().toLowerCase()),
+    password: z
+      .string()
+      .min(8)
+      .max(128)
+      .regex(passwordPolicy, 'Password must include uppercase, lowercase, digit, and special character'),
+    confirmPassword: z.string(),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Password confirmation does not match',
+  });
 
 const passwordResetRequestSchema = z.object({
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
@@ -25,9 +45,16 @@ const passwordResetConfirmSchema = z.object({
     .regex(passwordPolicy, 'Password must include uppercase, lowercase, digit, and special character'),
 });
 
-export type AuthPayload = {
+export type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type RegisterPayload = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 };
 
 export type PasswordResetRequestPayload = {
@@ -39,8 +66,12 @@ export type PasswordResetConfirmPayload = {
   newPassword: string;
 };
 
-export const parseAuthPayload = (input: unknown): AuthPayload => {
-  return validateOrThrow(authSchema, input);
+export const parseLoginPayload = (input: unknown): LoginPayload => {
+  return validateOrThrow(loginSchema, input);
+};
+
+export const parseRegisterPayload = (input: unknown): RegisterPayload => {
+  return validateOrThrow(registerSchema, input);
 };
 
 export const parsePasswordResetRequestPayload = (input: unknown): PasswordResetRequestPayload => {

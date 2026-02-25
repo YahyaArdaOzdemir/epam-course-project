@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth-service';
 import {
-  parseAuthPayload,
+  parseLoginPayload,
   parsePasswordResetConfirmPayload,
   parsePasswordResetRequestPayload,
+  parseRegisterPayload,
 } from '../validators/auth-validator';
 import { AuthenticatedRequest } from '../middleware/auth-guard';
 import { UnauthorizedError } from '../lib/errors';
@@ -33,8 +34,12 @@ const getAuthToken = (request: Request): string | null => {
 export const authController = {
   async register(request: Request, response: Response, next: NextFunction): Promise<void> {
     try {
-      const payload = parseAuthPayload(request.body);
-      const result = await authService.register(payload.email, payload.password);
+      const payload = parseRegisterPayload(request.body);
+      const result = await authService.register({
+        fullName: payload.fullName,
+        email: payload.email,
+        password: payload.password,
+      });
       response.status(201).json(result);
     } catch (error) {
       next(error);
@@ -43,7 +48,7 @@ export const authController = {
 
   async login(request: Request, response: Response, next: NextFunction): Promise<void> {
     try {
-      const payload = parseAuthPayload(request.body);
+      const payload = parseLoginPayload(request.body);
       const sourceIp = request.ip ?? '0.0.0.0';
       const result = await authService.login({
         email: payload.email,

@@ -29,3 +29,5 @@
 ## Notes
 
 - This checklist supersedes earlier per-feature requirement checklists in `001-*` folders.
+- 2026-02-25 lightweight UX/navigation delta synced in spec as `FR-063` and `FR-064` (public landing at `/` and authentication-aware header/logo navigation behavior).
+- 2026-02-25 auth UX refinement synced in spec as `FR-065` and `FR-066` (landing right-side login/register form toggle panel and contextual transient success popups without cross-page leakage).

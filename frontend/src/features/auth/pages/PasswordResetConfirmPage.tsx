@@ -1,22 +1,39 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const PasswordResetConfirmPage = () => {
-  const { passwordResetConfirm, message } = useAuth();
+  const { passwordResetConfirm } = useAuth();
   const [searchParams] = useSearchParams();
   const [token, setToken] = useState(searchParams.get('token') ?? '');
   const [newPassword, setNewPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSuccessMessage('');
+    }, 3500);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [successMessage]);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setErrorMessage('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
-      await passwordResetConfirm(token, newPassword);
+      const result = await passwordResetConfirm(token, newPassword);
+      setSuccessMessage(result.message);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to reset password');
     } finally {
@@ -27,6 +44,11 @@ export const PasswordResetConfirmPage = () => {
   return (
     <main className="mx-auto mt-12 max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="mb-6 text-center text-2xl font-semibold text-slate-900">Set New Password</h1>
+      {successMessage ? (
+        <div className="fixed right-6 top-6 z-50 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm" role="status" aria-live="polite">
+          {successMessage}
+        </div>
+      ) : null}
       {errorMessage ? <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errorMessage}</div> : null}
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block text-sm font-medium text-slate-700">
@@ -56,7 +78,6 @@ export const PasswordResetConfirmPage = () => {
           {isLoading ? 'Loading...' : 'Reset password'}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-600">{message}</p>
     </main>
   );
 };

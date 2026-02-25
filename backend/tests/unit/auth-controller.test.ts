@@ -13,7 +13,8 @@ jest.mock('../../src/services/auth-service', () => ({
 }));
 
 jest.mock('../../src/validators/auth-validator', () => ({
-  parseAuthPayload: jest.fn(),
+  parseLoginPayload: jest.fn(),
+  parseRegisterPayload: jest.fn(),
   parsePasswordResetRequestPayload: jest.fn(),
   parsePasswordResetConfirmPayload: jest.fn(),
 }));
@@ -21,13 +22,15 @@ jest.mock('../../src/validators/auth-validator', () => ({
 import { authController } from '../../src/controllers/auth-controller';
 import { authService } from '../../src/services/auth-service';
 import {
-  parseAuthPayload,
+  parseLoginPayload,
   parsePasswordResetConfirmPayload,
   parsePasswordResetRequestPayload,
+  parseRegisterPayload,
 } from '../../src/validators/auth-validator';
 
 const mockedAuthService = authService as jest.Mocked<typeof authService>;
-const mockedParseAuthPayload = parseAuthPayload as jest.MockedFunction<typeof parseAuthPayload>;
+const mockedParseLoginPayload = parseLoginPayload as jest.MockedFunction<typeof parseLoginPayload>;
+const mockedParseRegisterPayload = parseRegisterPayload as jest.MockedFunction<typeof parseRegisterPayload>;
 const mockedParseResetRequest = parsePasswordResetRequestPayload as jest.MockedFunction<typeof parsePasswordResetRequestPayload>;
 const mockedParseResetConfirm = parsePasswordResetConfirmPayload as jest.MockedFunction<typeof parsePasswordResetConfirmPayload>;
 
@@ -71,17 +74,26 @@ describe('authController', () => {
   });
 
   it('registers user and returns 201', async () => {
-    const request = makeRequest({ body: { email: 'a@epam.com', password: 'StrongPass123!' } });
+    const request = makeRequest({ body: { fullName: 'Alice Employee', email: 'a@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' } });
     const response = makeResponse();
     const next = jest.fn() as NextFunction;
 
-    mockedParseAuthPayload.mockReturnValue({ email: 'a@epam.com', password: 'StrongPass123!' });
+    mockedParseRegisterPayload.mockReturnValue({
+      fullName: 'Alice Employee',
+      email: 'a@epam.com',
+      password: 'StrongPass123!',
+      confirmPassword: 'StrongPass123!',
+    });
     mockedAuthService.register.mockResolvedValue({ userId: 'u1' });
 
     await authController.register(request, response, next);
 
-    expect(mockedParseAuthPayload).toHaveBeenCalledWith(request.body);
-    expect(mockedAuthService.register).toHaveBeenCalledWith('a@epam.com', 'StrongPass123!');
+    expect(mockedParseRegisterPayload).toHaveBeenCalledWith(request.body);
+    expect(mockedAuthService.register).toHaveBeenCalledWith({
+      fullName: 'Alice Employee',
+      email: 'a@epam.com',
+      password: 'StrongPass123!',
+    });
     expect(response.status).toHaveBeenCalledWith(201);
     expect(response.json).toHaveBeenCalledWith({ userId: 'u1' });
     expect(next).not.toHaveBeenCalled();
@@ -93,7 +105,7 @@ describe('authController', () => {
     const next = jest.fn() as NextFunction;
 
     const err = new Error('validation failed');
-    mockedParseAuthPayload.mockImplementation(() => {
+    mockedParseRegisterPayload.mockImplementation(() => {
       throw err;
     });
 
@@ -111,7 +123,7 @@ describe('authController', () => {
     const response = makeResponse();
     const next = jest.fn() as NextFunction;
 
-    mockedParseAuthPayload.mockReturnValue({ email: 'a@epam.com', password: 'StrongPass123!' });
+    mockedParseLoginPayload.mockReturnValue({ email: 'a@epam.com', password: 'StrongPass123!' });
     mockedAuthService.login.mockResolvedValue({
       token: 'jwt-token',
       userId: 'u1',
@@ -144,7 +156,7 @@ describe('authController', () => {
     const next = jest.fn() as NextFunction;
 
     const err = new Error('invalid');
-    mockedParseAuthPayload.mockImplementation(() => {
+    mockedParseLoginPayload.mockImplementation(() => {
       throw err;
     });
 

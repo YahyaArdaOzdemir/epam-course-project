@@ -215,6 +215,10 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 - **FR-060**: System MUST provide accessible semantics for forms and alerts, including programmatic input labels and appropriate ARIA roles for alert/status messaging.
 - **FR-061**: System MUST move focus to the visible error alert region when a form submission fails and preserve logical focus recovery for retry.
 - **FR-062**: System MUST expose error alerts with assertive announcement behavior and success alerts with polite announcement behavior to improve assistive-technology feedback consistency.
+- **FR-063**: System MUST provide a public landing page at `/` for unauthenticated users that introduces the InnovatEPAM Portal purpose.
+- **FR-064**: System MUST make global header navigation authentication-aware: unauthenticated users MUST NOT see protected links (`Dashboard`, `Submit Idea`, and other protected workspace links), and the product logo link MUST target `/` when logged out and `/dashboard` when logged in.
+- **FR-065**: System MUST provide unauthenticated landing-page authentication controls as a right-side panel with explicit `Register` and `Login` toggle buttons that switch the active form in place.
+- **FR-066**: System MUST render registration and password-reset success confirmations as contextual green transient popups scoped to the initiating page/form, and MUST NOT persist or leak those confirmations across unrelated pages.
 
 ### Assumptions
 
