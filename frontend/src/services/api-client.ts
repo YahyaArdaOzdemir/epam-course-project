@@ -66,6 +66,15 @@ export class ApiClient {
     return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body), headers });
   }
 
+  async delete<T>(path: string, csrfToken?: string): Promise<T> {
+    const headers: HeadersInit = {};
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return this.request<T>(path, { method: 'DELETE', headers });
+  }
+
   private async request<T>(path: string, init: RequestInit): Promise<T> {
     const headers = new Headers(init.headers);
 

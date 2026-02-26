@@ -97,3 +97,20 @@ e2e/
 ## Complexity Tracking
 
 No constitution violations or justified exceptions required at plan stage.
+
+## Change Addendum (2026-02-26)
+
+### Scope Propagation
+
+- Extend US2/US4/US6 with explicit dashboard shared-ideas discoverability, navigation active-state exact matching, and submit-time sharing control.
+- Extend US2/US3 with idea edit/delete authorization model (owner edit/delete only while `Submitted`, admin delete regardless of status).
+- Extend US3/US6 with threaded comments visible to authorized viewers and reply nesting cap of 5.
+- Refine idea/evaluation detail information architecture: category in top metadata row, description in separate body section, top-right status badge, and attachment preview/download split actions.
+- Add test-data hygiene hardening for E2E/integration environments so seeded test records are removed post-run.
+
+### Architecture Notes
+
+- Introduce comment domain model (`idea_comments`) with adjacency-list threading (`parent_comment_id`) and server-enforced `depth <= 5`.
+- Add idea mutation endpoints for update/delete with role-aware guards and status-aware owner checks.
+- Keep attachment storage unchanged; only UI interaction changes (preview target and dedicated download control).
+- Add dashboard shared-ideas query path that reuses existing list API visibility semantics with explicit `visibilityScope=all` for submitter discovery.

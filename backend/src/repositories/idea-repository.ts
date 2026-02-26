@@ -66,6 +66,31 @@ export const ideaRepository = {
     };
   },
 
+  createWithSharing(input: { ownerUserId: string; title: string; description: string; category: string; isShared: boolean }): IdeaRecord {
+    const db = getDb();
+    const id = uuid();
+    const now = new Date().toISOString();
+
+    db.prepare(
+      `INSERT INTO ideas (id, owner_user_id, title, description, category, status, is_shared, row_version, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'Submitted', ?, 0, ?, ?)`,
+    ).run(id, input.ownerUserId, input.title, input.description, input.category, input.isShared ? 1 : 0, now, now);
+
+    return {
+      id,
+      ownerUserId: input.ownerUserId,
+      title: input.title,
+      description: input.description,
+      category: input.category,
+      status: 'Submitted',
+      isShared: input.isShared,
+      rowVersion: 0,
+      latestEvaluationComment: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+  },
+
   findById(id: string): IdeaRecord | null {
     const db = getDb();
     const row = db
@@ -91,8 +116,15 @@ export const ideaRepository = {
     const whereClauses: string[] = [];
     const whereParams: Array<string | number> = [];
 
-    const shouldRestrictToOwner = input.query.visibilityScope === 'owner' || input.role !== 'admin';
-    if (shouldRestrictToOwner) {
+    if (input.role === 'admin') {
+      if (input.query.visibilityScope === 'owner') {
+        whereClauses.push('ideas.owner_user_id = ?');
+        whereParams.push(input.userId);
+      }
+    } else if (input.query.visibilityScope === 'all') {
+      whereClauses.push('(ideas.owner_user_id = ? OR ideas.is_shared = 1)');
+      whereParams.push(input.userId);
+    } else {
       whereClauses.push('ideas.owner_user_id = ?');
       whereParams.push(input.userId);
     }
@@ -161,6 +193,42 @@ export const ideaRepository = {
         totalPages: Math.max(1, Math.ceil(totalItems / input.query.pageSize)),
       },
     };
+  },
+
+  updateIdea(
+    id: string,
+    expectedRowVersion: number,
+    payload: { title: string; description: string; category: string },
+  ): IdeaRecord | null {
+    const db = getDb();
+    const updatedAt = new Date().toISOString();
+    const result = db
+      .prepare(
+        `UPDATE ideas
+           SET title = ?, description = ?, category = ?, row_version = row_version + 1, updated_at = ?
+         WHERE id = ? AND row_version = ?`,
+      )
+      .run(payload.title, payload.description, payload.category, updatedAt, id, expectedRowVersion);
+
+    if (result.changes === 0) {
+      return null;
+    }
+
+    return this.findById(id);
+  },
+
+  deleteIdeaCascade(id: string): boolean {
+    const db = getDb();
+    const transaction = db.transaction(() => {
+      db.prepare('DELETE FROM idea_comments WHERE idea_id = ?').run(id);
+      db.prepare('DELETE FROM status_history_entries WHERE idea_id = ?').run(id);
+      db.prepare('DELETE FROM evaluation_decisions WHERE idea_id = ?').run(id);
+      db.prepare('DELETE FROM attachments WHERE idea_id = ?').run(id);
+      const result = db.prepare('DELETE FROM ideas WHERE id = ?').run(id);
+      return result.changes > 0;
+    });
+
+    return transaction();
   },
 
   updateShare(id: string, ownerUserId: string, isShared: boolean, expectedRowVersion: number): IdeaRecord | null {

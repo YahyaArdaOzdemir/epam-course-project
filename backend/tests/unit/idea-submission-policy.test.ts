@@ -1,6 +1,6 @@
 jest.mock('../../src/repositories/idea-repository', () => ({
 	ideaRepository: {
-		create: jest.fn(),
+		createWithSharing: jest.fn(),
 		listVisible: jest.fn(),
 		findById: jest.fn(),
 		updateShare: jest.fn(),
@@ -28,7 +28,7 @@ describe('idea submission/listing policy', () => {
 	});
 
 	it('creates idea without attachment when no file provided', () => {
-		mockedIdeaRepository.create.mockReturnValue({
+		mockedIdeaRepository.createWithSharing.mockReturnValue({
 			id: 'idea-1',
 			ownerUserId: 'u-1',
 			title: 'Idea',
@@ -54,7 +54,7 @@ describe('idea submission/listing policy', () => {
 	});
 
 	it('stores attachment metadata when file is provided', () => {
-		mockedIdeaRepository.create.mockReturnValue({
+		mockedIdeaRepository.createWithSharing.mockReturnValue({
 			id: 'idea-2',
 			ownerUserId: 'u-1',
 			title: 'Idea',

@@ -94,7 +94,15 @@ export type IdeaCreateRequest = {
   title: string;
   description: string;
   category: IdeaCategory;
+  isShared?: boolean;
   file?: File;
+};
+
+export type IdeaUpdateRequest = {
+  title: string;
+  description: string;
+  category: IdeaCategory;
+  rowVersion: number;
 };
 
 export type ShareIdeaRequest = {
@@ -106,4 +114,21 @@ export type EvaluateIdeaRequest = {
   toStatus: 'Under Review' | 'Accepted' | 'Rejected';
   comment?: string;
   rowVersion: number;
+};
+
+export type IdeaComment = {
+  id: string;
+  ideaId: string;
+  authorUserId: string;
+  parentCommentId: string | null;
+  depth: number;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  authorEmail: string;
+  authorFullName: string;
+};
+
+export type IdeaCommentListResponse = {
+  items: IdeaComment[];
 };

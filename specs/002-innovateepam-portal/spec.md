@@ -19,6 +19,13 @@
 - Q: Which password reset mechanism is required? → A: One-time, time-limited email link token flow (30-minute lifetime).
 - Q: Which abuse throttling policy applies? → A: 5 failed attempts per 15 minutes per account and per source IP for login and password reset.
 
+### Session 2026-02-26
+
+- Q: Where should shared ideas be visible for non-admin users? → A: Dashboard MUST surface shared ideas for authenticated users.
+- Q: Who can comment and reply on ideas? → A: Any authenticated user can comment on ideas they are authorized to view, with threaded replies limited to 5 nesting levels.
+- Q: What edit/delete permissions apply to ideas? → A: Owners can edit/delete only while idea status is `Submitted`; admins can delete ideas in any status.
+- Q: How should attachments behave in detail views? → A: Attachment card click opens preview in a new tab; dedicated right-aligned download button with down-arrow icon performs direct download.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
@@ -259,6 +266,17 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-073**: System MUST visually segregate the read-only 'Idea Details' view from the write-access 'Evaluation Form' using explicit dividers or containment cards.
 - **FR-074**: System MUST render `Evaluation Queue` items with submission recency metadata, including relative submission time and explicit wait-time indication, and MUST visually flag items waiting longer than 3 days for prioritization.
 - **FR-075**: System MUST provide `Evaluation Queue` filter controls for status and category in-page, allowing admins to refine visible queue items without requiring navigation away from the queue view.
+- **FR-076**: System MUST ensure protected navigation active-state matching is route-exact for sibling paths so activating `Submit Idea` does not also mark `My Ideas` as active.
+- **FR-077**: System MUST allow idea owners to edit and delete their own ideas only when status is `Submitted`.
+- **FR-078**: System MUST allow admin users to delete ideas regardless of idea status.
+- **FR-079**: System MUST expose shared ideas on authenticated dashboards so submitters can discover ideas shared by others without requiring direct links.
+- **FR-080**: System MUST provide threaded idea comments for authorized viewers, including reply-to-comment behavior with a maximum nesting depth of 5.
+- **FR-081**: System MUST show current evaluation status in the top-right area of idea/evaluation detail header with status-dependent text and color badge styling.
+- **FR-082**: System MUST render category metadata as a dedicated top metadata field in idea/evaluation details and MUST present description in a separate content section.
+- **FR-083**: System MUST render attachment cards with click-to-preview behavior (open preview in new tab) and a separate dedicated download control aligned to the right using a down-arrow affordance.
+- **FR-084**: System MUST provide dashboard onboarding copy that explains portal purpose and dashboard usage context including personalized welcome identity.
+- **FR-085**: System MUST ensure automated test artifacts and fixture records are cleaned after test execution so seeded labels (e.g., `Idea A`) do not persist in normal runtime data.
+- **FR-086**: System MUST support idea sharing at submission time via explicit user control and persist the selected sharing flag.
 
 ### Assumptions
 

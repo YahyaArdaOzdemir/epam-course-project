@@ -39,9 +39,9 @@ export const ProtectedLayout = () => {
       </header>
 
       <nav aria-label="Primary" className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-700 shadow-sm">
-        <NavLink to="/dashboard" className={navigationLinkClassName}>Dashboard</NavLink>
+        <NavLink to="/dashboard" end className={navigationLinkClassName}>Dashboard</NavLink>
         <NavLink to="/ideas/new" className={navigationLinkClassName}>Submit Idea</NavLink>
-        <NavLink to="/ideas" className={navigationLinkClassName}>My Ideas</NavLink>
+        <NavLink to="/ideas" end className={navigationLinkClassName}>My Ideas</NavLink>
         <NavLink to="/evaluation" className={navigationLinkClassName}>Evaluation Queue</NavLink>
       </nav>
 

@@ -132,4 +132,21 @@ describe('idea submission page refactor', () => {
     expect(submitButton.disabled).toBe(false);
     expect(mockedIdeaCreate).toHaveBeenCalledTimes(1);
   });
+
+  test('renders share checkbox and allows toggling selection', async () => {
+    await act(async () => {
+      root.render(<IdeaSubmitPage />);
+    });
+
+    const shareCheckbox = container.querySelector('input[aria-label="Share with all employees"]') as HTMLInputElement;
+    expect(shareCheckbox).not.toBeNull();
+    expect(shareCheckbox.checked).toBe(false);
+
+    await act(async () => {
+      shareCheckbox.checked = true;
+      shareCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(shareCheckbox.checked).toBe(true);
+  });
 });

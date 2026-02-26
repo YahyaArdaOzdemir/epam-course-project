@@ -37,9 +37,16 @@ const createIdea = (input: {
   title: string;
   description: string;
   category: string;
+  isShared?: boolean;
   file?: Express.Multer.File;
 }) => {
-  const idea = ideaRepository.create(input);
+  const idea = ideaRepository.createWithSharing({
+    ownerUserId: input.ownerUserId,
+    title: input.title,
+    description: input.description,
+    category: input.category,
+    isShared: Boolean(input.isShared),
+  });
 
   if (input.file) {
     attachmentRepository.create({
@@ -66,7 +73,7 @@ const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 
     throw new ValidationError('Idea not found');
   }
 
-  if (input.viewerRole !== 'admin' && existing.ownerUserId !== input.viewerUserId) {
+  if (!canViewIdea(existing, { userId: input.viewerUserId, role: input.viewerRole })) {
     throw new ForbiddenError('You do not have access to this idea');
   }
 
@@ -84,6 +91,66 @@ const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 
         }
       : null,
   };
+};
+
+const updateIdea = (input: {
+  ideaId: string;
+  actorUserId: string;
+  actorRole: 'submitter' | 'admin';
+  title: string;
+  description: string;
+  category: string;
+  expectedRowVersion: number;
+}) => {
+  const existing = ideaRepository.findById(input.ideaId);
+  if (!existing) {
+    throw new ValidationError('Idea not found');
+  }
+
+  if (input.actorRole !== 'submitter' || existing.ownerUserId !== input.actorUserId) {
+    throw new ForbiddenError('Only owner can edit this idea');
+  }
+
+  if (existing.status !== 'Submitted') {
+    throw new ForbiddenError('Only submitted ideas can be edited');
+  }
+
+  const updated = ideaRepository.updateIdea(input.ideaId, input.expectedRowVersion, {
+    title: input.title,
+    description: input.description,
+    category: input.category,
+  });
+
+  if (!updated) {
+    throw new ConflictError('Idea was updated by another request');
+  }
+
+  return updated;
+};
+
+const deleteIdea = (input: {
+  ideaId: string;
+  actorUserId: string;
+  actorRole: 'submitter' | 'admin';
+}) => {
+  const existing = ideaRepository.findById(input.ideaId);
+  if (!existing) {
+    throw new ValidationError('Idea not found');
+  }
+
+  if (input.actorRole === 'admin') {
+    return { deleted: ideaRepository.deleteIdeaCascade(input.ideaId) };
+  }
+
+  if (existing.ownerUserId !== input.actorUserId) {
+    throw new ForbiddenError('Only owner can delete this idea');
+  }
+
+  if (existing.status !== 'Submitted') {
+    throw new ForbiddenError('Only submitted ideas can be deleted');
+  }
+
+  return { deleted: ideaRepository.deleteIdeaCascade(input.ideaId) };
 };
 
 /** Toggles sharing state for an owner with optimistic concurrency. */
@@ -121,4 +188,6 @@ export const ideaService = {
   listIdeas,
   getIdeaById,
   toggleShare,
+  updateIdea,
+  deleteIdea,
 };

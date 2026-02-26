@@ -1,5 +1,15 @@
 import { apiClient } from '../../../services/api-client';
-import { IdeaCreateRequest, IdeaDetails, IdeaListItem, IdeaListQuery, IdeaListResponse, ShareIdeaRequest } from '../../../services/contracts';
+import {
+  IdeaComment,
+  IdeaCommentListResponse,
+  IdeaCreateRequest,
+  IdeaDetails,
+  IdeaListItem,
+  IdeaListQuery,
+  IdeaListResponse,
+  IdeaUpdateRequest,
+  ShareIdeaRequest,
+} from '../../../services/contracts';
 
 /** API helpers for creating/listing/sharing ideas. */
 export const ideaApi = {
@@ -8,6 +18,7 @@ export const ideaApi = {
     formData.append('title', payload.title);
     formData.append('description', payload.description);
     formData.append('category', payload.category);
+    formData.append('isShared', payload.isShared ? 'true' : 'false');
     if (payload.file) {
       formData.append('file', payload.file);
     }
@@ -38,5 +49,34 @@ export const ideaApi = {
 
   share(ideaId: string, payload: ShareIdeaRequest, csrfToken: string): Promise<IdeaListItem> {
     return apiClient.patch(`/ideas/${ideaId}/share`, { isShared: payload.isShared }, payload.rowVersion, csrfToken);
+  },
+
+  update(ideaId: string, payload: IdeaUpdateRequest, csrfToken: string): Promise<IdeaListItem> {
+    return apiClient.patch(
+      `/ideas/${ideaId}`,
+      {
+        title: payload.title,
+        description: payload.description,
+        category: payload.category,
+      },
+      payload.rowVersion,
+      csrfToken,
+    );
+  },
+
+  delete(ideaId: string, csrfToken: string): Promise<void> {
+    return apiClient.delete(`/ideas/${ideaId}`, csrfToken);
+  },
+
+  listComments(ideaId: string): Promise<IdeaCommentListResponse> {
+    return apiClient.get(`/ideas/${ideaId}/comments`);
+  },
+
+  createComment(
+    ideaId: string,
+    payload: { body: string; parentCommentId?: string },
+    csrfToken: string,
+  ): Promise<IdeaComment> {
+    return apiClient.post(`/ideas/${ideaId}/comments`, payload, false, csrfToken);
   },
 };

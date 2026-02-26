@@ -13,6 +13,7 @@ export const IdeaSubmitPage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<IdeaCategory | ''>('');
+  const [isShared, setIsShared] = useState(false);
   const [file, setFile] = useState<File | undefined>();
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -45,12 +46,13 @@ export const IdeaSubmitPage = () => {
 
     try {
       await runGuarded(async () => {
-        await ideaApi.create({ title, description, category: validatedCategory, file }, csrfToken);
+        await ideaApi.create({ title, description, category: validatedCategory, isShared, file }, csrfToken);
       });
 
       setTitle('');
       setDescription('');
       setCategory('');
+      setIsShared(false);
       setFile(undefined);
       setSuccessMessage('Idea submitted successfully.');
     } catch (error) {
@@ -114,6 +116,15 @@ export const IdeaSubmitPage = () => {
             onChange={(event) => setFile(event.target.files?.[0])}
             className="mt-1 block w-full text-sm text-slate-700"
           />
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input
+            type="checkbox"
+            aria-label="Share with all employees"
+            checked={isShared}
+            onChange={(event) => setIsShared(event.target.checked)}
+          />
+          Share with all employees
         </label>
         <button
           type="submit"

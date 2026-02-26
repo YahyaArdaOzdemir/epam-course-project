@@ -270,3 +270,28 @@
 - Do not mock business logic; mock/fake only external I/O boundaries.
 - Keep task evidence up to date in `specs/002-innovateepam-portal/checklists/`.
 - Shared tasks tagged `[US1-US6]` explicitly trace to all story scopes per constitution traceability requirements.
+
+---
+
+## Phase 8: Change Request 2026-02-26 (UX, Permissions, Collaboration)
+
+**Purpose**: Address post-baseline UX correctness, permissions expansion, collaboration comments, and test-data hygiene.
+
+### Tests for Change Request (MANDATORY) ✅
+
+- [X] T083 [P] [US2-US6] Add backend unit tests for owner/admin edit-delete authorization and status guards in backend/tests/unit/idea-permissions.test.ts
+- [X] T084 [P] [US3-US6] Add backend unit tests for threaded comments depth/visibility in backend/tests/unit/idea-comments.test.ts
+- [X] T085 [P] [US2-US6] Add backend integration tests for edit/delete/comment routes in backend/tests/integration/idea-mutation-comments.test.ts
+- [X] T086 [P] [US4-US6] Add frontend unit tests for nav exact-active behavior, detail metadata layout, and attachment preview/download controls in frontend/tests/unit/idea-details-ux-regression.test.tsx
+- [X] T087 [P] [US4-US6] Add frontend unit tests for dashboard shared-ideas panel and personalized welcome copy in frontend/tests/unit/dashboard-shared-ideas.test.tsx
+- [X] T088 [P] [US1-US6] Add E2E/integration test-data cleanup assertions preventing persistent `Idea A` artifacts in e2e/tests/us2-idea-submission.spec.ts
+
+### Implementation for Change Request
+
+- [X] T089 [US2-US6] Implement backend idea update/delete service/controller/routes with owner/admin policy enforcement
+- [X] T090 [US3-US6] Implement threaded comments repository/service/controller/routes with max depth 5 and visibility guards
+- [X] T091 [US4-US6] Implement protected navigation exact-active matching for sibling routes in frontend/src/features/layout/ProtectedLayout.tsx
+- [X] T092 [US2-US6] Implement submit-time sharing control and persistence in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and backend idea create flow
+- [X] T093 [US4-US6] Implement details-page metadata separation, top-right status badge, and attachment preview/download split controls
+- [X] T094 [US4-US6] Implement dashboard purpose copy and shared-ideas panel in frontend/src/features/auth/pages/DashboardPage.tsx
+- [X] T095 [US1-US6] Implement automated test-data cleanup for E2E/integration runs
