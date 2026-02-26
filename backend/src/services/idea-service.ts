@@ -1,5 +1,7 @@
+import fs from 'fs';
 import { ConflictError, ForbiddenError, ValidationError } from '../lib/errors';
 import { attachmentRepository } from '../repositories/attachment-repository';
+import { evaluationRepository } from '../repositories/evaluation-repository';
 import { ideaRepository, IdeaRecord, PaginatedIdeaListResult } from '../repositories/idea-repository';
 import { ideaVoteRepository } from '../repositories/idea-vote-repository';
 import { IdeaListQuery } from '../validators/idea-query-validator';
@@ -12,6 +14,15 @@ type IdeaDetailsRecord = IdeaRecord & {
     uploadedAt: string;
     url: string;
   } | null;
+  evaluationDecisions: Array<{
+    id: string;
+    evaluatorUserId: string;
+    evaluatorFullName: string;
+    evaluatorEmail: string;
+    decision: 'Accepted' | 'Rejected';
+    comment: string;
+    createdAt: string;
+  }>;
 };
 
 export const canViewIdea = (
@@ -86,6 +97,9 @@ const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 
   }
 
   const attachment = attachmentRepository.findByIdeaId(existing.id);
+  const evaluationDecisions = canSeeEvaluationComment(existing, input.viewerRole)
+    ? evaluationRepository.listByIdeaIdWithEvaluator(existing.id)
+    : [];
 
   return {
     ...existing,
@@ -98,7 +112,29 @@ const getIdeaById = (input: { ideaId: string; viewerUserId: string; viewerRole: 
           url: `/uploads/${attachment.storedFileName}`,
         }
       : null,
+    evaluationDecisions: evaluationDecisions.map((decision) => ({
+      id: decision.id,
+      evaluatorUserId: decision.evaluatorUserId,
+      evaluatorFullName: decision.evaluatorFullName,
+      evaluatorEmail: decision.evaluatorEmail,
+      decision: decision.decision,
+      comment: decision.comment,
+      createdAt: decision.createdAt,
+    })),
   };
+};
+
+const cleanupAttachmentFile = (ideaId: string): void => {
+  const attachment = attachmentRepository.findByIdeaId(ideaId);
+  if (!attachment?.storagePath) {
+    return;
+  }
+
+  if (!fs.existsSync(attachment.storagePath)) {
+    return;
+  }
+
+  fs.unlinkSync(attachment.storagePath);
 };
 
 const updateIdea = (input: {
@@ -147,6 +183,7 @@ const deleteIdea = (input: {
   }
 
   if (input.actorRole === 'admin') {
+    cleanupAttachmentFile(input.ideaId);
     return { deleted: ideaRepository.deleteIdeaCascade(input.ideaId) };
   }
 
@@ -158,6 +195,7 @@ const deleteIdea = (input: {
     throw new ForbiddenError('Only submitted ideas can be deleted');
   }
 
+  cleanupAttachmentFile(input.ideaId);
   return { deleted: ideaRepository.deleteIdeaCascade(input.ideaId) };
 };
 

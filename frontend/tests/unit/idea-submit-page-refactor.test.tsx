@@ -108,6 +108,33 @@ describe('idea submission page refactor', () => {
     expect(container.querySelector('textarea[aria-label="Current Pain Points"]')).toBeNull();
   });
 
+  test('provides markdown formatting controls for description', async () => {
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    const descriptionInput = container.querySelector('textarea[aria-label="Description"]') as HTMLTextAreaElement;
+    const boldButton = container.querySelector('button[aria-label="Format bold"]') as HTMLButtonElement;
+    const italicButton = container.querySelector('button[aria-label="Format italic"]') as HTMLButtonElement;
+    const bulletsButton = container.querySelector('button[aria-label="Format bullet list"]') as HTMLButtonElement;
+
+    expect(boldButton).not.toBeNull();
+    expect(italicButton).not.toBeNull();
+    expect(bulletsButton).not.toBeNull();
+
+    await act(async () => {
+      descriptionInput.value = 'Initial';
+      descriptionInput.dispatchEvent(new Event('input', { bubbles: true }));
+      boldButton.click();
+      italicButton.click();
+      bulletsButton.click();
+    });
+
+    expect(descriptionInput.value).toContain('**');
+    expect(descriptionInput.value).toContain('*');
+    expect(descriptionInput.value).toContain('- ');
+  });
+
   test('submits dynamic field payload for cost saving category', async () => {
     mockedIdeaCreate.mockResolvedValue({
       id: 'idea-cost-1',

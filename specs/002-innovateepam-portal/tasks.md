@@ -355,3 +355,23 @@
 - [X] T117 [US2-US6] Implement dynamic follow-up payload contract + backend validation for create requests in frontend/src/services/contracts.ts, frontend/src/features/ideas/services/idea-service.ts, backend/src/validators/idea-validator.ts, and backend/src/validators/idea-query-validator.ts
 - [X] T118 [US4-US6] Implement per-user draft persistence and resume flow in frontend/src/features/ideas/services/idea-draft-storage.ts and frontend/src/features/ideas/pages/IdeaSubmitPage.tsx
 - [X] T119 [US4-US6] Refactor dashboard to left-aligned split layout with combined own/shared idea list and draft pill rendering in frontend/src/features/auth/pages/DashboardPage.tsx
+
+---
+
+## Phase 12: Change Request 2026-02-26 (Wave 5 - Evaluation Identity History, Markdown Controls, Admin Prefix Onboarding, Attachment File Cleanup)
+
+**Purpose**: Add evaluator-identifiable stacked decisions, markdown authoring controls for submit/edit flows, selected admin-role registration policy, and attachment filesystem cleanup on delete.
+
+### Tests for Change Request (MANDATORY)
+
+- [X] T120 [P] [US1-US3] Add backend integration tests for admin-prefix registration role assignment in backend/tests/integration/auth-routes.test.ts
+- [X] T121 [P] [US2-US6] Add backend unit/integration tests for attachment file deletion during idea delete in backend/tests/unit/idea-permissions.test.ts and backend/tests/integration/idea-mutation-comments.test.ts
+- [X] T122 [P] [US3-US6] Add frontend unit tests for stacked evaluation decision history with evaluator identity and chronological order in frontend/tests/unit/idea-details-voting-ux.test.tsx
+- [X] T123 [P] [US2-US6] Add frontend unit tests for markdown toolbar actions on submit/edit forms and markdown-rendered description in frontend/tests/unit/idea-submit-page-refactor.test.tsx and frontend/tests/unit/idea-details-ux-regression.test.tsx
+
+### Implementation for Change Request
+
+- [X] T124 [US1-US3] Implement registration role assignment policy based on normalized email local-part prefix `admin` in backend/src/services/auth-service.ts
+- [X] T125 [US3-US6] Implement evaluation decision history projection with evaluator identity in backend/src/repositories/evaluation-repository.ts, backend/src/services/idea-service.ts, frontend/src/services/contracts.ts, and frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
+- [X] T126 [US2-US6] Implement markdown formatting controls and markdown render utility for submit/edit/details flows in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
+- [X] T127 [US2-US6] Implement attachment binary cleanup during idea delete in backend/src/services/idea-service.ts and backend/src/repositories/attachment-repository.ts

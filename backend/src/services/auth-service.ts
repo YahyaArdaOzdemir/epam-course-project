@@ -50,6 +50,12 @@ type SessionSnapshot = {
   expiresAt: string;
 };
 
+const resolveRegistrationRole = (email: string): 'submitter' | 'admin' => {
+  const normalized = email.trim().toLowerCase();
+  const localPart = normalized.split('@')[0] ?? '';
+  return localPart.startsWith('admin') ? 'admin' : 'submitter';
+};
+
 /**
  * Core authentication domain service for credential login, cookie-backed session lifecycle,
  * CSRF issuance, and password reset token workflows.
@@ -69,7 +75,7 @@ export const authService = {
       fullName: input.fullName,
       email: input.email,
       passwordHash,
-      role: 'submitter',
+      role: resolveRegistrationRole(input.email),
     });
     return { userId: user.id };
   },

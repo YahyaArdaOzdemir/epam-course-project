@@ -43,6 +43,13 @@
 - Q: How should unfinished submissions behave across refresh/navigation? → A: Unsubmitted idea forms MUST persist as per-user drafts, and dashboard MUST list drafts with a `Draft` pill and resume link to the form.
 - Q: How should dashboard body be laid out for submitters? → A: Dashboard content card stays left-aligned with welcome summary on the left panel and combined own/shared idea list in the middle panel.
 
+### Session 2026-02-26 (Change Request Wave 5)
+
+- Q: How should repeated admin evaluations be displayed in idea details? → A: Evaluation decision history MUST render as stacked decision cards in chronological order (older first, newer below), and each decision card MUST include evaluator identity (`fullName`, `email`) and timestamp.
+- Q: How should submission/edit forms support text styling? → A: Idea submission and idea-edit forms MUST provide inline formatting controls for markdown-style bold, italic, and bullet-list insertion; idea details MUST render submitted markdown formatting.
+- Q: Which admin-account onboarding method applies for this release? → A: Registration assigns `admin` role automatically when normalized email local-part starts with `admin`; all other registrations remain `submitter`.
+- Q: What happens to attachment files when an idea is deleted? → A: Deleting an idea MUST also delete its attachment file from filesystem uploads storage when present.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
@@ -320,6 +327,10 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-109**: System MUST clear and omit dynamic follow-up values from payload when category changes to `Other` or no category is selected.
 - **FR-110**: System MUST persist in-progress submission drafts per authenticated submitter across refresh/navigation and MUST surface those drafts on dashboard with a visible `Draft` pill and resume action.
 - **FR-111**: System MUST render dashboard body as a left-aligned container where welcome summary remains in a left panel and combined own/shared idea list is presented in a middle panel.
+- **FR-112**: System MUST render finalized evaluation decision history as stacked decision entries ordered oldest-to-newest (newer entries appear below earlier entries), and each entry MUST include decision status, evaluator `fullName`, evaluator `email`, and decision timestamp.
+- **FR-113**: System MUST provide idea submission and idea-edit form controls for markdown-style `bold`, `italic`, and bulleted-list insertion, and MUST render stored idea description content with markdown formatting in idea details.
+- **FR-114**: System MUST assign newly registered account role as `admin` when normalized email local-part begins with `admin`; otherwise role remains `submitter`.
+- **FR-115**: System MUST remove associated attachment file from uploads filesystem when an idea is deleted and an attachment record exists.
 
 ### Assumptions
 

@@ -7,6 +7,7 @@ import { focusErrorAlert } from '../../shared/focus-error-alert';
 import { useSubmissionGuard } from '../../shared/useSubmissionGuard';
 import { ideaApi } from '../services/idea-service';
 import { loadDraftById, removeDraft, upsertDraft } from '../services/idea-draft-storage';
+import { appendBoldToken, appendBulletToken, appendItalicToken } from '../utils/idea-markdown';
 
 const IDEA_CATEGORIES: IdeaCategory[] = [
   'Process Improvement',
@@ -159,6 +160,20 @@ export const IdeaSubmitPage = () => {
     });
   };
 
+  const applyDescriptionFormat = (type: 'bold' | 'italic' | 'bullet'): void => {
+    setDescription((current) => {
+      if (type === 'bold') {
+        return appendBoldToken(current);
+      }
+
+      if (type === 'italic') {
+        return appendItalicToken(current);
+      }
+
+      return appendBulletToken(current);
+    });
+  };
+
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -268,6 +283,32 @@ export const IdeaSubmitPage = () => {
         </label>
         <label className="block text-sm font-medium text-slate-700">
           Description
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              aria-label="Format bold"
+              onClick={() => applyDescriptionFormat('bold')}
+              className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Bold
+            </button>
+            <button
+              type="button"
+              aria-label="Format italic"
+              onClick={() => applyDescriptionFormat('italic')}
+              className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Italic
+            </button>
+            <button
+              type="button"
+              aria-label="Format bullet list"
+              onClick={() => applyDescriptionFormat('bullet')}
+              className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Bullets
+            </button>
+          </div>
           <textarea
             aria-label="Description"
             value={description}

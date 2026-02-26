@@ -91,6 +91,7 @@ describe('idea details UX regression', () => {
       latestEvaluationComment: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      evaluationDecisions: [],
       attachment: {
         originalFileName: 'pitch.pdf',
         mimeType: 'application/pdf',
@@ -118,5 +119,76 @@ describe('idea details UX regression', () => {
     expect(previewLink).not.toBeNull();
     expect(downloadButton).not.toBeNull();
     expect(downloadButton?.textContent).toContain('⤓');
+  });
+
+  it('renders markdown-formatted idea description in details body', async () => {
+    getByIdSpy.mockResolvedValue({
+      id: 'idea-1',
+      title: 'Markdown Idea',
+      description: '**Bold text**\n\n*Italic text*\n\n- First item\n- Second item',
+      category: 'Other',
+      status: 'Submitted',
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      evaluationDecisions: [],
+      attachment: null,
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.querySelector('strong')?.textContent).toContain('Bold text');
+    expect(container.querySelector('em')?.textContent).toContain('Italic text');
+    expect(container.querySelectorAll('ul li').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows markdown controls on edit idea form', async () => {
+    getByIdSpy.mockResolvedValue({
+      id: 'idea-1',
+      title: 'Editable Idea',
+      description: 'Plain body',
+      category: 'Other',
+      status: 'Submitted',
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      evaluationDecisions: [],
+      attachment: null,
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    const editButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('Edit Idea')) as HTMLButtonElement;
+    expect(editButton).not.toBeNull();
+
+    await act(async () => {
+      editButton.click();
+    });
+
+    expect(container.querySelector('button[aria-label="Format edit description bold"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Format edit description italic"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Format edit description bullet list"]')).not.toBeNull();
   });
 });

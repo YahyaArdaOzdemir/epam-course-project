@@ -130,6 +130,20 @@ describe('auth routes', () => {
     expect(csrf.body.csrfToken.length).toBeGreaterThan(10);
   });
 
+  it('assigns admin role when registered email local-part starts with admin', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({ fullName: 'Admin Prefix User', email: 'Admin.Prefix@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
+      .expect(201);
+
+    const login = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'admin.prefix@epam.com', password: 'StrongPass123!' })
+      .expect(200);
+
+    expect(login.body.role).toBe('admin');
+  });
+
   it('accepts valid reset token once and denies token reuse', async () => {
     const email = `reset+${Date.now()}@epam.com`;
     const oldPassword = 'StrongPass123!';

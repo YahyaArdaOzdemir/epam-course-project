@@ -206,4 +206,55 @@ describe('idea mutations and threaded comments', () => {
     expect(Array.isArray(list.body.items)).toBe(true);
     expect(list.body.items.length).toBeGreaterThanOrEqual(5);
   });
+
+  it('removes uploaded attachment file from filesystem when idea is deleted', async () => {
+    const email = `owner-file-${Date.now()}@epam.com`;
+    const password = 'StrongPass123!';
+
+    await request(app)
+      .post('/api/auth/register')
+      .send({ fullName: 'Owner File User', email, password, confirmPassword: password })
+      .expect(201);
+
+    const login = await request(app)
+      .post('/api/auth/login')
+      .send({ email, password })
+      .expect(200);
+
+    const cookie = login.headers['set-cookie']?.[0] as string;
+    const csrf = await request(app)
+      .get('/api/auth/csrf')
+      .set('Cookie', cookie)
+      .expect(200);
+
+    const uploadsDir = path.resolve('uploads');
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    const sourcePath = path.resolve(`backend/tests/tmp/delete-file-${Date.now()}.pdf`);
+    fs.writeFileSync(sourcePath, 'attachment payload');
+
+    const create = await request(app)
+      .post('/api/ideas')
+      .set('Cookie', cookie)
+      .set('X-CSRF-Token', csrf.body.csrfToken)
+      .field('title', 'Delete with attachment')
+      .field('description', 'Desc')
+      .field('category', 'Other')
+      .attach('file', sourcePath)
+      .expect(201);
+
+    const db = getDb();
+    const attachmentRow = db
+      .prepare('SELECT storage_path FROM attachments WHERE idea_id = ?')
+      .get(create.body.id) as { storage_path: string };
+
+    expect(fs.existsSync(attachmentRow.storage_path)).toBe(true);
+
+    await request(app)
+      .delete(`/api/ideas/${create.body.id}`)
+      .set('Cookie', cookie)
+      .set('X-CSRF-Token', csrf.body.csrfToken)
+      .expect(204);
+
+    expect(fs.existsSync(attachmentRow.storage_path)).toBe(false);
+  });
 });

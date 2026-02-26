@@ -22,6 +22,7 @@ describe('protected shell dashboard utility contracts', () => {
 				latestEvaluationComment: null,
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+				evaluationDecisions: [],
 				attachment: {
 					originalFileName: 'image.png',
 					mimeType: 'image/png',
@@ -45,6 +46,7 @@ describe('protected shell dashboard utility contracts', () => {
 				latestEvaluationComment: null,
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+				evaluationDecisions: [],
 				attachment: null,
 			}),
 		).toBe(false);

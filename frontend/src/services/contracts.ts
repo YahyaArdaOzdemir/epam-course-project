@@ -66,6 +66,15 @@ export type IdeaDetails = IdeaListItem & {
   description: string;
   createdAt: string;
   updatedAt: string;
+  evaluationDecisions: Array<{
+    id: string;
+    evaluatorUserId: string;
+    evaluatorFullName: string;
+    evaluatorEmail: string;
+    decision: 'Accepted' | 'Rejected';
+    comment: string;
+    createdAt: string;
+  }>;
   attachment: {
     originalFileName: string;
     mimeType: string;

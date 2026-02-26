@@ -165,3 +165,19 @@ No constitution violations or justified exceptions required at plan stage.
 - Keep dynamic follow-up fields payload as optional structured object attached to create request (`dynamicFields`) with backend validation by category.
 - Implement drafts as per-user local persistence (`localStorage`) keyed by authenticated `userId` to avoid schema/migration churn in this phase.
 - Reuse existing dashboard queries (`owner` and `all` visibility scopes) to build middle-panel combined list and avoid introducing new backend endpoints.
+
+## Change Addendum (2026-02-26, Wave 5 - Evaluation History Identity, Markdown Authoring, Admin Onboarding, Attachment Cleanup)
+
+### Scope Propagation
+
+- Extend idea-details evaluation presentation to include full stacked decision history with evaluator identity and timestamp metadata.
+- Add markdown authoring controls (bold/italic/list) to submit and edit forms and render markdown in idea details description.
+- Introduce deterministic admin-onboarding policy at registration: normalized local-part prefix `admin` grants admin role.
+- Harden delete workflow so attachment binaries are removed from uploads storage when idea deletion occurs.
+
+### Architecture Notes
+
+- Add `evaluationRepository.listByIdeaIdWithEvaluator()` projection joining `users` for evaluator `full_name` and `email`, sorted ascending by creation time.
+- Extend idea-details response contract with `evaluationDecisions[]` to avoid extra network round-trips and keep render ordering deterministic.
+- Keep markdown support lightweight and deterministic using internal safe markdown renderer limited to required formatting subset (bold/italic/bullets).
+- Perform attachment file cleanup in service layer before DB cascade delete, tolerating already-missing files without failing deletion.

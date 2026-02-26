@@ -61,6 +61,7 @@ describe('idea details voting and inline reply UX', () => {
       ideaVotesUp: 3,
       ideaVotesDown: 1,
       ideaVotesTotal: 4,
+      evaluationDecisions: [],
     });
 
     listCommentsSpy.mockResolvedValue({
@@ -153,6 +154,7 @@ describe('idea details voting and inline reply UX', () => {
       ideaVotesUp: 3,
       ideaVotesDown: 1,
       ideaVotesTotal: 4,
+      evaluationDecisions: [],
     });
 
     await act(async () => {
@@ -188,6 +190,7 @@ describe('idea details voting and inline reply UX', () => {
       ideaVotesUp: 3,
       ideaVotesDown: 1,
       ideaVotesTotal: 4,
+      evaluationDecisions: [],
     });
 
     await act(async () => {
@@ -203,5 +206,62 @@ describe('idea details voting and inline reply UX', () => {
     expect(container.textContent).toContain('Commenting is locked while this idea is Rejected');
     expect(container.querySelector('textarea[aria-label="Reply to comment"]')).toBeNull();
     expect(Array.from(container.querySelectorAll('button')).some((button) => button.textContent?.trim() === 'Reply')).toBe(false);
+  });
+
+  it('renders stacked evaluation decisions with evaluator identity in chronological order', async () => {
+    getByIdSpy.mockResolvedValueOnce({
+      id: 'idea-1',
+      title: 'Unified Idea Title',
+      description: 'Description body',
+      category: 'Other',
+      status: 'Rejected',
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: 'Rejected due to policy mismatch.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      attachment: null,
+      ideaVotesUp: 3,
+      ideaVotesDown: 1,
+      ideaVotesTotal: 4,
+      evaluationDecisions: [
+        {
+          id: 'ev-1',
+          decision: 'Accepted',
+          comment: 'Looks promising.',
+          evaluatorUserId: 'admin-1',
+          evaluatorFullName: 'Admin One',
+          evaluatorEmail: 'admin.one@epam.com',
+          createdAt: '2026-02-26T10:00:00.000Z',
+        },
+        {
+          id: 'ev-2',
+          decision: 'Rejected',
+          comment: 'Need stronger KPI impact.',
+          evaluatorUserId: 'admin-2',
+          evaluatorFullName: 'Admin Two',
+          evaluatorEmail: 'admin.two@epam.com',
+          createdAt: '2026-02-26T12:00:00.000Z',
+        },
+      ],
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    const decisionCards = container.querySelectorAll('[data-evaluation-history-item="true"]');
+    expect(decisionCards).toHaveLength(2);
+    expect(decisionCards[0]?.textContent).toContain('Admin One (admin.one@epam.com)');
+    expect(decisionCards[0]?.textContent).toContain('Looks promising.');
+    expect(decisionCards[1]?.textContent).toContain('Admin Two (admin.two@epam.com)');
+    expect(decisionCards[1]?.textContent).toContain('Need stronger KPI impact.');
   });
 });

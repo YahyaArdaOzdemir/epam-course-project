@@ -13,6 +13,7 @@ import {
   getStatusBadgeClassName,
   hasImageAttachmentPreview,
 } from '../utils/idea-display';
+import { appendBoldToken, appendBulletToken, appendItalicToken, renderIdeaMarkdown } from '../utils/idea-markdown';
 import { useSubmissionGuard } from '../../shared/useSubmissionGuard';
 import { evaluationApi } from '../../evaluation/services/evaluation-service';
 import { ideaApi } from '../services/idea-service';
@@ -204,6 +205,20 @@ export const IdeaDetailsPage = () => {
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to update idea');
     }
+  };
+
+  const applyEditDescriptionFormat = (type: 'bold' | 'italic' | 'bullet'): void => {
+    setEditDescription((current) => {
+      if (type === 'bold') {
+        return appendBoldToken(current);
+      }
+
+      if (type === 'italic') {
+        return appendItalicToken(current);
+      }
+
+      return appendBulletToken(current);
+    });
   };
 
   const onDeleteIdea = async (): Promise<void> => {
@@ -417,6 +432,32 @@ export const IdeaDetailsPage = () => {
             </label>
             <label className="block text-sm font-medium text-slate-700">
               Description
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  aria-label="Format edit description bold"
+                  onClick={() => applyEditDescriptionFormat('bold')}
+                  className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Bold
+                </button>
+                <button
+                  type="button"
+                  aria-label="Format edit description italic"
+                  onClick={() => applyEditDescriptionFormat('italic')}
+                  className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Italic
+                </button>
+                <button
+                  type="button"
+                  aria-label="Format edit description bullet list"
+                  onClick={() => applyEditDescriptionFormat('bullet')}
+                  className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  Bullets
+                </button>
+              </div>
               <textarea
                 value={editDescription}
                 onChange={(event) => setEditDescription(event.target.value)}
@@ -441,7 +482,7 @@ export const IdeaDetailsPage = () => {
         </section>
       ) : (
         <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          <p className="mt-2 whitespace-pre-wrap">{idea.description}</p>
+          <div className="mt-2 space-y-2">{renderIdeaMarkdown(idea.description)}</div>
         </section>
       )}
 
@@ -514,6 +555,26 @@ export const IdeaDetailsPage = () => {
             </p>
             <p className="mt-1 text-sm text-slate-800">{idea.latestEvaluationComment}</p>
           </article>
+        ) : null}
+
+        {idea.evaluationDecisions.length > 0 ? (
+          <div className="mt-3 space-y-2">
+            {idea.evaluationDecisions.map((decisionItem) => (
+              <article
+                key={decisionItem.id}
+                data-evaluation-history-item="true"
+                className={`rounded-md border p-3 ${decisionItem.decision === 'Accepted' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
+              >
+                <p className={`text-xs font-semibold uppercase tracking-wide ${decisionItem.decision === 'Accepted' ? 'text-green-800' : 'text-red-800'}`}>
+                  {decisionItem.decision}
+                </p>
+                <p className="mt-1 text-xs text-slate-700">
+                  {decisionItem.evaluatorFullName} ({decisionItem.evaluatorEmail}) · {new Date(decisionItem.createdAt).toLocaleString()}
+                </p>
+                <p className="mt-1 text-sm text-slate-800">{decisionItem.comment}</p>
+              </article>
+            ))}
+          </div>
         ) : null}
 
         {isCommentLockedForUser ? (
