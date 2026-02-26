@@ -45,6 +45,7 @@ export const DashboardPage = () => {
     ]).then(([queue, accepted, rejected]) => {
       setEvaluationQueueCount(queue.pagination.totalItems);
       setRecentDecisions([...accepted.items, ...rejected.items].slice(0, 3));
+      setDrafts(loadDrafts(session.userId).map((draft) => ({ id: draft.id, title: draft.title || 'Untitled draft', updatedAt: draft.updatedAt })));
     }).catch(() => {
       setEvaluationQueueCount(0);
       setRecentDecisions([]);
@@ -104,8 +105,7 @@ export const DashboardPage = () => {
             )}
           </div>
 
-          {session?.role === 'submitter' ? (
-            <div className="rounded-lg border border-slate-200 p-4">
+          <div className="rounded-lg border border-slate-200 p-4">
               <h2 className="text-sm font-semibold text-slate-800">Working Drafts</h2>
               {drafts.length === 0 ? (
                 <p className="mt-2 text-sm text-slate-600">No drafts available right now.</p>
@@ -122,7 +122,8 @@ export const DashboardPage = () => {
                 </ul>
               )}
             </div>
-          ) : (
+
+          {session?.role !== 'submitter' ? (
             <div className="rounded-lg border border-slate-200 p-4">
               <h2 className="text-sm font-semibold text-slate-800">Recent Decisions</h2>
               {recentDecisions.length === 0 ? (
@@ -139,7 +140,7 @@ export const DashboardPage = () => {
                 </ul>
               )}
             </div>
-          )}
+          ) : null}
         </section>
       </div>
     </main>

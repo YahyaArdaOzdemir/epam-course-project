@@ -22,6 +22,7 @@ const navigateMock = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => navigateMock,
+  useBlocker: () => ({ state: 'unblocked' }),
 }));
 
 const renderSubmitPage = (root: Root): void => {

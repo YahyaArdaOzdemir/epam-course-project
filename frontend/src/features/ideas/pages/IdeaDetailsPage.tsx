@@ -49,6 +49,7 @@ export const IdeaDetailsPage = () => {
   const [commentBody, setCommentBody] = useState('');
   const [replyToCommentId, setReplyToCommentId] = useState<string | undefined>(undefined);
   const [replyBody, setReplyBody] = useState('');
+  const [commentUserVotes, setCommentUserVotes] = useState<Record<string, -1 | 1>>({});
   const { isSubmitting, runGuarded } = useSubmissionGuard();
   const errorAlertRef = useRef<HTMLDivElement | null>(null);
 
@@ -310,6 +311,7 @@ export const IdeaDetailsPage = () => {
           score: summary.score ?? (summary.upvotes - summary.downvotes),
         };
       }));
+      setCommentUserVotes((current) => ({ ...current, [commentId]: value }));
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to vote on comment');
     }
@@ -548,7 +550,7 @@ export const IdeaDetailsPage = () => {
                   <button
                     type="button"
                     onClick={() => { void onVoteComment(commentItem.id, 1); }}
-                    className="rounded border border-slate-300 px-1.5 py-0.5 transition hover:bg-slate-100"
+                    className={`rounded border px-1.5 py-0.5 transition hover:bg-slate-100 ${commentUserVotes[commentItem.id] === 1 ? 'border-green-500 text-green-600' : 'border-slate-300'}`}
                   >
                     ↑
                   </button>
@@ -556,11 +558,10 @@ export const IdeaDetailsPage = () => {
                   <button
                     type="button"
                     onClick={() => { void onVoteComment(commentItem.id, -1); }}
-                    className="rounded border border-slate-300 px-1.5 py-0.5 transition hover:bg-slate-100"
+                    className={`rounded border px-1.5 py-0.5 transition hover:bg-slate-100 ${commentUserVotes[commentItem.id] === -1 ? 'border-red-500 text-red-600' : 'border-slate-300'}`}
                   >
                     ↓
                   </button>
-                  <span>({commentItem.upvotes ?? 0}/{commentItem.downvotes ?? 0})</span>
                 </div>
                 <div className="mt-2 flex items-center gap-3">
                   {commentItem.depth < 5 && !isCommentLockedForUser ? (

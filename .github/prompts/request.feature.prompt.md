@@ -1,5 +1,4 @@
 ---
-model: GPT-5.3-Codex
 description: "Structured change-management controller for /request.feature"
 ---
 

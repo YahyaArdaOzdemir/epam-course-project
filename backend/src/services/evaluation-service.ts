@@ -5,7 +5,6 @@ import { statusHistoryRepository } from '../repositories/status-history-reposito
 
 export const isValidTransition = (from: IdeaRecord['status'], to: IdeaRecord['status']): boolean => {
   if (from === 'Submitted' && to === 'Under Review') return true;
-  if (from === 'Submitted' && (to === 'Accepted' || to === 'Rejected')) return true;
   if (from === 'Under Review' && (to === 'Accepted' || to === 'Rejected')) return true;
   return false;
 };

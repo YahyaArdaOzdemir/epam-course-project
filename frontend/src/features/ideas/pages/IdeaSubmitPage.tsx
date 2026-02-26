@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { IdeaCategory } from '../../shared/domain-types';
@@ -77,7 +77,22 @@ export const IdeaSubmitPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [activeDraftId, setActiveDraftId] = useState(() => searchParams.get('draftId') ?? createDraftId());
+  const [submitted, setSubmitted] = useState(false);
   const { csrfToken, session } = useAuth();
+
+  const hasContent = Boolean(
+    title.trim()
+    || description.trim()
+    || category
+    || dynamicFields.currentPainPoints.trim()
+    || dynamicFields.targetUserPersona.trim()
+    || dynamicFields.estimatedAnnualSavings.trim()
+    || dynamicFields.targetDepartment.trim()
+    || dynamicFields.proposedSoftwareHardware.trim()
+    || isShared,
+  );
+
+  const blocker = useBlocker(hasContent && !submitted);
   const { isSubmitting, runGuarded } = useSubmissionGuard();
 
   useEffect(() => {
@@ -116,18 +131,6 @@ export const IdeaSubmitPage = () => {
       return;
     }
 
-    const hasContent = Boolean(
-      title.trim()
-      || description.trim()
-      || category
-      || dynamicFields.currentPainPoints.trim()
-      || dynamicFields.targetUserPersona.trim()
-      || dynamicFields.estimatedAnnualSavings.trim()
-      || dynamicFields.targetDepartment.trim()
-      || dynamicFields.proposedSoftwareHardware.trim()
-      || isShared,
-    );
-
     if (!hasContent) {
       removeDraft(session.userId, activeDraftId);
       return;
@@ -143,7 +146,7 @@ export const IdeaSubmitPage = () => {
       isShared,
       updatedAt: new Date().toISOString(),
     });
-  }, [activeDraftId, category, description, dynamicFields, isShared, session, title]);
+  }, [activeDraftId, category, description, dynamicFields, hasContent, isShared, session, title]);
 
   const onCategoryChange = (nextCategory: IdeaCategory | ''): void => {
     setCategory(nextCategory);
@@ -193,6 +196,7 @@ export const IdeaSubmitPage = () => {
       if (session) {
         removeDraft(session.userId, activeDraftId);
       }
+      setSubmitted(true);
       setActiveDraftId(createDraftId());
       navigate(`/ideas/${createdIdea.id}`);
     } catch (error) {
@@ -201,6 +205,48 @@ export const IdeaSubmitPage = () => {
   };
 
   return (
+    <>
+      {blocker.state === 'blocked' ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="draft-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+        >
+          <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+            <h2 id="draft-dialog-title" className="text-lg font-semibold text-slate-900">Leave page?</h2>
+            <p className="mt-2 text-sm text-slate-600">You have an unsaved draft. Would you like to save it before leaving?</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => { blocker.proceed?.(); }}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+              >
+                Save Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (session) {
+                    removeDraft(session.userId, activeDraftId);
+                  }
+                  blocker.proceed?.();
+                }}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Discard Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => { blocker.reset?.(); }}
+                className="w-full rounded-lg px-4 py-2 text-sm text-slate-500 transition hover:text-slate-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     <main className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
       <h1 className="text-2xl font-semibold text-slate-900">Submit Idea</h1>
       <p className="mt-2 text-sm text-slate-600">Provide a clear idea summary and choose a valid category before submitting.</p>
@@ -339,5 +385,6 @@ export const IdeaSubmitPage = () => {
         </button>
       </form>
     </main>
+    </>
   );
 };
