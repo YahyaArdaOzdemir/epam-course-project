@@ -24,7 +24,8 @@ test('submitter can submit and list an idea', async ({ page }) => {
   await page.getByLabel('Category').selectOption('Other');
   await page.getByRole('button', { name: 'Submit Idea' }).click();
 
-  await expect(page.getByText('Idea submitted').first()).toBeVisible();
+  await expect(page).toHaveURL(/\/ideas\/.+/);
+  await expect(page.getByRole('heading', { name: uniqueTitle })).toBeVisible();
 
   await page.goto('/ideas');
   await page.getByRole('link', { name: uniqueTitle }).click();

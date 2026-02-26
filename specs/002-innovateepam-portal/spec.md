@@ -50,6 +50,13 @@
 - Q: Which admin-account onboarding method applies for this release? → A: Registration assigns `admin` role automatically when normalized email local-part starts with `admin`; all other registrations remain `submitter`.
 - Q: What happens to attachment files when an idea is deleted? → A: Deleting an idea MUST also delete its attachment file from filesystem uploads storage when present.
 
+### Session 2026-02-26 (Change Request Wave 6)
+
+- Q: Which dashboard list switcher tabs are required and what is default selection? → A: Dashboard middle panel MUST provide `Idea List`, `Working Drafts`, and role-gated `Recent Decisions` tabs, defaulting to `Idea List`; `Recent Decisions` is visible to admins only.
+- Q: Which filters apply to each dashboard tab? → A: `Idea List` MUST provide `status`, `category`, submission date range, and sort controls; `Working Drafts` and `Recent Decisions` MUST render without filters.
+- Q: What idea metadata is mandatory for dashboard idea cards? → A: Idea cards MUST show title, status badge, category, submitter full name, relative submission time, and net vote total, and card click MUST open idea details.
+- Q: How should draft-leave prompt behave during submission and pristine form states? → A: Draft prompt MUST NOT appear during confirmed successful submit transition and MUST NOT appear when no draftable changes exist.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
@@ -331,6 +338,13 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-113**: System MUST provide idea submission and idea-edit form controls for markdown-style `bold`, `italic`, and bulleted-list insertion, and MUST render stored idea description content with markdown formatting in idea details.
 - **FR-114**: System MUST assign newly registered account role as `admin` when normalized email local-part begins with `admin`; otherwise role remains `submitter`.
 - **FR-115**: System MUST remove associated attachment file from uploads filesystem when an idea is deleted and an attachment record exists.
+- **FR-116**: System MUST render dashboard middle-list controls as segmented buttons for `Idea List`, `Working Drafts`, and admin-only `Recent Decisions`, with `Idea List` selected by default.
+- **FR-117**: System MUST render dashboard `Idea List` view using per-idea clickable cards that navigate to idea details.
+- **FR-118**: System MUST show, on each dashboard idea card, title, status badge, category, submitter full name, relative submission time, and net vote total (`upvotes - downvotes`).
+- **FR-119**: System MUST provide dashboard `Idea List` filter controls for status, category, submission date range, and sort direction.
+- **FR-120**: System MUST NOT render filter controls for dashboard `Working Drafts` and `Recent Decisions` views.
+- **FR-121**: System MUST expose `Recent Decisions` dashboard tab and content only to admin users.
+- **FR-122**: System MUST suppress draft-leave prompt during successful idea-submit navigation flow and MUST avoid draft prompt surfaces when form has no draftable changes.
 
 ### Assumptions
 

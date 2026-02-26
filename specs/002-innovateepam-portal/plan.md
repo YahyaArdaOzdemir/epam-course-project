@@ -181,3 +181,18 @@ No constitution violations or justified exceptions required at plan stage.
 - Extend idea-details response contract with `evaluationDecisions[]` to avoid extra network round-trips and keep render ordering deterministic.
 - Keep markdown support lightweight and deterministic using internal safe markdown renderer limited to required formatting subset (bold/italic/bullets).
 - Perform attachment file cleanup in service layer before DB cascade delete, tolerating already-missing files without failing deletion.
+
+## Change Addendum (2026-02-26, Wave 6 - Dashboard Segmented Lists and Submit-Draft Prompt Correctness)
+
+### Scope Propagation
+
+- Refactor dashboard middle panel into segmented list views with default `Idea List`, always-visible `Working Drafts`, and admin-only `Recent Decisions`.
+- Add dashboard `Idea List` filtering parity for status/category/date-range/sort controls while intentionally keeping `Working Drafts` and `Recent Decisions` unfiltered.
+- Replace dashboard row-style idea entries with clickable metadata cards containing status/category/submitter identity/relative submission time/net vote summary.
+- Ensure submit flow does not trigger draft-leave prompt during successful post-submit redirect and retains silent behavior when form is pristine.
+
+### Architecture Notes
+
+- Reuse existing list endpoint with query params for dashboard idea-list tab filtering; avoid introducing dedicated dashboard API endpoints.
+- Extend list projection to include submitter display name for card metadata without changing authorization rules.
+- Keep draft persistence model unchanged (`localStorage` per-user); update blocker gating logic to suppress prompt only for confirmed submit transition.

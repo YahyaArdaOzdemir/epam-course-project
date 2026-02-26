@@ -154,7 +154,17 @@ describe('idea details voting and inline reply UX', () => {
       ideaVotesUp: 3,
       ideaVotesDown: 1,
       ideaVotesTotal: 4,
-      evaluationDecisions: [],
+      evaluationDecisions: [
+        {
+          id: 'ev-100',
+          decision: 'Rejected',
+          comment: 'Rejected due to missing business case.',
+          evaluatorUserId: 'admin-1',
+          evaluatorFullName: 'Parker Peter',
+          evaluatorEmail: 'admin.test@epam.com',
+          createdAt: '2026-02-26T21:16:15.000Z',
+        },
+      ],
     });
 
     await act(async () => {
@@ -169,8 +179,10 @@ describe('idea details voting and inline reply UX', () => {
 
     expect(container.textContent).toContain('Evaluation Decision');
     expect(container.textContent).toContain('Rejected due to missing business case.');
+    expect(container.textContent).toContain('Parker Peter (admin.test@epam.com)');
     const evaluationReplyButtons = Array.from(container.querySelectorAll('button')).filter((button) => button.textContent?.trim() === 'Reply' && button.closest('[data-evaluation-comment="true"]'));
     expect(evaluationReplyButtons).toHaveLength(0);
+    expect(container.querySelectorAll('[data-evaluation-history-item="true"]')).toHaveLength(1);
   });
 
   it('locks comment creation and replies for submitter on rejected idea', async () => {
@@ -227,6 +239,15 @@ describe('idea details voting and inline reply UX', () => {
       ideaVotesTotal: 4,
       evaluationDecisions: [
         {
+          id: 'ev-0',
+          decision: 'Under Review',
+          comment: 'Needs architecture review.',
+          evaluatorUserId: 'admin-0',
+          evaluatorFullName: 'Admin Zero',
+          evaluatorEmail: 'admin.zero@epam.com',
+          createdAt: '2026-02-26T09:00:00.000Z',
+        },
+        {
           id: 'ev-1',
           decision: 'Accepted',
           comment: 'Looks promising.',
@@ -258,10 +279,79 @@ describe('idea details voting and inline reply UX', () => {
     });
 
     const decisionCards = container.querySelectorAll('[data-evaluation-history-item="true"]');
-    expect(decisionCards).toHaveLength(2);
-    expect(decisionCards[0]?.textContent).toContain('Admin One (admin.one@epam.com)');
-    expect(decisionCards[0]?.textContent).toContain('Looks promising.');
-    expect(decisionCards[1]?.textContent).toContain('Admin Two (admin.two@epam.com)');
-    expect(decisionCards[1]?.textContent).toContain('Need stronger KPI impact.');
+    expect(decisionCards).toHaveLength(3);
+    expect(decisionCards[0]?.textContent).toContain('Admin Zero (admin.zero@epam.com)');
+    expect(decisionCards[0]?.textContent).toContain('Needs architecture review.');
+    expect(decisionCards[1]?.textContent).toContain('Admin One (admin.one@epam.com)');
+    expect(decisionCards[1]?.textContent).toContain('Looks promising.');
+    expect(decisionCards[2]?.textContent).toContain('Admin Two (admin.two@epam.com)');
+    expect(decisionCards[2]?.textContent).toContain('Need stronger KPI impact.');
+  });
+
+  it('keeps Under Review available in admin evaluation status options for reevaluation flow', async () => {
+    useAuthMock.mockReturnValue({
+      session: {
+        authenticated: true,
+        userId: 'admin-1',
+        role: 'admin',
+        fullName: 'Admin User',
+        email: 'admin@epam.com',
+        expiresAt: new Date().toISOString(),
+      },
+      csrfToken: 'csrf-token',
+      logout: jest.fn(),
+      message: '',
+      isLoading: false,
+      register: jest.fn(),
+      login: jest.fn(),
+      refreshSession: jest.fn(),
+      passwordResetRequest: jest.fn(),
+      passwordResetConfirm: jest.fn(),
+    });
+
+    getByIdSpy.mockResolvedValueOnce({
+      id: 'idea-1',
+      title: 'Unified Idea Title',
+      description: 'Description body',
+      category: 'Other',
+      status: 'Accepted',
+      rowVersion: 2,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: 'Good idea!',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      attachment: null,
+      ideaVotesUp: 3,
+      ideaVotesDown: 1,
+      ideaVotesTotal: 4,
+      evaluationDecisions: [
+        {
+          id: 'ev-1',
+          decision: 'Accepted',
+          comment: 'Good idea!',
+          evaluatorUserId: 'admin-1',
+          evaluatorFullName: 'Parker Peter',
+          evaluatorEmail: 'admin.test@epam.com',
+          createdAt: '2026-02-26T21:16:15.000Z',
+        },
+      ],
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    const statusSelect = container.querySelector('select') as HTMLSelectElement;
+    const optionValues = Array.from(statusSelect.querySelectorAll('option')).map((option) => option.value);
+    expect(optionValues).toContain('Under Review');
+    expect(optionValues).toContain('Accepted');
+    expect(optionValues).toContain('Rejected');
   });
 });

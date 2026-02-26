@@ -93,4 +93,43 @@ describe('ProtectedRoute', () => {
 
     expect(container.textContent).toContain('Protected Dashboard');
   });
+
+  it('waits for csrf token when session exists but csrf token is missing', async () => {
+    const refreshSession = jest.fn();
+
+    mockedUseAuth.mockReturnValue({
+      session: {
+        authenticated: true,
+        userId: 'u-1',
+        role: 'submitter',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+      csrfToken: null,
+      message: '',
+      isLoading: false,
+      register: jest.fn(),
+      login: jest.fn(),
+      logout: jest.fn(),
+      refreshSession,
+      passwordResetRequest: jest.fn(),
+      passwordResetConfirm: jest.fn(),
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/dashboard']}>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<div>Protected Dashboard</div>} />
+            </Route>
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain('Loading security token...');
+    expect(container.textContent).not.toContain('Protected Dashboard');
+    expect(refreshSession).toHaveBeenCalled();
+  });
 });

@@ -375,3 +375,20 @@
 - [X] T125 [US3-US6] Implement evaluation decision history projection with evaluator identity in backend/src/repositories/evaluation-repository.ts, backend/src/services/idea-service.ts, frontend/src/services/contracts.ts, and frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
 - [X] T126 [US2-US6] Implement markdown formatting controls and markdown render utility for submit/edit/details flows in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx and frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
 - [X] T127 [US2-US6] Implement attachment binary cleanup during idea delete in backend/src/services/idea-service.ts and backend/src/repositories/attachment-repository.ts
+
+## Phase 13: Change Request 2026-02-26 (Wave 6 - Dashboard Segmented Lists, Cards, and Submit Draft Prompt Fix)
+
+**Purpose**: Deliver dashboard segmented list UX with role gating + idea cards + idea-list filters, and fix submit navigation triggering draft-leave prompt.
+
+### Tests for Change Request (MANDATORY)
+
+- [X] T128 [P] [US2-US6] Add/update frontend unit tests for dashboard segmented controls, admin-only `Recent Decisions`, default `Idea List`, and filter visibility rules in frontend/tests/unit/dashboard-shared-ideas.test.tsx
+- [X] T129 [P] [US2-US6] Add/update frontend unit tests for dashboard idea-card metadata (title/status/category/submitter/relative-time/net-vote) and card click navigation in frontend/tests/unit/dashboard-shared-ideas.test.tsx
+- [X] T130 [P] [US2-US6] Add/update frontend unit tests for submit-flow draft prompt suppression and pristine no-prompt behavior in frontend/tests/unit/idea-submit-page-refactor.test.tsx
+
+### Implementation for Change Request
+
+- [X] T131 [US2-US6] Refactor dashboard middle panel to segmented button-switched views with default `Idea List`, admin-only `Recent Decisions`, and no filters on non-idea tabs in frontend/src/features/auth/pages/DashboardPage.tsx
+- [X] T132 [US2-US6] Implement dashboard idea list card presentation + filter controls and card-to-details navigation in frontend/src/features/auth/pages/DashboardPage.tsx
+- [X] T133 [US2-US6] Extend idea list payload/contracts to include submitter full-name metadata for dashboard cards in backend/src/repositories/idea-repository.ts, backend/src/services/idea-service.ts, and frontend/src/services/contracts.ts
+- [X] T134 [US2-US6] Fix idea submit blocker gating so successful submit redirect cannot trigger draft-save prompt and no-change form state remains prompt-free in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx

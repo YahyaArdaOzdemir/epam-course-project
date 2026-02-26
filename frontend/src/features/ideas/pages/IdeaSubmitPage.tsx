@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../../auth/hooks/useAuth';
@@ -79,6 +79,7 @@ export const IdeaSubmitPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [activeDraftId, setActiveDraftId] = useState(() => searchParams.get('draftId') ?? createDraftId());
   const [submitted, setSubmitted] = useState(false);
+  const skipDraftBlockRef = useRef(false);
   const { csrfToken, session } = useAuth();
 
   const hasContent = Boolean(
@@ -93,7 +94,7 @@ export const IdeaSubmitPage = () => {
     || isShared,
   );
 
-  const blocker = useBlocker(hasContent && !submitted);
+  const blocker = useBlocker(() => hasContent && !submitted && !skipDraftBlockRef.current);
   const { isSubmitting, runGuarded } = useSubmissionGuard();
 
   useEffect(() => {
@@ -211,6 +212,7 @@ export const IdeaSubmitPage = () => {
       if (session) {
         removeDraft(session.userId, activeDraftId);
       }
+      skipDraftBlockRef.current = true;
       setSubmitted(true);
       setActiveDraftId(createDraftId());
       navigate(`/ideas/${createdIdea.id}`);

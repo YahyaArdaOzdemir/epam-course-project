@@ -7,7 +7,7 @@ export type EvaluationDecisionRecord = {
   evaluatorUserId: string;
   evaluatorFullName: string;
   evaluatorEmail: string;
-  decision: 'Accepted' | 'Rejected';
+  decision: 'Under Review' | 'Accepted' | 'Rejected';
   comment: string;
   createdAt: string;
 };
@@ -18,7 +18,7 @@ const mapDecision = (row: Record<string, unknown>): EvaluationDecisionRecord => 
   evaluatorUserId: String(row.evaluator_user_id),
   evaluatorFullName: String(row.evaluator_full_name),
   evaluatorEmail: String(row.evaluator_email),
-  decision: row.decision as 'Accepted' | 'Rejected',
+  decision: row.decision as 'Under Review' | 'Accepted' | 'Rejected',
   comment: String(row.comment),
   createdAt: String(row.created_at),
 });
@@ -36,21 +36,41 @@ export const evaluationRepository = {
     const db = getDb();
     const rows = db
       .prepare(
-        `SELECT
-          decision.id,
-          decision.idea_id,
-          decision.evaluator_user_id,
-          user.full_name AS evaluator_full_name,
-          user.email AS evaluator_email,
-          decision.decision,
-          decision.comment,
-          decision.created_at
-         FROM evaluation_decisions AS decision
-         INNER JOIN users AS user ON user.id = decision.evaluator_user_id
-         WHERE decision.idea_id = ?
-         ORDER BY decision.created_at ASC`,
+        `SELECT * FROM (
+           SELECT
+             decision.id,
+             decision.idea_id,
+             decision.evaluator_user_id,
+             user.full_name AS evaluator_full_name,
+             user.email AS evaluator_email,
+             decision.decision,
+             decision.comment,
+             decision.created_at
+           FROM evaluation_decisions AS decision
+           INNER JOIN users AS user ON user.id = decision.evaluator_user_id
+           WHERE decision.idea_id = ?
+
+           UNION ALL
+
+           SELECT
+             history.id,
+             history.idea_id,
+             history.changed_by_user_id AS evaluator_user_id,
+             user.full_name AS evaluator_full_name,
+             user.email AS evaluator_email,
+             history.to_status AS decision,
+             history.comment_snapshot AS comment,
+             history.created_at
+           FROM status_history_entries AS history
+           INNER JOIN users AS user ON user.id = history.changed_by_user_id
+           WHERE history.idea_id = ?
+             AND history.to_status = 'Under Review'
+             AND history.comment_snapshot IS NOT NULL
+             AND TRIM(history.comment_snapshot) <> ''
+         ) AS combined
+         ORDER BY created_at ASC`,
       )
-      .all(ideaId) as Record<string, unknown>[];
+      .all(ideaId, ideaId) as Record<string, unknown>[];
 
     return rows.map(mapDecision);
   },

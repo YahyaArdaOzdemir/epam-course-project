@@ -5,6 +5,7 @@ import { IdeaListQuery } from '../validators/idea-query-validator';
 export type IdeaRecord = {
   id: string;
   ownerUserId: string;
+  ownerFullName?: string;
   title: string;
   description: string;
   category: string;
@@ -22,6 +23,7 @@ export type IdeaRecord = {
 const mapIdea = (row: Record<string, unknown>): IdeaRecord => ({
   id: String(row.id),
   ownerUserId: String(row.owner_user_id),
+  ownerFullName: row.owner_full_name == null ? undefined : String(row.owner_full_name),
   title: String(row.title),
   description: String(row.description),
   category: String(row.category),
@@ -60,6 +62,7 @@ export const ideaRepository = {
     return {
       id,
       ownerUserId: input.ownerUserId,
+      ownerFullName: undefined,
       title: input.title,
       description: input.description,
       category: input.category,
@@ -88,6 +91,7 @@ export const ideaRepository = {
     return {
       id,
       ownerUserId: input.ownerUserId,
+      ownerFullName: undefined,
       title: input.title,
       description: input.description,
       category: input.category,
@@ -109,6 +113,7 @@ export const ideaRepository = {
       .prepare(
         `SELECT
             ideas.*,
+          users.full_name AS owner_full_name,
             (
               SELECT decision.comment
               FROM evaluation_decisions AS decision
@@ -132,6 +137,7 @@ export const ideaRepository = {
               WHERE iv.idea_id = ideas.id
             ) AS idea_votes_total
          FROM ideas
+        INNER JOIN users ON users.id = ideas.owner_user_id
          WHERE ideas.id = ?`,
       )
       .get(id);
@@ -184,13 +190,13 @@ export const ideaRepository = {
 
     const orderBySql =
       input.query.sortBy === 'status'
-        ? `ORDER BY CASE status
+        ? `ORDER BY CASE ideas.status
               WHEN 'Submitted' THEN 1
               WHEN 'Under Review' THEN 2
               WHEN 'Accepted' THEN 3
               WHEN 'Rejected' THEN 4
-            END ASC, created_at DESC`
-        : `ORDER BY created_at ${input.query.sortDirection === 'Oldest' ? 'ASC' : 'DESC'}`;
+            END ASC, ideas.created_at DESC`
+        : `ORDER BY ideas.created_at ${input.query.sortDirection === 'Oldest' ? 'ASC' : 'DESC'}`;
 
     const offset = (input.query.page - 1) * input.query.pageSize;
     const rows = db
@@ -219,7 +225,8 @@ export const ideaRepository = {
               FROM idea_votes AS iv
               WHERE iv.idea_id = ideas.id
             ) AS idea_votes_total
-         FROM ideas
+        FROM ideas
+        INNER JOIN users ON users.id = ideas.owner_user_id
          ${whereSql}
          ${orderBySql}
          LIMIT ? OFFSET ?`,

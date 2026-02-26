@@ -14,13 +14,21 @@ jest.mock('../../src/repositories/attachment-repository', () => ({
 	},
 }));
 
+jest.mock('../../src/repositories/evaluation-repository', () => ({
+	evaluationRepository: {
+		listByIdeaIdWithEvaluator: jest.fn(),
+	},
+}));
+
 import { ConflictError, ForbiddenError, ValidationError } from '../../src/lib/errors';
 import { ideaService } from '../../src/services/idea-service';
 import { ideaRepository } from '../../src/repositories/idea-repository';
 import { attachmentRepository } from '../../src/repositories/attachment-repository';
+import { evaluationRepository } from '../../src/repositories/evaluation-repository';
 
 const mockedIdeaRepository = ideaRepository as jest.Mocked<typeof ideaRepository>;
 const mockedAttachmentRepository = attachmentRepository as jest.Mocked<typeof attachmentRepository>;
+const mockedEvaluationRepository = evaluationRepository as jest.Mocked<typeof evaluationRepository>;
 
 describe('idea submission/listing policy', () => {
 	beforeEach(() => {
@@ -160,6 +168,56 @@ describe('idea submission/listing policy', () => {
 
 		expect(details.attachment?.url).toBe('/uploads/stored.pdf');
 		expect(details.attachment?.sizeBytes).toBe(2048);
+	});
+
+	it('includes Under Review evaluation comments in chronological evaluationDecisions stack', () => {
+		mockedIdeaRepository.findById.mockReturnValue({
+			id: 'idea-7',
+			ownerUserId: 'owner-1',
+			title: 'Idea',
+			description: 'Desc',
+			category: 'Other',
+			status: 'Accepted',
+			isShared: true,
+			rowVersion: 2,
+			latestEvaluationComment: 'Accepted for pilot',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+
+		mockedEvaluationRepository.listByIdeaIdWithEvaluator.mockReturnValue([
+			{
+				id: 'eval-1',
+				ideaId: 'idea-7',
+				evaluatorUserId: 'admin-1',
+				evaluatorFullName: 'Admin One',
+				evaluatorEmail: 'admin.one@epam.com',
+				decision: 'Under Review',
+				comment: 'Needs deeper impact analysis',
+				createdAt: '2026-02-26T10:00:00.000Z',
+			},
+			{
+				id: 'eval-2',
+				ideaId: 'idea-7',
+				evaluatorUserId: 'admin-2',
+				evaluatorFullName: 'Admin Two',
+				evaluatorEmail: 'admin.two@epam.com',
+				decision: 'Accepted',
+				comment: 'Accepted for pilot',
+				createdAt: '2026-02-26T12:00:00.000Z',
+			},
+		]);
+
+		const details = ideaService.getIdeaById({
+			ideaId: 'idea-7',
+			viewerUserId: 'viewer-1',
+			viewerRole: 'submitter',
+		});
+
+		expect(details.evaluationDecisions).toHaveLength(2);
+		expect(details.evaluationDecisions[0]?.decision).toBe('Under Review');
+		expect(details.evaluationDecisions[0]?.comment).toBe('Needs deeper impact analysis');
+		expect(details.evaluationDecisions[1]?.decision).toBe('Accepted');
 	});
 
 	it('throws validation error when sharing unknown idea', () => {

@@ -58,7 +58,7 @@ describe('evaluation workflow service', () => {
 		}).toThrow(ValidationError);
 	});
 
-	it('rejects invalid status transition', () => {
+	it('allows status transition to Under Review for finalized idea reevaluation', () => {
 		mockedIdeaRepository.findById.mockReturnValue({
 			id: 'idea-1',
 			ownerUserId: 'u-1',
@@ -72,16 +72,75 @@ describe('evaluation workflow service', () => {
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 		});
+		mockedIdeaRepository.updateStatus.mockReturnValue({
+			id: 'idea-1',
+			ownerUserId: 'u-1',
+			title: 'Idea',
+			description: 'Desc',
+			category: 'Other',
+			status: 'Under Review',
+			isShared: false,
+			rowVersion: 1,
+			latestEvaluationComment: null,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
 
-		expect(() => {
-			evaluationService.updateIdeaStatus({
-				ideaId: 'idea-1',
-				evaluatorUserId: 'admin-1',
-				evaluatorRole: 'admin',
-				toStatus: 'Rejected',
-				expectedRowVersion: 0,
-			});
-		}).toThrow(ValidationError);
+		evaluationService.updateIdeaStatus({
+			ideaId: 'idea-1',
+			evaluatorUserId: 'admin-1',
+			evaluatorRole: 'admin',
+			toStatus: 'Under Review',
+			expectedRowVersion: 0,
+		});
+
+		expect(mockedEvaluationRepository.create).not.toHaveBeenCalled();
+	});
+
+	it('allows reevaluation from Accepted to Rejected with comment', () => {
+		mockedIdeaRepository.findById.mockReturnValue({
+			id: 'idea-accept-1',
+			ownerUserId: 'u-1',
+			title: 'Accepted Idea',
+			description: 'Desc',
+			category: 'Other',
+			status: 'Accepted',
+			isShared: true,
+			rowVersion: 2,
+			latestEvaluationComment: 'Initially accepted',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+
+		mockedIdeaRepository.updateStatus.mockReturnValue({
+			id: 'idea-accept-1',
+			ownerUserId: 'u-1',
+			title: 'Accepted Idea',
+			description: 'Desc',
+			category: 'Other',
+			status: 'Rejected',
+			isShared: true,
+			rowVersion: 3,
+			latestEvaluationComment: 'Re-evaluated after review',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+
+		evaluationService.updateIdeaStatus({
+			ideaId: 'idea-accept-1',
+			evaluatorUserId: 'admin-1',
+			evaluatorRole: 'admin',
+			toStatus: 'Rejected',
+			comment: 'Re-evaluated after review',
+			expectedRowVersion: 2,
+		});
+
+		expect(mockedEvaluationRepository.create).toHaveBeenCalledWith({
+			ideaId: 'idea-accept-1',
+			evaluatorUserId: 'admin-1',
+			decision: 'Rejected',
+			comment: 'Re-evaluated after review',
+		});
 	});
 
 	it('requires comment for final decision', () => {
@@ -224,7 +283,7 @@ describe('evaluation workflow service', () => {
 		});
 	});
 
-	it('rejects direct Submitted to Rejected transition (must go through Under Review first)', () => {
+	it('allows direct Submitted to Rejected transition with required decision comment', () => {
 		mockedIdeaRepository.findById.mockReturnValue({
 			id: 'idea-2',
 			ownerUserId: 'u-2',
@@ -239,13 +298,34 @@ describe('evaluation workflow service', () => {
 			updatedAt: new Date().toISOString(),
 		});
 
-		expect(() => evaluationService.updateIdeaStatus({
+		mockedIdeaRepository.updateStatus.mockReturnValue({
+			id: 'idea-2',
+			ownerUserId: 'u-2',
+			title: 'Idea 2',
+			description: 'Desc 2',
+			category: 'Other',
+			status: 'Rejected',
+			isShared: true,
+			rowVersion: 2,
+			latestEvaluationComment: 'Not feasible',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+
+		evaluationService.updateIdeaStatus({
 			ideaId: 'idea-2',
 			evaluatorUserId: 'admin-1',
 			evaluatorRole: 'admin',
 			toStatus: 'Rejected',
 			comment: 'Not feasible',
 			expectedRowVersion: 1,
-		})).toThrow(ValidationError);
+		});
+
+		expect(mockedEvaluationRepository.create).toHaveBeenCalledWith({
+			ideaId: 'idea-2',
+			evaluatorUserId: 'admin-1',
+			decision: 'Rejected',
+			comment: 'Not feasible',
+		});
 	});
 });

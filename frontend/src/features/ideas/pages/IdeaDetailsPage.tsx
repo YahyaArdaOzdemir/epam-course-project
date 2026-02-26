@@ -73,6 +73,10 @@ export const IdeaDetailsPage = () => {
         setEditCategory(nextIdea.category);
         if (nextIdea.status === 'Submitted') {
           setToStatus('Under Review');
+        } else if (nextIdea.status === 'Under Review') {
+          setToStatus('Accepted');
+        } else {
+          setToStatus(nextIdea.status);
         }
 
         const commentResult = await ideaApi.listComments(ideaId);
@@ -143,19 +147,15 @@ export const IdeaDetailsPage = () => {
         csrfToken,
       ));
 
-      setIdea((current) => {
-        if (!current) {
-          return current;
-        }
-
-        return {
-          ...current,
-          status: updated.status,
-          rowVersion: updated.rowVersion,
-          latestEvaluationComment: updated.latestEvaluationComment,
-          updatedAt: new Date().toISOString(),
-        };
-      });
+      const refreshedIdea = await ideaApi.getById(updated.id);
+      setIdea(refreshedIdea);
+      if (refreshedIdea.status === 'Submitted') {
+        setToStatus('Under Review');
+      } else if (refreshedIdea.status === 'Under Review') {
+        setToStatus('Accepted');
+      } else {
+        setToStatus(refreshedIdea.status);
+      }
       setSuccessMessage('Status updated');
       if (toStatus === 'Accepted' || toStatus === 'Rejected') {
         setComment('');
@@ -374,6 +374,8 @@ export const IdeaDetailsPage = () => {
   const totalIdeaVotes = idea.ideaVotesTotal ?? (ideaVotesUp + ideaVotesDown);
   const netIdeaVotes = ideaVotesUp - ideaVotesDown;
   const filledStars = totalIdeaVotes > 0 ? Math.round((ideaVotesUp / totalIdeaVotes) * 5) : 0;
+  const latestDecisionIndex = idea.evaluationDecisions.length - 1;
+  const evaluationStatusOptions: Array<'Under Review' | 'Accepted' | 'Rejected'> = ['Under Review', 'Accepted', 'Rejected'];
 
   return (
     <main className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -545,7 +547,40 @@ export const IdeaDetailsPage = () => {
       <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="text-base font-semibold text-slate-900">Comments</h2>
 
-        {idea.latestEvaluationComment && (idea.status === 'Accepted' || idea.status === 'Rejected') ? (
+        {idea.evaluationDecisions.length > 0 ? (
+          <div className="mt-3 space-y-2">
+            {idea.evaluationDecisions.map((decisionItem, index) => {
+              const isLatestDecision = index === latestDecisionIndex;
+              const decisionCardClassName = decisionItem.decision === 'Accepted'
+                ? 'border-green-200 bg-green-50'
+                : decisionItem.decision === 'Rejected'
+                  ? 'border-red-200 bg-red-50'
+                  : 'border-amber-200 bg-amber-50';
+              const decisionTextClassName = decisionItem.decision === 'Accepted'
+                ? 'text-green-800'
+                : decisionItem.decision === 'Rejected'
+                  ? 'text-red-800'
+                  : 'text-amber-800';
+
+              return (
+              <article
+                key={decisionItem.id}
+                data-evaluation-history-item="true"
+                data-evaluation-comment={isLatestDecision ? 'true' : undefined}
+                className={`rounded-md border p-3 ${decisionCardClassName}`}
+              >
+                <p className={`text-xs font-semibold uppercase tracking-wide ${decisionTextClassName}`}>
+                  {isLatestDecision ? `Evaluation Decision · ${decisionItem.decision}` : decisionItem.decision}
+                </p>
+                <p className="mt-1 text-xs text-slate-700">
+                  {decisionItem.evaluatorFullName} ({decisionItem.evaluatorEmail}) · {new Date(decisionItem.createdAt).toLocaleString()}
+                </p>
+                <p className="mt-1 text-sm text-slate-800">{decisionItem.comment}</p>
+              </article>
+              );
+            })}
+          </div>
+        ) : idea.latestEvaluationComment && (idea.status === 'Accepted' || idea.status === 'Rejected') ? (
           <article
             data-evaluation-comment="true"
             className={`mt-3 rounded-md border p-3 ${idea.status === 'Accepted' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
@@ -555,26 +590,6 @@ export const IdeaDetailsPage = () => {
             </p>
             <p className="mt-1 text-sm text-slate-800">{idea.latestEvaluationComment}</p>
           </article>
-        ) : null}
-
-        {idea.evaluationDecisions.length > 0 ? (
-          <div className="mt-3 space-y-2">
-            {idea.evaluationDecisions.map((decisionItem) => (
-              <article
-                key={decisionItem.id}
-                data-evaluation-history-item="true"
-                className={`rounded-md border p-3 ${decisionItem.decision === 'Accepted' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
-              >
-                <p className={`text-xs font-semibold uppercase tracking-wide ${decisionItem.decision === 'Accepted' ? 'text-green-800' : 'text-red-800'}`}>
-                  {decisionItem.decision}
-                </p>
-                <p className="mt-1 text-xs text-slate-700">
-                  {decisionItem.evaluatorFullName} ({decisionItem.evaluatorEmail}) · {new Date(decisionItem.createdAt).toLocaleString()}
-                </p>
-                <p className="mt-1 text-sm text-slate-800">{decisionItem.comment}</p>
-              </article>
-            ))}
-          </div>
         ) : null}
 
         {isCommentLockedForUser ? (
@@ -688,9 +703,9 @@ export const IdeaDetailsPage = () => {
             <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
               Next Status
               <Select value={toStatus} onChange={(event) => setToStatus(event.target.value as 'Under Review' | 'Accepted' | 'Rejected')}>
-                <option value="Under Review">Under Review</option>
-                <option value="Accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
+                {evaluationStatusOptions.map((statusOption) => (
+                  <option key={statusOption} value={statusOption}>{statusOption}</option>
+                ))}
               </Select>
             </label>
 

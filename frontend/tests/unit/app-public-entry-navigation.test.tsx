@@ -59,7 +59,7 @@ describe('App public entry and auth-aware navigation', () => {
   ) => {
     mockedUseAuth.mockReturnValue({
       session,
-      csrfToken: null,
+      csrfToken: session ? 'csrf-test-token' : null,
       message: '',
       isLoading: false,
       register: overrides?.register ?? jest.fn(),
@@ -139,38 +139,53 @@ describe('App public entry and auth-aware navigation', () => {
   });
 
   it('renders admin dashboard widgets and protected header role badge', async () => {
-    mockedIdeaApi.list
-      .mockResolvedValueOnce({ items: [], pagination: { page: 1, pageSize: 1, totalItems: 7, totalPages: 7 } })
-      .mockResolvedValueOnce({
-        items: [
-          {
-            id: 'idea-1',
-            title: 'Accepted idea',
-            category: 'Other',
-            status: 'Accepted',
-            isShared: false,
-            rowVersion: 0,
-            ownerUserId: 'u-2',
-            latestEvaluationComment: 'Good',
-          },
-        ],
-        pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
-      })
-      .mockResolvedValueOnce({
-        items: [
-          {
-            id: 'idea-2',
-            title: 'Rejected idea',
-            category: 'Other',
-            status: 'Rejected',
-            isShared: false,
-            rowVersion: 0,
-            ownerUserId: 'u-2',
-            latestEvaluationComment: 'Not now',
-          },
-        ],
-        pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
-      });
+    mockedIdeaApi.list.mockImplementation(async (query = {}) => {
+      if (query.status === 'Submitted') {
+        return { items: [], pagination: { page: 1, pageSize: 1, totalItems: 7, totalPages: 7 } };
+      }
+
+      if (query.status === 'Under Review') {
+        return { items: [], pagination: { page: 1, pageSize: 1, totalItems: 1, totalPages: 1 } };
+      }
+
+      if (query.status === 'Accepted') {
+        return {
+          items: [
+            {
+              id: 'idea-1',
+              title: 'Accepted idea',
+              category: 'Other',
+              status: 'Accepted',
+              isShared: false,
+              rowVersion: 0,
+              ownerUserId: 'u-2',
+              latestEvaluationComment: 'Good',
+            },
+          ],
+          pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
+        };
+      }
+
+      if (query.status === 'Rejected') {
+        return {
+          items: [
+            {
+              id: 'idea-2',
+              title: 'Rejected idea',
+              category: 'Other',
+              status: 'Rejected',
+              isShared: false,
+              rowVersion: 0,
+              ownerUserId: 'u-2',
+              latestEvaluationComment: 'Not now',
+            },
+          ],
+          pagination: { page: 1, pageSize: 3, totalItems: 1, totalPages: 1 },
+        };
+      }
+
+      return { items: [], pagination: { page: 1, pageSize: 20, totalItems: 0, totalPages: 1 } };
+    });
 
     mockAuthValue({
       authenticated: true,
@@ -192,6 +207,12 @@ describe('App public entry and auth-aware navigation', () => {
     expect(container.textContent).toContain('Admin');
     expect(container.textContent).toContain('Evaluation Queue');
     expect(container.textContent).toContain('Recent Decisions');
+
+    const recentDecisionsTab = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'Recent Decisions');
+    await act(async () => {
+      recentDecisionsTab?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
     expect(container.textContent).toContain('Accepted idea');
     expect(container.textContent).toContain('Rejected idea');
     expect(Array.from(container.querySelectorAll('a')).some((link) => link.textContent === 'Evaluation Queue')).toBe(true);

@@ -19,7 +19,7 @@ type IdeaDetailsRecord = IdeaRecord & {
     evaluatorUserId: string;
     evaluatorFullName: string;
     evaluatorEmail: string;
-    decision: 'Accepted' | 'Rejected';
+    decision: 'Under Review' | 'Accepted' | 'Rejected';
     comment: string;
     createdAt: string;
   }>;

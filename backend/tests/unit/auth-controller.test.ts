@@ -69,8 +69,16 @@ const makeRequest = (input?: {
 };
 
 describe('authController', () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+  const originalSessionCookieSecure = process.env.SESSION_COOKIE_SECURE;
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+    process.env.SESSION_COOKIE_SECURE = originalSessionCookieSecure;
   });
 
   it('registers user and returns 201', async () => {
@@ -143,11 +151,40 @@ describe('authController', () => {
     expect(response.cookie).toHaveBeenCalledWith(
       'innovatepam_session',
       'jwt-token',
-      expect.objectContaining({ httpOnly: true, secure: true, sameSite: 'lax', path: '/' }),
+      expect.objectContaining({ httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' }),
     );
     expect(response.status).toHaveBeenCalledWith(200);
     expect(response.json).toHaveBeenCalledWith({ userId: 'u1', role: 'submitter', redirectTo: '/dashboard' });
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it('sets non-secure cookie in non-production environments', async () => {
+    process.env.NODE_ENV = 'development';
+
+    const request = makeRequest({
+      body: { email: 'a@epam.com', password: 'StrongPass123!' },
+      headers: { 'user-agent': 'jest-agent' },
+      ip: undefined,
+    });
+    const response = makeResponse();
+    const next = jest.fn() as NextFunction;
+
+    mockedParseLoginPayload.mockReturnValue({ email: 'a@epam.com', password: 'StrongPass123!' });
+    mockedAuthService.login.mockResolvedValue({
+      token: 'jwt-token',
+      userId: 'u1',
+      role: 'submitter',
+      redirectTo: '/dashboard',
+      expiresAt: new Date().toISOString(),
+    });
+
+    await authController.login(request, response, next);
+
+    expect(response.cookie).toHaveBeenCalledWith(
+      'innovatepam_session',
+      'jwt-token',
+      expect.objectContaining({ secure: false }),
+    );
   });
 
   it('forwards login errors to next', async () => {
@@ -175,7 +212,7 @@ describe('authController', () => {
     expect(mockedAuthService.logout).toHaveBeenCalledWith('token-1');
     expect(response.clearCookie).toHaveBeenCalledWith(
       'innovatepam_session',
-      expect.objectContaining({ httpOnly: true, secure: true, sameSite: 'lax', path: '/' }),
+      expect.objectContaining({ httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' }),
     );
     expect(response.status).toHaveBeenCalledWith(204);
     expect(response.send).toHaveBeenCalled();

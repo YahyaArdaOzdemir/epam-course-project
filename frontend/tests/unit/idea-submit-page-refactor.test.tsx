@@ -17,12 +17,36 @@ jest.mock('../../src/features/ideas/services/idea-service', () => ({
 
 const mockedUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockedIdeaCreate = ideaApi.create as jest.MockedFunction<typeof ideaApi.create>;
+let latestBlockerArgument: unknown;
+let blockerState: 'blocked' | 'unblocked' = 'unblocked';
+
+const evaluateLatestBlockerArgument = (): boolean => {
+  if (typeof latestBlockerArgument === 'function') {
+    return Boolean(
+      latestBlockerArgument({
+        currentLocation: { pathname: '/ideas/new' },
+        nextLocation: { pathname: '/ideas/idea-42' },
+        historyAction: 'PUSH',
+      }),
+    );
+  }
+
+  return Boolean(latestBlockerArgument);
+};
+
 const navigateMock = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => navigateMock,
-  useBlocker: () => ({ state: 'unblocked' }),
+  useBlocker: (argument: unknown) => {
+    latestBlockerArgument = argument;
+    return {
+      state: blockerState,
+      proceed: jest.fn(),
+      reset: jest.fn(),
+    };
+  },
 }));
 
 const renderSubmitPage = (root: Root): void => {
@@ -38,6 +62,9 @@ describe('idea submission page refactor', () => {
   let root: Root;
 
   beforeEach(() => {
+    window.localStorage.clear();
+    latestBlockerArgument = false;
+    blockerState = 'unblocked';
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -300,6 +327,11 @@ describe('idea submission page refactor', () => {
   });
 
   test('redirects to created idea details after successful submit', async () => {
+    let blockerStateAtNavigate: boolean | null = null;
+    navigateMock.mockImplementation(() => {
+      blockerStateAtNavigate = evaluateLatestBlockerArgument();
+    });
+
     mockedIdeaCreate.mockResolvedValue({
       id: 'idea-42',
       title: 'Idea title',
@@ -334,5 +366,16 @@ describe('idea submission page refactor', () => {
     });
 
     expect(navigateMock).toHaveBeenCalledWith('/ideas/idea-42');
+    expect(blockerStateAtNavigate).toBe(false);
+  });
+
+  test('keeps draft blocker disabled when form is pristine', async () => {
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    expect(evaluateLatestBlockerArgument()).toBe(false);
+    const persistedDrafts = window.localStorage.getItem('innovateepam.ideaDrafts.u-1');
+    expect(persistedDrafts === null || persistedDrafts === '[]').toBe(true);
   });
 });

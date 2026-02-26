@@ -1,5 +1,23 @@
 const defaultBaseUrl = '/api';
 
+type ApiErrorPayload = {
+  message?: string;
+  code?: string;
+};
+
+class ApiError extends Error {
+  readonly status: number;
+
+  readonly code?: string;
+
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
 const resolveApiBaseUrl = (): string => {
   const runtime = globalThis as {
     process?: { env?: Record<string, string | undefined> };
@@ -87,7 +105,23 @@ export class ApiClient {
     return this.request<T>(path, { method: 'PUT', body: JSON.stringify(body), headers });
   }
 
-  private async request<T>(path: string, init: RequestInit): Promise<T> {
+  private async issueFreshCsrfToken(): Promise<string | null> {
+    const response = await fetch(`${this.baseUrl}/auth/csrf`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json().catch(() => ({}))) as { csrfToken?: string };
+    return typeof payload.csrfToken === 'string' && payload.csrfToken.length > 0
+      ? payload.csrfToken
+      : null;
+  }
+
+  private async request<T>(path: string, init: RequestInit, retryOnCsrfInvalid = true): Promise<T> {
     const headers = new Headers(init.headers);
 
     const response = await fetch(`${this.baseUrl}${path}`, {
@@ -97,8 +131,24 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      const maybeJson = await response.json().catch(() => ({ message: response.statusText }));
-      throw new Error(maybeJson.message ?? 'Request failed');
+      const maybeJson = (await response.json().catch(() => ({ message: response.statusText }))) as ApiErrorPayload;
+
+      if (
+        retryOnCsrfInvalid
+        && init.method
+        && init.method !== 'GET'
+        && maybeJson.code === 'AUTH_CSRF_INVALID'
+        && !path.startsWith('/auth/csrf')
+      ) {
+        const nextCsrfToken = await this.issueFreshCsrfToken();
+        if (nextCsrfToken) {
+          const retryHeaders = new Headers(init.headers);
+          retryHeaders.set('X-CSRF-Token', nextCsrfToken);
+          return this.request<T>(path, { ...init, headers: retryHeaders }, false);
+        }
+      }
+
+      throw new ApiError(maybeJson.message ?? 'Request failed', response.status, maybeJson.code);
     }
 
     if (response.status === 204) {

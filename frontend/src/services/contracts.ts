@@ -54,6 +54,7 @@ export type IdeaListItem = {
   isShared: boolean;
   rowVersion: number;
   ownerUserId: string;
+  ownerFullName?: string;
   latestEvaluationComment: string | null;
   ideaVotesUp?: number;
   ideaVotesDown?: number;
@@ -71,7 +72,7 @@ export type IdeaDetails = IdeaListItem & {
     evaluatorUserId: string;
     evaluatorFullName: string;
     evaluatorEmail: string;
-    decision: 'Accepted' | 'Rejected';
+    decision: 'Under Review' | 'Accepted' | 'Rejected';
     comment: string;
     createdAt: string;
   }>;

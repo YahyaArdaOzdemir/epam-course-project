@@ -11,6 +11,19 @@ import { UnauthorizedError } from '../lib/errors';
 
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? 'innovatepam_session';
 
+const resolveCookieSecure = (): boolean => {
+  const configured = process.env.SESSION_COOKIE_SECURE;
+  if (configured === 'true') {
+    return true;
+  }
+
+  if (configured === 'false') {
+    return false;
+  }
+
+  return process.env.NODE_ENV === 'production';
+};
+
 const getAuthToken = (request: Request): string | null => {
   const header = request.header('authorization');
   if (header?.startsWith('Bearer ')) {
@@ -59,7 +72,7 @@ export const authController = {
 
       response.cookie(SESSION_COOKIE_NAME, result.token, {
         httpOnly: true,
-        secure: true,
+        secure: resolveCookieSecure(),
         sameSite: 'lax',
         maxAge: Number(process.env.SESSION_TTL_HOURS ?? 24) * 60 * 60 * 1000,
         path: '/',
@@ -85,7 +98,7 @@ export const authController = {
       authService.logout(token);
       response.clearCookie(SESSION_COOKIE_NAME, {
         httpOnly: true,
-        secure: true,
+        secure: resolveCookieSecure(),
         sameSite: 'lax',
         path: '/',
       });

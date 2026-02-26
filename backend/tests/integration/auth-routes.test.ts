@@ -59,7 +59,7 @@ describe('auth routes', () => {
       .expect(401);
   });
 
-  it('rejects duplicate register and issues secure session cookie on login', async () => {
+  it('rejects duplicate register and issues session cookie on login', async () => {
     await request(app)
       .post('/api/auth/register')
       .send({ fullName: 'Duplicate User', email: 'dup@epam.com', password: 'StrongPass123!', confirmPassword: 'StrongPass123!' })
@@ -80,7 +80,11 @@ describe('auth routes', () => {
     const setCookie = (login.headers['set-cookie']?.[0] ?? '') as string;
     expect(setCookie).toContain('innovatepam_session=');
     expect(setCookie).toContain('HttpOnly');
-    expect(setCookie).toContain('Secure');
+    if (process.env.NODE_ENV === 'production') {
+      expect(setCookie).toContain('Secure');
+    } else {
+      expect(setCookie).not.toContain('Secure');
+    }
     expect(setCookie).toContain('SameSite=Lax');
   });
 
