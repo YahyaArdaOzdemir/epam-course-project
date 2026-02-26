@@ -37,7 +37,6 @@ jest.mock('../../src/features/ideas/services/idea-service', () => ({
 
 jest.mock('../../src/features/evaluation/pages', () => ({
   EvaluationQueuePage: () => <div>Evaluation Queue Page</div>,
-  EvaluationDetailPage: () => <div>Evaluation Detail Page</div>,
 }));
 
 jest.mock('../../src/features/auth/hooks/useAuth', () => ({
@@ -132,10 +131,11 @@ describe('App public entry and auth-aware navigation', () => {
     });
 
     expect(container.textContent).toContain('Dashboard');
-    expect(container.textContent).toContain('Signed in as Alice Employee');
+    expect(container.textContent ?? '').not.toContain('Signed in as Alice Employee');
     expect(container.textContent).toContain('Submitter');
     const profileLink = container.querySelector('header a[href="/profile"]');
     expect(profileLink?.textContent).toBe('Alice Employee');
+    expect(Array.from(container.querySelectorAll('a')).some((link) => link.textContent === 'Evaluation Queue')).toBe(false);
   });
 
   it('renders admin dashboard widgets and protected header role badge', async () => {
@@ -194,6 +194,7 @@ describe('App public entry and auth-aware navigation', () => {
     expect(container.textContent).toContain('Recent Decisions');
     expect(container.textContent).toContain('Accepted idea');
     expect(container.textContent).toContain('Rejected idea');
+    expect(Array.from(container.querySelectorAll('a')).some((link) => link.textContent === 'Evaluation Queue')).toBe(true);
   });
 
   it('uses logo link to / for guests and /dashboard for authenticated users', async () => {

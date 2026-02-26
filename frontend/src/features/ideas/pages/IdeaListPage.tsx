@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
+import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Select';
 import { IdeaCategory, IdeaListItem, IdeaStatus, IdeaSortDirection, PaginationMeta } from '../../../services/contracts';
 import { ideaApi } from '../services/idea-service';
+import { getStatusBadgeClassName } from '../utils/idea-display';
 
 const statusOptions: Array<IdeaStatus> = ['Submitted', 'Under Review', 'Accepted', 'Rejected'];
 const categoryOptions: Array<IdeaCategory> = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'];
@@ -173,11 +175,12 @@ export const IdeaListPage = () => {
               <Link to={`/ideas/${idea.id}`} className="font-medium text-slate-900 transition hover:text-blue-700">
                 {idea.title}
               </Link>
+              <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+                <Badge data-status-pill="true" className={getStatusBadgeClassName(idea.status)}>{idea.status}</Badge>
+                <span>{idea.category}</span>
+              </div>
               <p className="mt-1 text-xs text-slate-600">
-                {idea.status} · {idea.category} · shared: {String(idea.isShared)}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">
-                Votes: {idea.ideaVotesUp ?? 0}↑ / {idea.ideaVotesDown ?? 0}↓ ({idea.ideaVotesTotal ?? ((idea.ideaVotesUp ?? 0) + (idea.ideaVotesDown ?? 0))} total)
+                Votes: {(idea.ideaVotesUp ?? 0) - (idea.ideaVotesDown ?? 0)}
               </p>
               {idea.latestEvaluationComment ? (
                 <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700">

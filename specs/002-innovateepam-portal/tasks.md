@@ -315,3 +315,24 @@
 - [X] T101 [US4-US6] Consolidate detail routes to one page and remove separate evaluation detail route usage in frontend/src/App.tsx and evaluation queue/list links
 - [X] T102 [US4-US6] Implement detail-page UX updates (title/category hierarchy, inline edit swap, inline reply form, attachment download affordance/hover states, star rating and vote counts)
 - [X] T103 [US3-US6] Implement comment delete actions with owner/admin guards and frontend controls
+
+---
+
+## Phase 10: Change Request 2026-02-26 (Wave 3 - Detail UX Tightening and Role Gating)
+
+**Purpose**: Apply final UX/policy corrections for vote summaries, dashboard copy, comment locking on rejected ideas, compact attachment layout, and navigation visibility.
+
+### Tests for Change Request (MANDATORY)
+
+- [X] T104 [P] [US4-US6] Add/update frontend unit tests for dashboard copy cleanup and submitter-hidden evaluation queue navigation in frontend/tests/unit/app-public-entry-navigation.test.tsx and frontend/tests/unit/dashboard-shared-ideas.test.tsx
+- [X] T105 [P] [US2-US6] Add/update frontend unit tests for post-submit redirect-to-detail behavior in frontend/tests/unit/idea-submit-page-refactor.test.tsx
+- [X] T106 [P] [US3-US6] Add/update frontend unit tests for rejected-status comment lock and highlighted non-repliable evaluation comment rendering in frontend/tests/unit/idea-details-voting-ux.test.tsx
+- [X] T107 [P] [US4-US6] Add/update frontend unit tests for attachment card behavior, removed description heading, status pill in `My Ideas`, and net-vote summary display in frontend/tests/unit/idea-details-ux-regression.test.tsx and frontend/tests/unit/idea-list-empty-states.test.tsx
+
+### Implementation for Change Request
+
+- [X] T108 [US4-US6] Update protected layout and dashboard copy/visibility rules for role-gated navigation and welcome text in frontend/src/features/layout/ProtectedLayout.tsx and frontend/src/features/auth/pages/DashboardPage.tsx
+- [X] T109 [US2-US6] Update idea submit flow to redirect to created idea details after successful creation in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx
+- [X] T110 [US3-US6] Update idea details comment/evaluation rendering for highlighted decision block, rejected-status comment lock, submitter read-only message removal, and retained attachment card behavior in frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
+- [X] T111 [US4-US6] Update idea list and evaluation queue vote/status presentation to net-vote + status-pill parity in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
+- [X] T112 [US4-US6] Remove unused evaluation detail page artifact and related exports/tests references in frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx and frontend/src/features/evaluation/pages/index.ts

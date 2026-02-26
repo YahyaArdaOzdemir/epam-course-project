@@ -92,5 +92,6 @@ describe('dashboard shared ideas and onboarding copy', () => {
     expect(container.textContent).toContain('here you can');
     expect(container.textContent).toContain('Shared ideas');
     expect(container.textContent).toContain('Shared innovation');
+    expect(container.textContent ?? '').not.toContain('Signed in as Arda User');
   });
 });

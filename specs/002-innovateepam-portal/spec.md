@@ -26,6 +26,16 @@
 - Q: What edit/delete permissions apply to ideas? → A: Owners can edit/delete only while idea status is `Submitted`; admins can delete ideas in any status.
 - Q: How should attachments behave in detail views? → A: Attachment card click opens preview in a new tab; dedicated right-aligned download button with down-arrow icon performs direct download.
 
+### Session 2026-02-26 (Change Request Wave 3)
+
+- Q: How should idea vote summary be shown in detail/list/queue cards? → A: UI MUST show a single net vote total computed as `upvotes - downvotes`; split up/down counters are hidden in user-facing summaries.
+- Q: How should finalized evaluation comments appear? → A: The latest evaluation decision comment MUST render as a highlighted, non-repliable system comment card that includes decision label (`Accepted`/`Rejected`) with decision-dependent visual treatment.
+- Q: Who can access evaluation queue navigation? → A: Only admin users may see and access `Evaluation Queue` entry points in protected navigation.
+- Q: What is the submit-success navigation behavior? → A: After successful idea creation, UI MUST redirect to the created idea details route.
+- Q: Should submitters see explicit read-only warning blocks on idea details? → A: No; submitter UI should simply omit admin-only evaluation actions without extra read-only warning copy.
+- Q: Can rejected ideas receive discussion comments? → A: Rejected ideas are comment-locked for regular users; comments may resume only after a subsequent admin evaluation update re-opens interaction context.
+- Q: What dashboard identity copy is required? → A: Dashboard header should show personalized welcome guidance only; separate signed-in identity line is not rendered on dashboard body.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
@@ -287,6 +297,16 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-094**: System MUST render reply input inline directly beneath the targeted comment item instead of using a single global reply form position.
 - **FR-095**: System MUST replace generic detail page title labels (`Idea Details`, `Evaluation Detail`) with the idea title as the primary header text and preserve category as distinct metadata.
 - **FR-096**: System MUST render attachment download affordance adjacent to filename metadata using a standard download icon/button treatment and MUST apply visible hover-state styling to attachment cards.
+- **FR-097**: System MUST render user-facing vote summary in idea list, evaluation queue, and idea details as a single net total computed by `upvotes - downvotes`, and MUST NOT display split up/down counters in those summaries.
+- **FR-098**: System MUST render latest evaluation decision comment as a dedicated highlighted system comment block that includes decision status label and decision-dependent color treatment (`Accepted` success tone, `Rejected` warning/error tone).
+- **FR-099**: System MUST prevent replying to the highlighted evaluation decision comment block.
+- **FR-101**: System MUST omit redundant `Description` section heading in idea details body when description content is already clearly presented.
+- **FR-102**: System MUST render dashboard body copy as personalized welcome guidance and MUST NOT render an additional `Signed in as ...` dashboard line.
+- **FR-103**: System MUST hide `Evaluation Queue` navigation and direct entry points for `submitter` role users.
+- **FR-104**: System MUST redirect users to `/ideas/{ideaId}` immediately after successful idea submission.
+- **FR-105**: System MUST suppress submitter-only read-only warning text on idea details and instead rely on omission of admin-only controls.
+- **FR-106**: System MUST lock comment creation and reply actions for non-admin users while idea status is `Rejected`, unless and until a subsequent admin evaluation update re-enables commenting context.
+- **FR-107**: System MUST display status in `My Ideas` list rows using the same badge-style status pill treatment used across other idea views.
 
 ### Assumptions
 

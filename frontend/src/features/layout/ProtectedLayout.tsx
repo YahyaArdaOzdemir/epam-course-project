@@ -42,7 +42,9 @@ export const ProtectedLayout = () => {
         <NavLink to="/dashboard" end className={navigationLinkClassName}>Dashboard</NavLink>
         <NavLink to="/ideas/new" className={navigationLinkClassName}>Submit Idea</NavLink>
         <NavLink to="/ideas" end className={navigationLinkClassName}>My Ideas</NavLink>
-        <NavLink to="/evaluation" className={navigationLinkClassName}>Evaluation Queue</NavLink>
+        {session?.role === 'admin' ? (
+          <NavLink to="/evaluation" className={navigationLinkClassName}>Evaluation Queue</NavLink>
+        ) : null}
       </nav>
 
       <main>

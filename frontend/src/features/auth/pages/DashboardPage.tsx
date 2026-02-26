@@ -6,7 +6,6 @@ import { ideaApi } from '../../ideas/services/idea-service';
 
 export const DashboardPage = () => {
   const { session } = useAuth();
-  const roleLabel = session?.role === 'admin' ? 'Admin' : 'Submitter';
   const identityLabel = session?.fullName ?? session?.email ?? 'User';
   const [myIdeasCount, setMyIdeasCount] = useState(0);
   const [sharedIdeas, setSharedIdeas] = useState<IdeaListItem[]>([]);
@@ -47,9 +46,7 @@ export const DashboardPage = () => {
 
   return (
     <main className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-      <p className="mt-2 text-sm text-slate-700">Welcome {identityLabel}, here you can submit ideas, track your progress, and collaborate through shared idea discussions.</p>
-      <p className="mt-2 text-sm text-slate-600">Signed in as {identityLabel} ({roleLabel})</p>
+      <h1 className="text-2xl font-semibold text-slate-900">Welcome {identityLabel}, here you can submit ideas, track your progress, and collaborate through shared idea discussions.</h1>
 
       {session?.role === 'submitter' ? (
         <section className="mt-6 space-y-4">

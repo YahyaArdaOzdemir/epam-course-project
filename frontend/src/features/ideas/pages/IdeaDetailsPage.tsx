@@ -348,12 +348,14 @@ export const IdeaDetailsPage = () => {
   const isOwner = session?.userId === idea.ownerUserId;
   const canEditOrDeleteAsOwner = isOwner && idea.status === 'Submitted';
   const canDelete = isAdmin || canEditOrDeleteAsOwner;
+  const isCommentLockedForUser = !isAdmin && idea.status === 'Rejected';
   const submittedAtAbsolute = new Date(idea.createdAt).toLocaleString();
   const submittedAtRelative = formatRelativeTime(idea.createdAt);
   const hasImagePreview = hasImageAttachmentPreview(idea);
   const ideaVotesUp = idea.ideaVotesUp ?? 0;
   const ideaVotesDown = idea.ideaVotesDown ?? 0;
   const totalIdeaVotes = idea.ideaVotesTotal ?? (ideaVotesUp + ideaVotesDown);
+  const netIdeaVotes = ideaVotesUp - ideaVotesDown;
   const filledStars = totalIdeaVotes > 0 ? Math.round((ideaVotesUp / totalIdeaVotes) * 5) : 0;
 
   return (
@@ -367,8 +369,7 @@ export const IdeaDetailsPage = () => {
           </div>
           <div className="mt-3 flex items-center gap-3 text-sm text-slate-700">
             <span aria-label="Idea rating" className="text-amber-500">{'★'.repeat(filledStars)}{'☆'.repeat(5 - filledStars)}</span>
-            <span>Total votes: {totalIdeaVotes}</span>
-            <span className="text-xs text-slate-500">({ideaVotesUp} up / {ideaVotesDown} down)</span>
+            <span>Total votes: {netIdeaVotes}</span>
           </div>
           <div className="mt-2 flex items-center gap-2">
             <button
@@ -436,7 +437,6 @@ export const IdeaDetailsPage = () => {
         </section>
       ) : (
         <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          <h2 className="font-semibold text-slate-900">Description</h2>
           <p className="mt-2 whitespace-pre-wrap">{idea.description}</p>
         </section>
       )}
@@ -499,21 +499,40 @@ export const IdeaDetailsPage = () => {
 
       <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
         <h2 className="text-base font-semibold text-slate-900">Comments</h2>
-        <form className="mt-3 space-y-3" onSubmit={onSubmitComment}>
-          <label className="block text-sm font-medium text-slate-700">
-            Comment
-            <textarea
-              value={commentBody}
-              onChange={(event) => setCommentBody(event.target.value)}
-              className="mt-1 min-h-20 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            />
-          </label>
-          <div className="flex items-center gap-2">
-            <Button type="submit" variant="primary" disabled={isSubmitting || !commentBody.trim()}>
-              {isSubmitting ? 'Loading...' : 'Add Comment'}
-            </Button>
-          </div>
-        </form>
+
+        {idea.latestEvaluationComment && (idea.status === 'Accepted' || idea.status === 'Rejected') ? (
+          <article
+            data-evaluation-comment="true"
+            className={`mt-3 rounded-md border p-3 ${idea.status === 'Accepted' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}
+          >
+            <p className={`text-xs font-semibold uppercase tracking-wide ${idea.status === 'Accepted' ? 'text-green-800' : 'text-red-800'}`}>
+              Evaluation Decision · {idea.status}
+            </p>
+            <p className="mt-1 text-sm text-slate-800">{idea.latestEvaluationComment}</p>
+          </article>
+        ) : null}
+
+        {isCommentLockedForUser ? (
+          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Commenting is locked while this idea is Rejected.
+          </p>
+        ) : (
+          <form className="mt-3 space-y-3" onSubmit={onSubmitComment}>
+            <label className="block text-sm font-medium text-slate-700">
+              Comment
+              <textarea
+                value={commentBody}
+                onChange={(event) => setCommentBody(event.target.value)}
+                className="mt-1 min-h-20 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </label>
+            <div className="flex items-center gap-2">
+              <Button type="submit" variant="primary" disabled={isSubmitting || !commentBody.trim()}>
+                {isSubmitting ? 'Loading...' : 'Add Comment'}
+              </Button>
+            </div>
+          </form>
+        )}
 
         {comments.length === 0 ? (
           <p className="mt-3 text-sm text-slate-600">No comments yet.</p>
@@ -542,7 +561,7 @@ export const IdeaDetailsPage = () => {
                   <span>({commentItem.upvotes ?? 0}/{commentItem.downvotes ?? 0})</span>
                 </div>
                 <div className="mt-2 flex items-center gap-3">
-                  {commentItem.depth < 5 ? (
+                  {commentItem.depth < 5 && !isCommentLockedForUser ? (
                     <button
                       type="button"
                       onClick={() => {
@@ -625,11 +644,7 @@ export const IdeaDetailsPage = () => {
             </Button>
           </form>
         </section>
-      ) : (
-        <section className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-          This idea is read-only for submitter role.
-        </section>
-      )}
+      ) : null}
     </main>
   );
 };

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { IdeaCategory } from '../../shared/domain-types';
@@ -10,6 +11,7 @@ const IDEA_CATEGORIES: IdeaCategory[] = ['Process Improvement', 'Product Feature
 const IDEA_SUBMIT_ERROR_ALERT_ID = 'idea-submit-error-alert';
 
 export const IdeaSubmitPage = () => {
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<IdeaCategory | ''>('');
@@ -45,16 +47,11 @@ export const IdeaSubmitPage = () => {
     const validatedCategory = category as IdeaCategory;
 
     try {
+      const createdIdea =
       await runGuarded(async () => {
-        await ideaApi.create({ title, description, category: validatedCategory, isShared, file }, csrfToken);
+        return ideaApi.create({ title, description, category: validatedCategory, isShared, file }, csrfToken);
       });
-
-      setTitle('');
-      setDescription('');
-      setCategory('');
-      setIsShared(false);
-      setFile(undefined);
-      setSuccessMessage('Idea submitted successfully.');
+      navigate(`/ideas/${createdIdea.id}`);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to submit idea.');
     }

@@ -108,9 +108,10 @@ describe('idea details voting and inline reply UX', () => {
     expect(container.textContent).toContain('Unified Idea Title');
     expect(container.textContent ?? '').not.toContain('Idea Details');
     expect(container.textContent ?? '').not.toContain('Evaluation Detail');
-    expect(container.textContent).toContain('Total votes: 4');
+    expect(container.textContent).toContain('Total votes: 2');
     expect(container.textContent).toContain('↑');
     expect(container.textContent).toContain('↓');
+    expect(container.textContent ?? '').not.toContain('up /');
   });
 
   it('renders inline reply form under selected comment', async () => {
@@ -133,5 +134,74 @@ describe('idea details voting and inline reply UX', () => {
 
     const inlineReplyArea = container.querySelector('textarea[aria-label="Reply to comment"]');
     expect(inlineReplyArea).not.toBeNull();
+  });
+
+  it('renders highlighted evaluation decision comment without reply action', async () => {
+    getByIdSpy.mockResolvedValueOnce({
+      id: 'idea-1',
+      title: 'Unified Idea Title',
+      description: 'Description body',
+      category: 'Other',
+      status: 'Rejected',
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: 'Rejected due to missing business case.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      attachment: null,
+      ideaVotesUp: 3,
+      ideaVotesDown: 1,
+      ideaVotesTotal: 4,
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain('Evaluation Decision');
+    expect(container.textContent).toContain('Rejected due to missing business case.');
+    const evaluationReplyButtons = Array.from(container.querySelectorAll('button')).filter((button) => button.textContent?.trim() === 'Reply' && button.closest('[data-evaluation-comment="true"]'));
+    expect(evaluationReplyButtons).toHaveLength(0);
+  });
+
+  it('locks comment creation and replies for submitter on rejected idea', async () => {
+    getByIdSpy.mockResolvedValueOnce({
+      id: 'idea-1',
+      title: 'Unified Idea Title',
+      description: 'Description body',
+      category: 'Other',
+      status: 'Rejected',
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      isShared: true,
+      latestEvaluationComment: 'Rejected due to policy mismatch.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      attachment: null,
+      ideaVotesUp: 3,
+      ideaVotesDown: 1,
+      ideaVotesTotal: 4,
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/ideas/idea-1']}>
+          <Routes>
+            <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain('Commenting is locked while this idea is Rejected');
+    expect(container.querySelector('textarea[aria-label="Reply to comment"]')).toBeNull();
+    expect(Array.from(container.querySelectorAll('button')).some((button) => button.textContent?.trim() === 'Reply')).toBe(false);
   });
 });

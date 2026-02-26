@@ -75,6 +75,9 @@ describe('idea and evaluation empty states', () => {
           rowVersion: 0,
           ownerUserId: 'owner-1',
           latestEvaluationComment: null,
+          ideaVotesUp: 4,
+          ideaVotesDown: 1,
+          ideaVotesTotal: 5,
         },
       ],
       pagination: { page: 1, pageSize: 10, totalItems: 1, totalPages: 1 },
@@ -95,5 +98,11 @@ describe('idea and evaluation empty states', () => {
     expect(previousButton?.disabled).toBe(true);
     expect(nextButton?.disabled).toBe(true);
     expect(container.textContent).toContain('Page 1 of 1 (1 total)');
+    expect(container.textContent).toContain('Votes: 3');
+    expect(container.textContent ?? '').not.toContain('↑');
+    expect(container.textContent ?? '').not.toContain('shared:');
+
+    const statusBadge = container.querySelector('[data-status-pill="true"]');
+    expect(statusBadge?.textContent).toContain('Submitted');
   });
 });

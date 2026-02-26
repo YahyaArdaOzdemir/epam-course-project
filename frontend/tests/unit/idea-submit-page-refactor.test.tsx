@@ -1,5 +1,6 @@
 import { act } from 'react-dom/test-utils';
 import { createRoot, Root } from 'react-dom/client';
+import { MemoryRouter } from 'react-router-dom';
 import { IdeaSubmitPage } from '../../src/features/ideas/pages/IdeaSubmitPage';
 import { useAuth } from '../../src/features/auth/hooks/useAuth';
 import { ideaApi } from '../../src/features/ideas/services/idea-service';
@@ -16,6 +17,20 @@ jest.mock('../../src/features/ideas/services/idea-service', () => ({
 
 const mockedUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockedIdeaCreate = ideaApi.create as jest.MockedFunction<typeof ideaApi.create>;
+const navigateMock = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => navigateMock,
+}));
+
+const renderSubmitPage = (root: Root): void => {
+  root.render(
+    <MemoryRouter>
+      <IdeaSubmitPage />
+    </MemoryRouter>,
+  );
+};
 
 describe('idea submission page refactor', () => {
   let container: HTMLDivElement;
@@ -49,7 +64,7 @@ describe('idea submission page refactor', () => {
 
   test('renders category as dropdown with exact enum values', async () => {
     await act(async () => {
-      root.render(<IdeaSubmitPage />);
+      renderSubmitPage(root);
     });
 
     const select = container.querySelector('select[aria-label="Category"]');
@@ -63,7 +78,7 @@ describe('idea submission page refactor', () => {
     mockedIdeaCreate.mockRejectedValue(new Error('Validation failed'));
 
     await act(async () => {
-      root.render(<IdeaSubmitPage />);
+      renderSubmitPage(root);
     });
 
     const titleInput = container.querySelector('input[aria-label="Title"]') as HTMLInputElement;
@@ -99,7 +114,7 @@ describe('idea submission page refactor', () => {
     mockedIdeaCreate.mockReturnValue(pendingCreate as ReturnType<typeof ideaApi.create>);
 
     await act(async () => {
-      root.render(<IdeaSubmitPage />);
+      renderSubmitPage(root);
     });
 
     const titleInput = container.querySelector('input[aria-label="Title"]') as HTMLInputElement;
@@ -135,7 +150,7 @@ describe('idea submission page refactor', () => {
 
   test('renders share checkbox and allows toggling selection', async () => {
     await act(async () => {
-      root.render(<IdeaSubmitPage />);
+      renderSubmitPage(root);
     });
 
     const shareCheckbox = container.querySelector('input[aria-label="Share with all employees"]') as HTMLInputElement;
@@ -148,5 +163,42 @@ describe('idea submission page refactor', () => {
     });
 
     expect(shareCheckbox.checked).toBe(true);
+  });
+
+  test('redirects to created idea details after successful submit', async () => {
+    mockedIdeaCreate.mockResolvedValue({
+      id: 'idea-42',
+      title: 'Idea title',
+      category: 'Cost Saving',
+      status: 'Submitted',
+      isShared: false,
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      latestEvaluationComment: null,
+    });
+
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    const titleInput = container.querySelector('input[aria-label="Title"]') as HTMLInputElement;
+    const descriptionInput = container.querySelector('textarea[aria-label="Description"]') as HTMLTextAreaElement;
+    const categorySelect = container.querySelector('select[aria-label="Category"]') as HTMLSelectElement;
+
+    await act(async () => {
+      titleInput.value = 'Idea title';
+      titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+      descriptionInput.value = 'Idea description';
+      descriptionInput.dispatchEvent(new Event('input', { bubbles: true }));
+      categorySelect.value = 'Cost Saving';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(navigateMock).toHaveBeenCalledWith('/ideas/idea-42');
   });
 });

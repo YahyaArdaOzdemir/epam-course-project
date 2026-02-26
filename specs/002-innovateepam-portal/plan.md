@@ -132,3 +132,21 @@ No constitution violations or justified exceptions required at plan stage.
 - Extend idea/comment query projections to include vote aggregates and current-viewer vote state without changing existing auth boundaries.
 - Reuse existing idea details page as single source of truth for both `/ideas/:ideaId` and `/evaluation/:ideaId` routes.
 - Keep repository/service layering unchanged; add narrowly scoped repository methods for vote upsert/delete and comment deletion authorization checks.
+
+## Change Addendum (2026-02-26, Wave 3)
+
+### Scope Propagation
+
+- Refine vote presentation to user-facing net-total display (`upvotes - downvotes`) across dashboard-adjacent idea summaries, idea list rows, queue rows, and idea detail summary.
+- Introduce highlighted non-threaded system rendering for evaluation decision comments, including decision label and status-dependent accent colors.
+- Enforce role-aware shell/navigation visibility so submitters do not see evaluation queue entry points.
+- Tighten idea detail visual density by removing redundant description heading while retaining attachment card behavior from prior baseline.
+- Align dashboard onboarding copy to welcome-only body text; remove redundant signed-in line.
+- Enforce submit-success redirect to created idea details route.
+- Apply rejected-idea comment lock for regular users while preserving admin evaluation control path.
+
+### Architecture Notes
+
+- Keep unified detail route/component (`/ideas/:ideaId` and alias routes) and remove dead evaluation-detail page artifact from exports to avoid ghost imports.
+- Implement comment-lock policy as UI capability gating derived from idea status + role, without altering existing comment data contracts.
+- Reuse existing badge primitives for status-pill parity in `My Ideas` rows.

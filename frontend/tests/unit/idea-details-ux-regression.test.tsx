@@ -111,12 +111,12 @@ describe('idea details UX regression', () => {
     });
 
     expect(container.textContent).toContain('Category');
-    expect(container.textContent).toContain('Description');
+    expect(container.textContent ?? '').not.toContain('Description');
 
     const previewLink = container.querySelector('a[href="/uploads/pitch.pdf"][target="_blank"]') as HTMLAnchorElement | null;
     const downloadButton = container.querySelector('a[download="pitch.pdf"]') as HTMLAnchorElement | null;
     expect(previewLink).not.toBeNull();
     expect(downloadButton).not.toBeNull();
-    expect(downloadButton?.textContent).toContain('↓');
+    expect(downloadButton?.textContent).toContain('⤓');
   });
 });

@@ -123,7 +123,7 @@ export const EvaluationQueuePage = () => {
                   Wait time: {waitTimeDays} day{waitTimeDays === 1 ? '' : 's'}
                 </span>
                 <span className="text-xs text-slate-600">
-                  Votes: {idea.ideaVotesUp ?? 0}↑ / {idea.ideaVotesDown ?? 0}↓ ({idea.ideaVotesTotal ?? ((idea.ideaVotesUp ?? 0) + (idea.ideaVotesDown ?? 0))})
+                  Votes: {(idea.ideaVotesUp ?? 0) - (idea.ideaVotesDown ?? 0)}
                 </span>
                 {isHighLatency ? (
                   <Badge className="bg-red-100 text-red-800">High Latency</Badge>
