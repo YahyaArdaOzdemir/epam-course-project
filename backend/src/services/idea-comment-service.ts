@@ -1,4 +1,5 @@
 import { ForbiddenError, ValidationError } from '../lib/errors';
+import { ideaCommentVoteRepository } from '../repositories/idea-comment-vote-repository';
 import { ideaCommentRepository } from '../repositories/idea-comment-repository';
 import { ideaRepository } from '../repositories/idea-repository';
 import { canViewIdea } from './idea-service';
@@ -54,6 +55,61 @@ export const ideaCommentService = {
       parentCommentId: input.parentCommentId,
       depth,
       body: input.body,
+    });
+  },
+
+  deleteComment(input: {
+    ideaId: string;
+    commentId: string;
+    actorUserId: string;
+    actorRole: 'submitter' | 'admin';
+  }) {
+    const idea = ideaRepository.findById(input.ideaId);
+    if (!idea) {
+      throw new ValidationError('Idea not found');
+    }
+
+    if (!canViewIdea(idea, { userId: input.actorUserId, role: input.actorRole })) {
+      throw new ForbiddenError('You do not have access to this idea');
+    }
+
+    const comment = ideaCommentRepository.findById(input.commentId);
+    if (!comment || comment.ideaId !== input.ideaId) {
+      throw new ValidationError('Comment not found');
+    }
+
+    if (input.actorRole !== 'admin' && comment.authorUserId !== input.actorUserId) {
+      throw new ForbiddenError('You can only delete your own comments');
+    }
+
+    ideaCommentRepository.deleteById(input.commentId);
+  },
+
+  voteComment(input: {
+    ideaId: string;
+    commentId: string;
+    actorUserId: string;
+    actorRole: 'submitter' | 'admin';
+    value: -1 | 1;
+  }) {
+    const idea = ideaRepository.findById(input.ideaId);
+    if (!idea) {
+      throw new ValidationError('Idea not found');
+    }
+
+    if (!canViewIdea(idea, { userId: input.actorUserId, role: input.actorRole })) {
+      throw new ForbiddenError('You do not have access to this idea');
+    }
+
+    const comment = ideaCommentRepository.findById(input.commentId);
+    if (!comment || comment.ideaId !== input.ideaId) {
+      throw new ValidationError('Comment not found');
+    }
+
+    return ideaCommentVoteRepository.setVote({
+      commentId: input.commentId,
+      userId: input.actorUserId,
+      value: input.value,
     });
   },
 };

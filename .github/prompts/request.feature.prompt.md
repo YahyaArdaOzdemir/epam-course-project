@@ -30,10 +30,12 @@ Before classification or editing, detect ambiguity, underspecification, or multi
 
 If ambiguity exists:
 1. STOP immediately.
-2. Ask structured clarification questions as a numbered list.
+2. **Do not simply end the report.** Instead, ask structured clarification questions as a numbered list, providing:
+   - A recommended default interpretation (clearly labeled) for each question.
+   - Alternative options if applicable
 3. Do not assume missing requirements.
 4. Do not perform any file modification.
-5. After clarification is answered, restart from Change Classification.
+5. Once clarification is answered, update the provisional decisions and continue the workflow from the appropriate stage.
 
 If no ambiguity exists:
 - Mark ambiguity result as `Clear` and continue.

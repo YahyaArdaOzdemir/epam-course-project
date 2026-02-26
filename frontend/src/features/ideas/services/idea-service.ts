@@ -9,6 +9,7 @@ import {
   IdeaListResponse,
   IdeaUpdateRequest,
   ShareIdeaRequest,
+  VoteSummary,
 } from '../../../services/contracts';
 
 /** API helpers for creating/listing/sharing ideas. */
@@ -78,5 +79,17 @@ export const ideaApi = {
     csrfToken: string,
   ): Promise<IdeaComment> {
     return apiClient.post(`/ideas/${ideaId}/comments`, payload, false, csrfToken);
+  },
+
+  deleteComment(ideaId: string, commentId: string, csrfToken: string): Promise<void> {
+    return apiClient.delete(`/ideas/${ideaId}/comments/${commentId}`, csrfToken);
+  },
+
+  voteIdea(ideaId: string, value: -1 | 1, csrfToken: string): Promise<VoteSummary> {
+    return apiClient.put(`/ideas/${ideaId}/vote`, { value }, csrfToken);
+  },
+
+  voteComment(ideaId: string, commentId: string, value: -1 | 1, csrfToken: string): Promise<VoteSummary> {
+    return apiClient.put(`/ideas/${ideaId}/comments/${commentId}/vote`, { value }, csrfToken);
   },
 };

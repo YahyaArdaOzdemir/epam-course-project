@@ -11,5 +11,8 @@ ideaRouter.post('/', requireAuth, requireCsrf, handleSingleIdeaAttachmentUpload,
 ideaRouter.patch('/:ideaId/share', requireAuth, requireCsrf, ideaController.share);
 ideaRouter.patch('/:ideaId', requireAuth, requireCsrf, ideaController.update);
 ideaRouter.delete('/:ideaId', requireAuth, requireCsrf, ideaController.delete);
+ideaRouter.put('/:ideaId/vote', requireAuth, requireCsrf, ideaController.voteIdea);
 ideaRouter.get('/:ideaId/comments', requireAuth, ideaController.listComments);
 ideaRouter.post('/:ideaId/comments', requireAuth, requireCsrf, ideaController.createComment);
+ideaRouter.delete('/:ideaId/comments/:commentId', requireAuth, requireCsrf, ideaController.deleteComment);
+ideaRouter.put('/:ideaId/comments/:commentId/vote', requireAuth, requireCsrf, ideaController.voteComment);

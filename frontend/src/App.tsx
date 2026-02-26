@@ -13,7 +13,7 @@ import {
 import { IdeaSubmitPage } from './features/ideas/pages/IdeaSubmitPage';
 import { IdeaListPage } from './features/ideas/pages/IdeaListPage';
 import { IdeaDetailsPage } from './features/ideas/pages/IdeaDetailsPage';
-import { EvaluationQueuePage, EvaluationDetailPage } from './features/evaluation/pages';
+import { EvaluationQueuePage } from './features/evaluation/pages';
 import { ProtectedLayout } from './features/layout/ProtectedLayout';
 import { Alert } from './components/ui/Alert';
 
@@ -52,8 +52,8 @@ export const App = () => {
               <Route path="/ideas/:ideaId" element={<IdeaDetailsPage />} />
               <Route path="/evaluation" element={<EvaluationQueuePage />} />
               <Route path="/evaluate" element={<EvaluationQueuePage />} />
-              <Route path="/evaluation/:ideaId" element={<EvaluationDetailPage />} />
-              <Route path="/evaluate/:ideaId" element={<EvaluationDetailPage />} />
+              <Route path="/evaluation/:ideaId" element={<IdeaDetailsPage />} />
+              <Route path="/evaluate/:ideaId" element={<IdeaDetailsPage />} />
             </Route>
           </Route>
 

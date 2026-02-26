@@ -1,6 +1,7 @@
 import { ConflictError, ForbiddenError, ValidationError } from '../lib/errors';
 import { attachmentRepository } from '../repositories/attachment-repository';
 import { ideaRepository, IdeaRecord, PaginatedIdeaListResult } from '../repositories/idea-repository';
+import { ideaVoteRepository } from '../repositories/idea-vote-repository';
 import { IdeaListQuery } from '../validators/idea-query-validator';
 
 type IdeaDetailsRecord = IdeaRecord & {
@@ -153,6 +154,28 @@ const deleteIdea = (input: {
   return { deleted: ideaRepository.deleteIdeaCascade(input.ideaId) };
 };
 
+const voteIdea = (input: {
+  ideaId: string;
+  actorUserId: string;
+  actorRole: 'submitter' | 'admin';
+  value: -1 | 1;
+}) => {
+  const existing = ideaRepository.findById(input.ideaId);
+  if (!existing) {
+    throw new ValidationError('Idea not found');
+  }
+
+  if (!canViewIdea(existing, { userId: input.actorUserId, role: input.actorRole })) {
+    throw new ForbiddenError('You do not have access to this idea');
+  }
+
+  return ideaVoteRepository.setVote({
+    ideaId: input.ideaId,
+    userId: input.actorUserId,
+    value: input.value,
+  });
+};
+
 /** Toggles sharing state for an owner with optimistic concurrency. */
 const toggleShare = (input: {
   ideaId: string;
@@ -190,4 +213,5 @@ export const ideaService = {
   toggleShare,
   updateIdea,
   deleteIdea,
+  voteIdea,
 };

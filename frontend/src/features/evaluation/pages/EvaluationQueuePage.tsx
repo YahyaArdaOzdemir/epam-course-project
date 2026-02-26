@@ -110,7 +110,7 @@ export const EvaluationQueuePage = () => {
 
             return (
             <li key={idea.id} className="rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
-              <Link to={`/evaluation/${idea.id}`} className="font-medium text-blue-700 transition hover:text-blue-800">
+              <Link to={`/ideas/${idea.id}`} className="font-medium text-blue-700 transition hover:text-blue-800">
                 {idea.title}
               </Link>
 
@@ -121,6 +121,9 @@ export const EvaluationQueuePage = () => {
                 </span>
                 <span className={`text-xs font-medium ${isHighLatency ? 'text-red-700' : 'text-slate-600'}`}>
                   Wait time: {waitTimeDays} day{waitTimeDays === 1 ? '' : 's'}
+                </span>
+                <span className="text-xs text-slate-600">
+                  Votes: {idea.ideaVotesUp ?? 0}↑ / {idea.ideaVotesDown ?? 0}↓ ({idea.ideaVotesTotal ?? ((idea.ideaVotesUp ?? 0) + (idea.ideaVotesDown ?? 0))})
                 </span>
                 {isHighLatency ? (
                   <Badge className="bg-red-100 text-red-800">High Latency</Badge>

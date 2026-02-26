@@ -12,6 +12,9 @@ export type IdeaCommentRecord = {
   updatedAt: string;
   authorEmail: string;
   authorFullName: string;
+  upvotes?: number;
+  downvotes?: number;
+  score?: number;
 };
 
 const mapComment = (row: Record<string, unknown>): IdeaCommentRecord => ({
@@ -25,6 +28,9 @@ const mapComment = (row: Record<string, unknown>): IdeaCommentRecord => ({
   updatedAt: String(row.updated_at),
   authorEmail: String(row.author_email),
   authorFullName: String(row.author_full_name),
+  upvotes: Number(row.upvotes ?? 0),
+  downvotes: Number(row.downvotes ?? 0),
+  score: Number(row.score ?? 0),
 });
 
 export const ideaCommentRepository = {
@@ -38,6 +44,15 @@ export const ideaCommentRepository = {
           u.full_name AS author_full_name
         FROM idea_comments c
         INNER JOIN users u ON u.id = c.author_user_id
+        LEFT JOIN (
+          SELECT
+            comment_id,
+            SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END) AS upvotes,
+            SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END) AS downvotes,
+            SUM(value) AS score
+          FROM idea_comment_votes
+          GROUP BY comment_id
+        ) vote ON vote.comment_id = c.id
         WHERE c.id = ?`,
       )
       .get(id);
@@ -55,6 +70,15 @@ export const ideaCommentRepository = {
           u.full_name AS author_full_name
         FROM idea_comments c
         INNER JOIN users u ON u.id = c.author_user_id
+        LEFT JOIN (
+          SELECT
+            comment_id,
+            SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END) AS upvotes,
+            SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END) AS downvotes,
+            SUM(value) AS score
+          FROM idea_comment_votes
+          GROUP BY comment_id
+        ) vote ON vote.comment_id = c.id
         WHERE c.idea_id = ?
         ORDER BY c.created_at ASC`,
       )
@@ -89,5 +113,11 @@ export const ideaCommentRepository = {
     );
 
     return this.findById(id)!;
+  },
+
+  deleteById(id: string): boolean {
+    const db = getDb();
+    const result = db.prepare('DELETE FROM idea_comments WHERE id = ?').run(id);
+    return result.changes > 0;
   },
 };

@@ -277,6 +277,16 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-084**: System MUST provide dashboard onboarding copy that explains portal purpose and dashboard usage context including personalized welcome identity.
 - **FR-085**: System MUST ensure automated test artifacts and fixture records are cleaned after test execution so seeded labels (e.g., `Idea A`) do not persist in normal runtime data.
 - **FR-086**: System MUST support idea sharing at submission time via explicit user control and persist the selected sharing flag.
+- **FR-087**: System MUST use a single idea details route/component for both submitter and admin users, with role-appropriate sections rendered conditionally instead of separate page implementations.
+- **FR-088**: System MUST redirect users away from deleted-idea detail views by navigating back to previous in-app route, with `/dashboard` fallback when no prior in-app history exists.
+- **FR-089**: System MUST allow direct admin finalization transitions from `Submitted` to `Accepted` or `Rejected`, in addition to existing workflow transitions.
+- **FR-090**: System MUST support authenticated voting on ideas with upvote/downvote controls, per-user single active vote, and aggregated counts exposed in both list previews and detail views.
+- **FR-091**: System MUST support authenticated voting on comments with upvote/downvote controls, per-user single active vote, and visible comment score summary derived from upvotes and downvotes.
+- **FR-092**: System MUST render idea detail rating display as 1-5 stars derived from vote ratio using `stars = round((upvotes / totalVotes) * 5)` with total-vote count shown; when no votes exist, system MUST show zero-filled rating with zero total votes.
+- **FR-093**: System MUST allow users to delete their own comments and allow admins to delete any comment.
+- **FR-094**: System MUST render reply input inline directly beneath the targeted comment item instead of using a single global reply form position.
+- **FR-095**: System MUST replace generic detail page title labels (`Idea Details`, `Evaluation Detail`) with the idea title as the primary header text and preserve category as distinct metadata.
+- **FR-096**: System MUST render attachment download affordance adjacent to filename metadata using a standard download icon/button treatment and MUST apply visible hover-state styling to attachment cards.
 
 ### Assumptions
 

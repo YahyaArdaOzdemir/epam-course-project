@@ -12,6 +12,9 @@ export type IdeaRecord = {
   isShared: boolean;
   rowVersion: number;
   latestEvaluationComment: string | null;
+  ideaVotesUp?: number;
+  ideaVotesDown?: number;
+  ideaVotesTotal?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -26,6 +29,9 @@ const mapIdea = (row: Record<string, unknown>): IdeaRecord => ({
   isShared: Number(row.is_shared) === 1,
   rowVersion: Number(row.row_version),
   latestEvaluationComment: row.latest_evaluation_comment == null ? null : String(row.latest_evaluation_comment),
+  ideaVotesUp: Number(row.idea_votes_up ?? 0),
+  ideaVotesDown: Number(row.idea_votes_down ?? 0),
+  ideaVotesTotal: Number(row.idea_votes_total ?? 0),
   createdAt: String(row.created_at),
   updatedAt: String(row.updated_at),
 });
@@ -61,6 +67,9 @@ export const ideaRepository = {
       isShared: false,
       rowVersion: 0,
       latestEvaluationComment: null,
+      ideaVotesUp: 0,
+      ideaVotesDown: 0,
+      ideaVotesTotal: 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -86,6 +95,9 @@ export const ideaRepository = {
       isShared: input.isShared,
       rowVersion: 0,
       latestEvaluationComment: null,
+      ideaVotesUp: 0,
+      ideaVotesDown: 0,
+      ideaVotesTotal: 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -104,6 +116,21 @@ export const ideaRepository = {
               ORDER BY decision.created_at DESC
               LIMIT 1
             ) AS latest_evaluation_comment
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id AND iv.value = 1
+            ) AS idea_votes_up
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id AND iv.value = -1
+            ) AS idea_votes_down
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id
+            ) AS idea_votes_total
          FROM ideas
          WHERE ideas.id = ?`,
       )
@@ -177,6 +204,21 @@ export const ideaRepository = {
               ORDER BY decision.created_at DESC
               LIMIT 1
             ) AS latest_evaluation_comment
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id AND iv.value = 1
+            ) AS idea_votes_up
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id AND iv.value = -1
+            ) AS idea_votes_down
+            ,(
+              SELECT COUNT(*)
+              FROM idea_votes AS iv
+              WHERE iv.idea_id = ideas.id
+            ) AS idea_votes_total
          FROM ideas
          ${whereSql}
          ${orderBySql}
@@ -221,6 +263,7 @@ export const ideaRepository = {
     const db = getDb();
     const transaction = db.transaction(() => {
       db.prepare('DELETE FROM idea_comments WHERE idea_id = ?').run(id);
+      db.prepare('DELETE FROM idea_votes WHERE idea_id = ?').run(id);
       db.prepare('DELETE FROM status_history_entries WHERE idea_id = ?').run(id);
       db.prepare('DELETE FROM evaluation_decisions WHERE idea_id = ?').run(id);
       db.prepare('DELETE FROM attachments WHERE idea_id = ?').run(id);

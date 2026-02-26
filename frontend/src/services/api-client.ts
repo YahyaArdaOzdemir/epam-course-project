@@ -75,6 +75,18 @@ export class ApiClient {
     return this.request<T>(path, { method: 'DELETE', headers });
   }
 
+  async put<T>(path: string, body: object, csrfToken?: string): Promise<T> {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return this.request<T>(path, { method: 'PUT', body: JSON.stringify(body), headers });
+  }
+
   private async request<T>(path: string, init: RequestInit): Promise<T> {
     const headers = new Headers(init.headers);
 

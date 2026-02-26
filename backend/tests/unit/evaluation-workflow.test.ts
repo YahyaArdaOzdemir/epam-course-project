@@ -223,4 +223,50 @@ describe('evaluation workflow service', () => {
 			comment: 'Great idea',
 		});
 	});
+
+	it('allows direct Submitted to Rejected transition for admin with comment', () => {
+		mockedIdeaRepository.findById.mockReturnValue({
+			id: 'idea-2',
+			ownerUserId: 'u-2',
+			title: 'Idea 2',
+			description: 'Desc 2',
+			category: 'Other',
+			status: 'Submitted',
+			isShared: true,
+			rowVersion: 1,
+			latestEvaluationComment: null,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+		mockedIdeaRepository.updateStatus.mockReturnValue({
+			id: 'idea-2',
+			ownerUserId: 'u-2',
+			title: 'Idea 2',
+			description: 'Desc 2',
+			category: 'Other',
+			status: 'Rejected',
+			isShared: true,
+			rowVersion: 2,
+			latestEvaluationComment: 'Not feasible',
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		});
+
+		const result = evaluationService.updateIdeaStatus({
+			ideaId: 'idea-2',
+			evaluatorUserId: 'admin-1',
+			evaluatorRole: 'admin',
+			toStatus: 'Rejected',
+			comment: 'Not feasible',
+			expectedRowVersion: 1,
+		});
+
+		expect(result.status).toBe('Rejected');
+		expect(mockedEvaluationRepository.create).toHaveBeenCalledWith({
+			ideaId: 'idea-2',
+			evaluatorUserId: 'admin-1',
+			decision: 'Rejected',
+			comment: 'Not feasible',
+		});
+	});
 });

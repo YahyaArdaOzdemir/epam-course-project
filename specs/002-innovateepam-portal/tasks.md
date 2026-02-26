@@ -295,3 +295,23 @@
 - [X] T093 [US4-US6] Implement details-page metadata separation, top-right status badge, and attachment preview/download split controls
 - [X] T094 [US4-US6] Implement dashboard purpose copy and shared-ideas panel in frontend/src/features/auth/pages/DashboardPage.tsx
 - [X] T095 [US1-US6] Implement automated test-data cleanup for E2E/integration runs
+
+---
+
+## Phase 9: Change Request 2026-02-26 (Wave 2 - Unified Details, Voting, Redirect UX)
+
+**Purpose**: Resolve detail-page duplication, add collaboration voting/rating, and correct deletion/reply interaction behavior.
+
+### Tests for Change Request (MANDATORY) ✅
+
+- [X] T096 [P] [US3-US6] Add backend unit tests for expanded evaluation transitions and vote aggregation in backend/tests/unit/evaluation-workflow.test.ts and backend/tests/unit/idea-voting.test.ts
+- [X] T097 [P] [US2-US6] Add backend integration tests for idea/comment voting and comment-delete permissions in backend/tests/integration/idea-voting-comments.test.ts
+- [X] T098 [P] [US4-US6] Add frontend unit tests for unified detail routing, delete redirect behavior, inline reply composer, and idea/comment voting UI in frontend/tests/unit/idea-details-voting-ux.test.tsx
+
+### Implementation for Change Request
+
+- [X] T099 [US3-US6] Implement backend vote persistence and aggregate projection for ideas/comments in repositories/services/controllers/routes
+- [X] T100 [US3-US6] Implement expanded admin status transition support for direct `Submitted -> Accepted/Rejected` decisions in backend/src/services/evaluation-service.ts
+- [X] T101 [US4-US6] Consolidate detail routes to one page and remove separate evaluation detail route usage in frontend/src/App.tsx and evaluation queue/list links
+- [X] T102 [US4-US6] Implement detail-page UX updates (title/category hierarchy, inline edit swap, inline reply form, attachment download affordance/hover states, star rating and vote counts)
+- [X] T103 [US3-US6] Implement comment delete actions with owner/admin guards and frontend controls

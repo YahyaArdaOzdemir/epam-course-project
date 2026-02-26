@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
@@ -19,6 +19,7 @@ import { ideaApi } from '../services/idea-service';
 
 export const IdeaDetailsPage = () => {
   const { ideaId = '' } = useParams();
+  const navigate = useNavigate();
   const { session, csrfToken } = useAuth();
   const [idea, setIdea] = useState<IdeaDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,9 +42,13 @@ export const IdeaDetailsPage = () => {
     updatedAt: string;
     authorEmail: string;
     authorFullName: string;
+    upvotes?: number;
+    downvotes?: number;
+    score?: number;
   }>>([]);
   const [commentBody, setCommentBody] = useState('');
   const [replyToCommentId, setReplyToCommentId] = useState<string | undefined>(undefined);
+  const [replyBody, setReplyBody] = useState('');
   const { isSubmitting, runGuarded } = useSubmissionGuard();
   const errorAlertRef = useRef<HTMLDivElement | null>(null);
 
@@ -210,8 +215,11 @@ export const IdeaDetailsPage = () => {
 
     try {
       await runGuarded(() => ideaApi.delete(idea.id, csrfToken));
-      setIdea(null);
-      setSuccessMessage('Idea deleted');
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to delete idea');
     }
@@ -228,16 +236,95 @@ export const IdeaDetailsPage = () => {
         idea.id,
         {
           body: commentBody.trim(),
-          parentCommentId: replyToCommentId,
         },
         csrfToken,
       ));
 
       setComments((current) => [...current, created]);
       setCommentBody('');
-      setReplyToCommentId(undefined);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to add comment');
+    }
+  };
+
+  const onSubmitReply = async (event: FormEvent): Promise<void> => {
+    event.preventDefault();
+    if (!idea || !csrfToken || !replyToCommentId || !replyBody.trim()) {
+      return;
+    }
+
+    try {
+      const created = await runGuarded(() => ideaApi.createComment(
+        idea.id,
+        {
+          body: replyBody.trim(),
+          parentCommentId: replyToCommentId,
+        },
+        csrfToken,
+      ));
+
+      setComments((current) => [...current, created]);
+      setReplyBody('');
+      setReplyToCommentId(undefined);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to add reply');
+    }
+  };
+
+  const onVoteIdea = async (value: -1 | 1): Promise<void> => {
+    if (!idea || !csrfToken) {
+      return;
+    }
+
+    try {
+      const summary = await runGuarded(() => ideaApi.voteIdea(idea.id, value, csrfToken));
+      setIdea((current) => (current
+        ? {
+            ...current,
+            ideaVotesUp: summary.upvotes,
+            ideaVotesDown: summary.downvotes,
+            ideaVotesTotal: summary.totalVotes ?? (summary.upvotes + summary.downvotes),
+          }
+        : current));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to vote on idea');
+    }
+  };
+
+  const onVoteComment = async (commentId: string, value: -1 | 1): Promise<void> => {
+    if (!idea || !csrfToken) {
+      return;
+    }
+
+    try {
+      const summary = await runGuarded(() => ideaApi.voteComment(idea.id, commentId, value, csrfToken));
+      setComments((current) => current.map((item) => {
+        if (item.id !== commentId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          upvotes: summary.upvotes,
+          downvotes: summary.downvotes,
+          score: summary.score ?? (summary.upvotes - summary.downvotes),
+        };
+      }));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to vote on comment');
+    }
+  };
+
+  const onDeleteComment = async (commentId: string): Promise<void> => {
+    if (!idea || !csrfToken) {
+      return;
+    }
+
+    try {
+      await runGuarded(() => ideaApi.deleteComment(idea.id, commentId, csrfToken));
+      setComments((current) => current.filter((item) => item.id !== commentId));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to delete comment');
     }
   };
 
@@ -264,16 +351,40 @@ export const IdeaDetailsPage = () => {
   const submittedAtAbsolute = new Date(idea.createdAt).toLocaleString();
   const submittedAtRelative = formatRelativeTime(idea.createdAt);
   const hasImagePreview = hasImageAttachmentPreview(idea);
+  const ideaVotesUp = idea.ideaVotesUp ?? 0;
+  const ideaVotesDown = idea.ideaVotesDown ?? 0;
+  const totalIdeaVotes = idea.ideaVotesTotal ?? (ideaVotesUp + ideaVotesDown);
+  const filledStars = totalIdeaVotes > 0 ? Math.round((ideaVotesUp / totalIdeaVotes) * 5) : 0;
 
   return (
     <main className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Idea Details</h1>
+          <h1 className="text-3xl font-semibold text-slate-900">{idea.title}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-            <span className="font-medium text-slate-900">{idea.title}</span>
-            <span className="font-semibold text-slate-700">Category: {idea.category}</span>
+            <span className="rounded-md border border-slate-300 bg-slate-50 px-2 py-1 font-semibold text-slate-700">Category: {idea.category}</span>
             <span title={submittedAtAbsolute}>Submitted {submittedAtRelative}</span>
+          </div>
+          <div className="mt-3 flex items-center gap-3 text-sm text-slate-700">
+            <span aria-label="Idea rating" className="text-amber-500">{'★'.repeat(filledStars)}{'☆'.repeat(5 - filledStars)}</span>
+            <span>Total votes: {totalIdeaVotes}</span>
+            <span className="text-xs text-slate-500">({ideaVotesUp} up / {ideaVotesDown} down)</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => { void onVoteIdea(1); }}
+              className="rounded-md border border-slate-300 px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-100"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              onClick={() => { void onVoteIdea(-1); }}
+              className="rounded-md border border-slate-300 px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-100"
+            >
+              ↓
+            </button>
           </div>
         </div>
         <Badge className={getStatusBadgeClassName(idea.status)}>{idea.status}</Badge>
@@ -289,36 +400,8 @@ export const IdeaDetailsPage = () => {
       ) : null}
       {successMessage ? <Alert severity="success" message={successMessage} className="mt-4" /> : null}
 
-      <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-        <h2 className="font-semibold text-slate-900">Description</h2>
-        <p className="mt-2 whitespace-pre-wrap">{idea.description}</p>
-      </section>
-
-      {(canEditOrDeleteAsOwner || isAdmin) ? (
-        <section className="mt-4 flex flex-wrap items-center gap-3">
-          {canEditOrDeleteAsOwner ? (
-            <button
-              type="button"
-              onClick={() => setIsEditing((current) => !current)}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              {isEditing ? 'Cancel Edit' : 'Edit Idea'}
-            </button>
-          ) : null}
-          {canDelete ? (
-            <button
-              type="button"
-              onClick={() => { void onDeleteIdea(); }}
-              className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-50"
-            >
-              Delete Idea
-            </button>
-          ) : null}
-        </section>
-      ) : null}
-
       {isEditing ? (
-        <section className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="text-base font-semibold text-slate-900">Edit Idea</h2>
           <form className="mt-3 space-y-3" onSubmit={onSaveEdit}>
             <label className="block text-sm font-medium text-slate-700">
@@ -351,12 +434,40 @@ export const IdeaDetailsPage = () => {
             </Button>
           </form>
         </section>
+      ) : (
+        <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          <h2 className="font-semibold text-slate-900">Description</h2>
+          <p className="mt-2 whitespace-pre-wrap">{idea.description}</p>
+        </section>
+      )}
+
+      {(canEditOrDeleteAsOwner || isAdmin) ? (
+        <section className="mt-4 flex flex-wrap items-center gap-3">
+          {canEditOrDeleteAsOwner ? (
+            <button
+              type="button"
+              onClick={() => setIsEditing((current) => !current)}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              {isEditing ? 'Cancel Edit' : 'Edit Idea'}
+            </button>
+          ) : null}
+          {canDelete ? (
+            <button
+              type="button"
+              onClick={() => { void onDeleteIdea(); }}
+              className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-50"
+            >
+              Delete Idea
+            </button>
+          ) : null}
+        </section>
       ) : null}
 
       {idea.attachment ? (
         <section className="mt-4">
           <h2 className="mb-2 text-sm font-semibold text-slate-900">Attachments</h2>
-          <Card className="flex max-w-md items-center justify-between gap-3 p-3">
+          <Card className="flex max-w-md items-center gap-2 p-3 transition hover:bg-slate-50">
             <a href={idea.attachment.url} target="_blank" rel="noreferrer" className="flex min-w-0 flex-1 items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-slate-100 text-slate-500">
                 {hasImagePreview ? (
@@ -380,7 +491,7 @@ export const IdeaDetailsPage = () => {
               aria-label={`Download ${idea.attachment.originalFileName}`}
               className="rounded-md border border-slate-300 px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-100"
             >
-              ↓
+              ⤓
             </a>
           </Card>
         </section>
@@ -390,7 +501,7 @@ export const IdeaDetailsPage = () => {
         <h2 className="text-base font-semibold text-slate-900">Comments</h2>
         <form className="mt-3 space-y-3" onSubmit={onSubmitComment}>
           <label className="block text-sm font-medium text-slate-700">
-            {replyToCommentId ? 'Reply' : 'Comment'}
+            Comment
             <textarea
               value={commentBody}
               onChange={(event) => setCommentBody(event.target.value)}
@@ -399,17 +510,8 @@ export const IdeaDetailsPage = () => {
           </label>
           <div className="flex items-center gap-2">
             <Button type="submit" variant="primary" disabled={isSubmitting || !commentBody.trim()}>
-              {isSubmitting ? 'Loading...' : replyToCommentId ? 'Reply' : 'Add Comment'}
+              {isSubmitting ? 'Loading...' : 'Add Comment'}
             </Button>
-            {replyToCommentId ? (
-              <button
-                type="button"
-                onClick={() => setReplyToCommentId(undefined)}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100"
-              >
-                Cancel reply
-              </button>
-            ) : null}
           </div>
         </form>
 
@@ -421,14 +523,71 @@ export const IdeaDetailsPage = () => {
               <li key={commentItem.id} className="rounded-md border border-slate-200 p-3" style={{ marginLeft: `${(commentItem.depth - 1) * 16}px` }}>
                 <p className="text-xs font-semibold text-slate-700">{commentItem.authorFullName} · {new Date(commentItem.createdAt).toLocaleString()}</p>
                 <p className="mt-1 text-sm text-slate-800">{commentItem.body}</p>
-                {commentItem.depth < 5 ? (
+                <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
                   <button
                     type="button"
-                    onClick={() => setReplyToCommentId(commentItem.id)}
-                    className="mt-2 text-xs font-medium text-blue-700 transition hover:text-blue-800"
+                    onClick={() => { void onVoteComment(commentItem.id, 1); }}
+                    className="rounded border border-slate-300 px-1.5 py-0.5 transition hover:bg-slate-100"
                   >
-                    Reply
+                    ↑
                   </button>
+                  <span>{commentItem.score ?? ((commentItem.upvotes ?? 0) - (commentItem.downvotes ?? 0))}</span>
+                  <button
+                    type="button"
+                    onClick={() => { void onVoteComment(commentItem.id, -1); }}
+                    className="rounded border border-slate-300 px-1.5 py-0.5 transition hover:bg-slate-100"
+                  >
+                    ↓
+                  </button>
+                  <span>({commentItem.upvotes ?? 0}/{commentItem.downvotes ?? 0})</span>
+                </div>
+                <div className="mt-2 flex items-center gap-3">
+                  {commentItem.depth < 5 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplyToCommentId((current) => (current === commentItem.id ? undefined : commentItem.id));
+                        setReplyBody('');
+                      }}
+                      className="text-xs font-medium text-blue-700 transition hover:text-blue-800"
+                    >
+                      Reply
+                    </button>
+                  ) : null}
+                  {(session?.role === 'admin' || session?.userId === commentItem.authorUserId) ? (
+                    <button
+                      type="button"
+                      onClick={() => { void onDeleteComment(commentItem.id); }}
+                      className="text-xs font-medium text-red-700 transition hover:text-red-800"
+                    >
+                      Delete
+                    </button>
+                  ) : null}
+                </div>
+                {replyToCommentId === commentItem.id ? (
+                  <form className="mt-3 space-y-2" onSubmit={onSubmitReply}>
+                    <textarea
+                      aria-label="Reply to comment"
+                      value={replyBody}
+                      onChange={(event) => setReplyBody(event.target.value)}
+                      className="min-h-20 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button type="submit" variant="primary" disabled={isSubmitting || !replyBody.trim()}>
+                        {isSubmitting ? 'Loading...' : 'Reply'}
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplyToCommentId(undefined);
+                          setReplyBody('');
+                        }}
+                        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 ) : null}
               </li>
             ))}

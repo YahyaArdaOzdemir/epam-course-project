@@ -176,6 +176,9 @@ export const IdeaListPage = () => {
               <p className="mt-1 text-xs text-slate-600">
                 {idea.status} · {idea.category} · shared: {String(idea.isShared)}
               </p>
+              <p className="mt-1 text-xs text-slate-600">
+                Votes: {idea.ideaVotesUp ?? 0}↑ / {idea.ideaVotesDown ?? 0}↓ ({idea.ideaVotesTotal ?? ((idea.ideaVotesUp ?? 0) + (idea.ideaVotesDown ?? 0))} total)
+              </p>
               {idea.latestEvaluationComment ? (
                 <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700">
                   Latest evaluation comment: {idea.latestEvaluationComment}

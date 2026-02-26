@@ -114,3 +114,21 @@ No constitution violations or justified exceptions required at plan stage.
 - Add idea mutation endpoints for update/delete with role-aware guards and status-aware owner checks.
 - Keep attachment storage unchanged; only UI interaction changes (preview target and dedicated download control).
 - Add dashboard shared-ideas query path that reuses existing list API visibility semantics with explicit `visibilityScope=all` for submitter discovery.
+
+## Change Addendum (2026-02-26, Wave 2)
+
+### Scope Propagation
+
+- Consolidate idea/evaluation detail experiences into one route/component with role-gated admin controls.
+- Add idea and comment voting domain behavior (upvote/downvote) with aggregated score metadata for list/detail/comment rendering.
+- Add rating presentation model for idea details using vote-ratio-to-5-stars projection and total-vote count.
+- Add redirect-on-delete UX for idea detail pages with back-navigation first and dashboard fallback.
+- Add inline reply composer anchored under target comment and comment-level delete permissions (owner/admin).
+- Resolve evaluation rejection failure by expanding allowed transition set for admin finalization from `Submitted`.
+
+### Architecture Notes
+
+- Introduce normalized vote tables for idea votes and comment votes with unique `(entity_id, user_id)` constraint and value domain `{-1, +1}`.
+- Extend idea/comment query projections to include vote aggregates and current-viewer vote state without changing existing auth boundaries.
+- Reuse existing idea details page as single source of truth for both `/ideas/:ideaId` and `/evaluation/:ideaId` routes.
+- Keep repository/service layering unchanged; add narrowly scoped repository methods for vote upsert/delete and comment deletion authorization checks.

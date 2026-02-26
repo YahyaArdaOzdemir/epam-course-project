@@ -49,6 +49,9 @@ export type IdeaListItem = {
   rowVersion: number;
   ownerUserId: string;
   latestEvaluationComment: string | null;
+  ideaVotesUp?: number;
+  ideaVotesDown?: number;
+  ideaVotesTotal?: number;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -127,6 +130,16 @@ export type IdeaComment = {
   updatedAt: string;
   authorEmail: string;
   authorFullName: string;
+  upvotes?: number;
+  downvotes?: number;
+  score?: number;
+};
+
+export type VoteSummary = {
+  upvotes: number;
+  downvotes: number;
+  totalVotes?: number;
+  score?: number;
 };
 
 export type IdeaCommentListResponse = {

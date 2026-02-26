@@ -24,7 +24,12 @@ const createCommentSchema = z.object({
   parentCommentId: z.string().uuid().optional(),
 });
 
+const voteSchema = z.object({
+  value: z.union([z.literal(1), z.literal(-1)]),
+});
+
 export const parseCreateIdeaPayload = (input: unknown) => validateOrThrow(createIdeaSchema, input);
 export const parseShareIdeaPayload = (input: unknown) => validateOrThrow(shareIdeaSchema, input);
 export const parseUpdateIdeaPayload = (input: unknown) => validateOrThrow(updateIdeaSchema, input);
 export const parseCreateCommentPayload = (input: unknown) => validateOrThrow(createCommentSchema, input);
+export const parseVotePayload = (input: unknown) => validateOrThrow(voteSchema, input);

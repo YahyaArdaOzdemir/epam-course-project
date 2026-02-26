@@ -5,6 +5,7 @@ import {
   parseCreateIdeaPayload,
   parseShareIdeaPayload,
   parseUpdateIdeaPayload,
+  parseVotePayload,
 } from '../validators/idea-validator';
 import { parseIdeaListQuery } from '../validators/idea-query-validator';
 import { ideaService } from '../services/idea-service';
@@ -150,6 +151,62 @@ export const ideaController = {
       });
 
       response.status(201).json(created);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  deleteComment(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
+    try {
+      const auth = request.auth!;
+      const ideaId = String(request.params.ideaId);
+      const commentId = String(request.params.commentId);
+      ideaCommentService.deleteComment({
+        ideaId,
+        commentId,
+        actorUserId: auth.userId,
+        actorRole: auth.role,
+      });
+
+      response.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  voteIdea(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
+    try {
+      const auth = request.auth!;
+      const ideaId = String(request.params.ideaId);
+      const payload = parseVotePayload(request.body);
+      const summary = ideaService.voteIdea({
+        ideaId,
+        actorUserId: auth.userId,
+        actorRole: auth.role,
+        value: payload.value,
+      });
+
+      response.status(200).json(summary);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  voteComment(request: AuthenticatedRequest, response: Response, next: NextFunction): void {
+    try {
+      const auth = request.auth!;
+      const ideaId = String(request.params.ideaId);
+      const commentId = String(request.params.commentId);
+      const payload = parseVotePayload(request.body);
+      const summary = ideaCommentService.voteComment({
+        ideaId,
+        commentId,
+        actorUserId: auth.userId,
+        actorRole: auth.role,
+        value: payload.value,
+      });
+
+      response.status(200).json(summary);
     } catch (error) {
       next(error);
     }
