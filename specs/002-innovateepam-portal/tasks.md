@@ -11,11 +11,11 @@
 
 **Purpose**: Ensure build/test/tooling baseline for this feature is aligned and reproducible.
 
-- [X] T001 [US1-US4] Align feature test commands and coverage gate in package.json
-- [X] T002 [US1-US4] Configure backend environment variable templates in backend/.env.example
-- [X] T003 [P] [US1-US4] Add shared backend domain constants in backend/src/lib/domain-constants.ts
-- [X] T004 [P] [US1-US4] Add shared frontend domain types in frontend/src/features/shared/domain-types.ts
-- [X] T005 [US1-US4] Add API contract validation script wiring (`npm run lint:openapi`) in package.json for specs/002-innovateepam-portal/contracts/openapi.yaml with non-zero exit on schema or reference errors
+- [X] T001 [US1-US6] Align feature test commands and coverage gate in package.json
+- [X] T002 [US1-US6] Configure backend environment variable templates in backend/.env.example
+- [X] T003 [P] [US1-US6] Add shared backend domain constants in backend/src/lib/domain-constants.ts
+- [X] T004 [P] [US1-US6] Add shared frontend domain types in frontend/src/features/shared/domain-types.ts
+- [X] T005 [US1-US6] Add API contract validation script wiring (`npm run lint:openapi`) in package.json for specs/002-innovateepam-portal/contracts/openapi.yaml with non-zero exit on schema or reference errors
 
 ---
 
@@ -25,13 +25,13 @@
 
 **⚠️ CRITICAL**: No user story implementation starts before this phase is complete.
 
-- [X] T006 [US1-US4] Add/refresh baseline migrations for auth and ideas in backend/src/lib/migrations/20260225_core_baseline.ts
-- [X] T007 [P] [US1-US4] Implement central auth/session guard utilities in backend/src/middleware/auth-guard.ts
-- [X] T008 [P] [US1-US4] Implement shared API error mapping in backend/src/middleware/error-handler.ts
-- [X] T009 [US1-US4] Implement CSRF middleware baseline in backend/src/middleware/csrf-guard.ts
-- [X] T010 [P] [US1-US4] Implement request validation helpers in backend/src/validators/common.ts
-- [X] T011 [US1-US4] Define backend repository contracts for core entities in backend/src/repositories/index.ts
-- [X] T012 [US1-US4] Record failing-proof checklist scaffolding in specs/002-innovateepam-portal/checklists/requirements.md
+- [X] T006 [US1-US6] Add/refresh baseline migrations for auth and ideas in backend/src/lib/migrations/20260225_core_baseline.ts
+- [X] T007 [P] [US1-US6] Implement central auth/session guard utilities in backend/src/middleware/auth-guard.ts
+- [X] T008 [P] [US1-US6] Implement shared API error mapping in backend/src/middleware/error-handler.ts
+- [X] T009 [US1-US6] Implement CSRF middleware baseline in backend/src/middleware/csrf-guard.ts
+- [X] T010 [P] [US1-US6] Implement request validation helpers in backend/src/validators/common.ts
+- [X] T011 [US1-US6] Define backend repository contracts for core entities in backend/src/repositories/index.ts
+- [X] T012 [US1-US6] Record failing-proof checklist scaffolding in specs/002-innovateepam-portal/checklists/requirements.md
 
 **Checkpoint**: Foundation complete — user stories can proceed.
 
@@ -133,44 +133,44 @@
 
 ---
 
-## Phase 6: User Story 4 - Post-Login Workspace and Global UX Feedback (Priority: P2)
+## Phase 6: User Stories 4-6 - Post-Login Workspace, Feedback Safety, and Accessibility (Priority: P2/P3)
 
-**Goal**: Shared protected shell, role-aware dashboard, standardized alerts, loading safety, and accessibility behaviors.
+**Goal**: Deliver three independently testable slices for protected shell/dashboard (US4), standardized feedback + submission safety (US5), and accessibility/interaction quality (US6).
 
-**Acceptance References**: US4 scenarios 1-15, FR-038..FR-042, FR-048..FR-053, FR-059..FR-062, FR-071..FR-075
+**Acceptance References**: US4 scenarios 1-11, US5 scenarios 1-5, US6 scenarios 1-4, FR-038..FR-042, FR-048..FR-053, FR-059..FR-062, FR-071..FR-075
 
-**Independent Test**: Verify shell/header/nav across protected pages, role-specific dashboard widgets, red/green alert behavior, duplicate-submit prevention, keyboard operation, ARIA semantics, and focus-to-error alert.
+**Independent Test**: Validate US4 shell/dashboard/profile flows independently, validate US5 alert and duplicate-submit safety independently, and validate US6 keyboard/focus/ARIA/interaction states independently.
 
-### Tests for User Story 4 (MANDATORY) ✅
+### Tests for User Stories 4-6 (MANDATORY) ✅
 
-- [X] T048 [P] [US4] Add shell/dashboard unit tests in frontend/tests/unit/protected-shell-dashboard.test.tsx
-- [X] T049 [P] [US4] Add alert/loading/a11y unit tests in frontend/tests/unit/ux-safety-a11y.test.tsx
-- [X] T050 [P] [US4] Add end-to-end shell/ux regression in e2e/tests/us4-shell-ux.spec.ts
-- [X] T051 [US4] Capture failing test evidence for US4 in specs/002-innovateepam-portal/checklists/us4-test-proof.md
-- [X] T068 [P] [US4] Add unit tests for ARIA announcement behavior (assertive error, polite success) in frontend/tests/unit/alert-aria-announcement.test.tsx
-- [X] T075 [P] [US4] Add unit tests for profile-view identity rendering and clickable header email navigation in frontend/tests/unit/app-public-entry-navigation.test.tsx
-- [X] T076 [P] [US4] Add unit tests for `My Ideas` and `Evaluation Queue` empty-state CTA rendering in frontend/tests/unit/idea-list-empty-states.test.tsx
-- [X] T077 [P] [US4] Add E2E assertion for logout redirect destination `/` in e2e/tests/us1-auth.spec.ts
+- [X] T048 [P] [US4-US6] Add shell/dashboard unit tests in frontend/tests/unit/protected-shell-dashboard.test.tsx
+- [X] T049 [P] [US4-US6] Add alert/loading/a11y unit tests in frontend/tests/unit/ux-safety-a11y.test.tsx
+- [X] T050 [P] [US4-US6] Add end-to-end shell/ux regression in e2e/tests/us4-shell-ux.spec.ts
+- [X] T051 [US4-US6] Capture failing test evidence for workspace UX slices in specs/002-innovateepam-portal/checklists/us4-test-proof.md
+- [X] T068 [P] [US4-US6] Add unit tests for ARIA announcement behavior (assertive error, polite success) in frontend/tests/unit/alert-aria-announcement.test.tsx
+- [X] T075 [P] [US4-US6] Add unit tests for profile-view identity rendering and clickable header email navigation in frontend/tests/unit/app-public-entry-navigation.test.tsx
+- [X] T076 [P] [US4-US6] Add unit tests for `My Ideas` and `Evaluation Queue` empty-state CTA rendering in frontend/tests/unit/idea-list-empty-states.test.tsx
+- [X] T077 [P] [US4-US6] Add E2E assertion for logout redirect destination `/` in e2e/tests/us1-auth.spec.ts
 
-### Implementation for User Story 4
+### Implementation for User Stories 4-6
 
-- [X] T052 [P] [US4] Implement shared protected layout with active nav in frontend/src/features/layout/ProtectedLayout.tsx
-- [X] T053 [US4] Implement role-aware dashboard widgets in frontend/src/features/dashboard/DashboardPage.tsx
-- [X] T054 [US4] Implement standardized alert component with severity semantics in frontend/src/features/shared/Alert.tsx
-- [X] T055 [US4] Implement form loading/disable/re-enable behavior in frontend/src/features/shared/useSubmissionGuard.ts
-- [X] T056 [US4] Implement focus-to-error-alert helper in frontend/src/features/shared/focus-error-alert.ts
-- [X] T057 [US4] Apply ARIA labels/roles to auth forms in frontend/src/features/auth/AuthPage.tsx
-- [X] T069 [US4] Apply ARIA labels/roles to idea submission/listing forms in frontend/src/features/ideas/IdeaSubmissionForm.tsx
-- [X] T070 [US4] Apply ARIA labels/roles to evaluation forms in frontend/src/features/evaluation/AdminEvaluationPage.tsx
-- [X] T058 [US4] Add/Update JSDoc for exported US4 APIs in frontend/src/features/layout/ProtectedLayout.tsx
-- [X] T071 [US4] Implement alert live-region behavior (`role="alert"` assertive errors, `role="status"` polite success) in frontend/src/features/shared/Alert.tsx
-- [X] T078 [US4] Implement protected profile view, header email-link routing, and logout redirect to public landing in frontend/src/App.tsx and frontend/src/features/auth/pages/ProfilePage.tsx
-- [X] T079 [US4] Implement `My Ideas` and `Evaluation Queue` empty-state components and CTA actions in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
-- [X] T080 [US4] Apply visible hover/active feedback styling to primary/secondary controls in frontend/src/styles.css and protected-shell surfaces
-- [X] T081 [US4] Formalize evaluation-detail UI constraints for status badges, Outlook-style attachment cards, relative/absolute submission timestamps, and read-vs-write section separation in frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx
-- [X] T082 [US4] Align idea-details visual treatment with evaluation detail and enhance evaluation queue with status/category filter bar, wait-time metadata, and high-latency visual cues in frontend/src/features/ideas/pages/IdeaDetailsPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
+- [X] T052 [P] [US4-US6] Implement shared protected layout with active nav in frontend/src/features/layout/ProtectedLayout.tsx
+- [X] T053 [US4-US6] Implement role-aware dashboard widgets in frontend/src/features/dashboard/DashboardPage.tsx
+- [X] T054 [US4-US6] Implement standardized alert component with severity semantics in frontend/src/features/shared/Alert.tsx
+- [X] T055 [US4-US6] Implement form loading/disable/re-enable behavior in frontend/src/features/shared/useSubmissionGuard.ts
+- [X] T056 [US4-US6] Implement focus-to-error-alert helper in frontend/src/features/shared/focus-error-alert.ts
+- [X] T057 [US4-US6] Apply ARIA labels/roles to auth forms in frontend/src/features/auth/AuthPage.tsx
+- [X] T069 [US4-US6] Apply ARIA labels/roles to idea submission/listing forms in frontend/src/features/ideas/IdeaSubmissionForm.tsx
+- [X] T070 [US4-US6] Apply ARIA labels/roles to evaluation forms in frontend/src/features/evaluation/AdminEvaluationPage.tsx
+- [X] T058 [US4-US6] Add/Update JSDoc for exported workspace UX APIs in frontend/src/features/layout/ProtectedLayout.tsx
+- [X] T071 [US4-US6] Implement alert live-region behavior (`role="alert"` assertive errors, `role="status"` polite success) in frontend/src/features/shared/Alert.tsx
+- [X] T078 [US4-US6] Implement protected profile view, header email-link routing, and logout redirect to public landing in frontend/src/App.tsx and frontend/src/features/auth/pages/ProfilePage.tsx
+- [X] T079 [US4-US6] Implement `My Ideas` and `Evaluation Queue` empty-state components and CTA actions in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
+- [X] T080 [US4-US6] Apply visible hover/active feedback styling to primary/secondary controls in frontend/src/styles.css and protected-shell surfaces
+- [X] T081 [US4-US6] Formalize evaluation-detail UI constraints for status badges, Outlook-style attachment cards, relative/absolute submission timestamps, and read-vs-write section separation in frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx
+- [X] T082 [US4-US6] Align idea-details visual treatment with evaluation detail and enhance evaluation queue with status/category filter bar, wait-time metadata, and high-latency visual cues in frontend/src/features/ideas/pages/IdeaDetailsPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
 
-**Checkpoint**: US4 is independently functional and testable.
+**Checkpoint**: US4-US6 slices are independently functional and testable.
 
 ---
 
@@ -178,11 +178,11 @@
 
 **Purpose**: Final hardening, conformance, and release evidence.
 
-- [X] T059 [P] [US1-US4] Validate OpenAPI conformance updates in specs/002-innovateepam-portal/contracts/openapi.yaml
-- [X] T060 [US1-US4] Run quickstart acceptance validation and record results in specs/002-innovateepam-portal/checklists/quickstart-validation.md
-- [X] T061 [P] [US1-US4] Verify coverage/report gates and update evidence in specs/002-innovateepam-portal/checklists/coverage-report.md
-- [X] T062 [US1-US4] Verify test-distribution balance and record in specs/002-innovateepam-portal/checklists/release-readiness.md
-- [X] T063 [US1-US4] Refresh ADR/spec traceability notes in docs/adr/README.md
+- [X] T059 [P] [US1-US6] Validate OpenAPI conformance updates in specs/002-innovateepam-portal/contracts/openapi.yaml
+- [X] T060 [US1-US6] Run quickstart acceptance validation and record results in specs/002-innovateepam-portal/checklists/quickstart-validation.md
+- [X] T061 [P] [US1-US6] Verify coverage/report gates and update evidence in specs/002-innovateepam-portal/checklists/coverage-report.md
+- [X] T062 [US1-US6] Verify test-distribution balance and record in specs/002-innovateepam-portal/checklists/release-readiness.md
+- [X] T063 [US1-US6] Refresh ADR/spec traceability notes in docs/adr/README.md
 
 ---
 
@@ -200,11 +200,13 @@
 - **US1 (P1)**: no dependency on other user stories; first MVP slice.
 - **US2 (P2)**: depends on US1 auth/session baseline.
 - **US3 (P3)**: depends on US1 auth baseline and US2 idea entities/routes.
-- **US4 (P2)**: depends on US1 for protected shell; integrates with US2/US3 pages.
+- **US4 (P2)**: depends on US1 for protected shell and role-dashboard baseline.
+- **US5 (P2)**: depends on US4 shell/component baseline and integrates with US1/US2/US3 form and API error surfaces.
+- **US6 (P3)**: depends on US4 shell and US5 feedback mechanics for complete keyboard/ARIA/focus validation.
 
 ### Completion Order Graph
 
-`US1 -> US2 -> US3 -> US4`
+`US1 -> US2 -> US3 -> US4 -> US5 -> US6`
 
 ---
 
@@ -225,7 +227,7 @@
 - T037 and T038 can run in parallel (unit + integration tests).
 - T041 and T042 can run in parallel after failing tests are captured.
 
-### US4
+### US4-US6
 
 - T048 and T049 can run in parallel (shell/dashboard + ux/a11y tests).
 - T052 and T054 can run in parallel (layout + shared alerts).
@@ -247,14 +249,16 @@
 2. Add US2 and validate independently.
 3. Add US3 and validate independently.
 4. Add US4 and validate independently.
-5. Run Phase 7 polish before release cut.
+5. Add US5 and validate independently.
+6. Add US6 and validate independently.
+7. Run Phase 7 polish before release cut.
 
 ### Team Parallelization
 
 1. Team completes Phases 1-2 together.
 2. Then split by story ownership:
 	- Dev A: US1/US2 backend threads
-	- Dev B: US2/US4 frontend threads
+	- Dev B: US2/US4-US6 frontend threads
 	- Dev C: US3 evaluation and timeline threads
 
 ---
@@ -265,4 +269,4 @@
 - Every story phase includes tests first, then implementation.
 - Do not mock business logic; mock/fake only external I/O boundaries.
 - Keep task evidence up to date in `specs/002-innovateepam-portal/checklists/`.
-- Shared tasks tagged `[US1-US4]` explicitly trace to all story scopes per constitution traceability requirements.
+- Shared tasks tagged `[US1-US6]` explicitly trace to all story scopes per constitution traceability requirements.

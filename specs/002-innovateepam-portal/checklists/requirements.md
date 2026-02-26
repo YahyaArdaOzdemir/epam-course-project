@@ -15,7 +15,7 @@
 
 - [x] No unresolved clarification markers
 - [x] Requirements are testable and measurable
-- [x] Acceptance scenarios are covered for US1-US4
+- [x] Acceptance scenarios are covered for US1-US6
 - [x] Security, visibility, and concurrency edge cases are represented
 - [x] Dependencies and assumptions are explicit
 

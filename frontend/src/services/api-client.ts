@@ -1,9 +1,28 @@
 const defaultBaseUrl = '/api';
 
+const resolveApiBaseUrl = (): string => {
+  const runtime = globalThis as {
+    process?: { env?: Record<string, string | undefined> };
+    VITE_API_BASE_URL?: unknown;
+  };
+
+  const processEnvBaseUrl =
+    runtime.process?.env && typeof runtime.process.env.VITE_API_BASE_URL === 'string'
+      ? runtime.process.env.VITE_API_BASE_URL
+      : undefined;
+
+  const globalEnvBaseUrl =
+    runtime.VITE_API_BASE_URL && typeof runtime.VITE_API_BASE_URL === 'string'
+      ? runtime.VITE_API_BASE_URL
+      : undefined;
+
+  return processEnvBaseUrl ?? globalEnvBaseUrl ?? defaultBaseUrl;
+};
+
 export class ApiClient {
   private readonly baseUrl: string;
 
-  constructor(baseUrl = import.meta.env.VITE_API_BASE_URL ?? defaultBaseUrl) {
+  constructor(baseUrl = resolveApiBaseUrl()) {
     this.baseUrl = baseUrl;
   }
 

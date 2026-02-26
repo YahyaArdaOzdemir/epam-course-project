@@ -90,17 +90,20 @@ test('supports reset success and rejects expired/reused reset tokens', async ({ 
 
   await page.goto(`/reset-password/confirm?token=${expiredToken}`);
   await page.getByLabel('New Password').fill('StrongPass123!');
+  await page.getByLabel('Confirm Password').fill('StrongPass123!');
   await page.getByRole('button', { name: 'Reset password' }).click();
   await expect(page.getByText('Reset link is invalid or expired. Request a new one.').first()).toBeVisible();
 
   await page.goto(`/reset-password/confirm?token=${validToken}`);
   await page.getByLabel('New Password').fill(newPassword);
+  await page.getByLabel('Confirm Password').fill(newPassword);
   await page.getByRole('button', { name: 'Reset password' }).click();
   await expect(page.getByText('Password reset completed').first()).toBeVisible();
 
   await page.goto('/reset-password/confirm');
   await page.getByLabel('Reset Token').fill(validToken);
   await page.getByLabel('New Password').fill('AnotherStrong123!');
+  await page.getByLabel('Confirm Password').fill('AnotherStrong123!');
   await page.getByRole('button', { name: 'Reset password' }).click();
   await expect(page.getByText('Reset link is invalid or expired. Request a new one.').first()).toBeVisible();
 

@@ -5,7 +5,7 @@
 
 ## Summary
 
-Deliver MVP in four story slices with quality/safety built in: secure local auth and recovery (US1), idea submission and listing with server-side query controls (US2), admin evaluation with optimistic concurrency and timeline auditability (US3), and protected app shell plus robust UX/a11y behavior (US4). Implementation continues test-first under strict TypeScript with explicit API contracts and >=80% changed-code coverage.
+Deliver MVP in six INVEST-aligned story slices with quality/safety built in: secure local auth and recovery (US1), idea submission and listing with server-side query controls (US2), admin evaluation with optimistic concurrency and timeline auditability (US3), post-login shell and role dashboard (US4), standardized feedback and submission safety (US5), and accessibility/interaction baseline behaviors (US6). Implementation continues test-first under strict TypeScript with explicit API contracts and >=80% changed-code coverage.
 
 ## Technical Context
 
@@ -17,7 +17,7 @@ Deliver MVP in four story slices with quality/safety built in: secure local auth
 **Project Type**: Monorepo web application (`backend`, `frontend`, `e2e`)  
 **Performance Goals**: Protected-route auth/session checks and list responses return within practical UAT thresholds; pagination required for large listings  
 **Constraints**: TDD-first, strict TS + JSDoc on exported surfaces, no business-logic mocking, 10 MiB attachment cap, CSRF for authenticated writes, 5/15min auth throttles  
-**Scale/Scope**: Internal employee MVP with two roles (`submitter`, `admin`), four user stories, API + web UI
+**Scale/Scope**: Internal employee MVP with two roles (`submitter`, `admin`), six user stories, API + web UI
 
 ## Constitution Check
 
@@ -25,7 +25,7 @@ Deliver MVP in four story slices with quality/safety built in: secure local auth
 
 ### Pre-Design Gate
 
-- **Story/Spec Traceability**: PASS — Plan is anchored to US1-US4 and FR-001..FR-075.
+- **Story/Spec Traceability**: PASS — Plan is anchored to US1-US6 and FR-001..FR-075.
 - **Strict TypeScript**: PASS — strict TS explicitly required for API/domain/frontend contracts.
 - **Documentation Discipline**: PASS — exported APIs/types remain JSDoc-documented by constitution rule.
 - **TDD First**: PASS — implementation sequencing remains tests-first per story.
@@ -87,7 +87,7 @@ e2e/
 
 ## Constitution Check (Post-Design Re-check)
 
-- **Story/Spec Traceability**: PASS — design artifacts map back to US1-US4 and acceptance scenarios.
+- **Story/Spec Traceability**: PASS — design artifacts map back to US1-US6 and acceptance scenarios.
 - **Strict TypeScript**: PASS — contracts and model names retain strict-typing compatibility.
 - **Documentation Discipline**: PASS — API schema surfaces provide explicit contract definitions for generated docs/types.
 - **TDD First**: PASS — no implementation sequencing change; tasks remain fail-first.

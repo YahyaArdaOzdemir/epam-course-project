@@ -32,3 +32,18 @@
 | Lines | 82.06% | >=80% | PASS |
 
 - Test result summary: `34` suites passed, `101` tests passed.
+
+## Latest Run (2026-02-26)
+
+- Command: `CI=true npm run test:coverage -- --runInBand --silent`
+- Result: ✅ Passed coverage gate with improved auth-service branch/function coverage
+
+| Metric | Value | Threshold | Status |
+|--------|-------|-----------|--------|
+| Statements | 95.54% | >=80% | PASS |
+| Branches | 88.79% | n/a (reported) | PASS |
+| Functions | 85.41% | n/a (reported) | PASS |
+| Lines | 95.30% | >=80% | PASS |
+
+- Focus file improvement: `backend/src/services/auth-service.ts` now reports Statements `100%`, Branches `96.66%`, Functions `100%`, Lines `100%`.
+- Test result summary: `30` suites passed, `124` tests passed.

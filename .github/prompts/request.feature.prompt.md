@@ -74,7 +74,7 @@ Downstream-only edits (implementation/task/plan changes without required upstrea
 
 ### 4.5) TDD Protocol Enforcement (MANDATORY)
 If the request involves writing or modifying logic (JS/TS/Python code):
-1. **Test First:** You MUST generate/update the corresponding Test File (`.test.ts` or `.spec.ts`) first.
+1. **Test First:** You MUST generate/update the corresponding Test File (e.g. `.test.ts` or `.spec.ts`) first.
 2. **Red State:** The test must explicitly target the new requirement.
 3. **Implementation Second:** Only AFTER the test is defined may you generate the implementation code.
 

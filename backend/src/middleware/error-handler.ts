@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import multer from 'multer';
+import multer = require('multer');
 import { AppError } from '../lib/errors';
 
 export const errorHandler = (

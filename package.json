@@ -15,7 +15,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest --selectProjects backend-unit frontend-unit",
     "test:integration": "jest --selectProjects backend-integration frontend-integration",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage --selectProjects backend-unit frontend-unit",
     "test:e2e": "playwright test",
     "lint:openapi": "swagger-cli validate specs/002-innovateepam-portal/contracts/openapi.yaml",
     "lint": "npm --workspace backend run lint && npm --workspace frontend run lint",

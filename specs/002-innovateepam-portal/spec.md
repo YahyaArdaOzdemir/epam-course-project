@@ -21,7 +21,7 @@
 
 ## Constitution Alignment *(mandatory)*
 
-- **Referenced User Story IDs**: US1, US2, US3, US4
+- **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
 - **Spec Approval Evidence**: This specification is the authoritative scope artifact for `002-innovateepam-portal`; new planning and implementation updates continue from this baseline.
 - **TypeScript Strictness Impact**: Feature behavior and data rules must be expressible under strict typing, with no ungoverned unsafe typing shortcuts.
 - **JSDoc Impact**: All exported APIs introduced for authentication, idea submission, listing, status updates, and evaluation actions require complete JSDoc.
@@ -29,7 +29,7 @@
 - **Test Distribution Plan**: This feature targets Unit 70%, Integration 20%, E2E 10%.
 - **Coverage Plan**: Changed production code must maintain at least 80% line coverage before merge.
 - **Mocking Boundaries**: Only external I/O boundaries may be mocked/faked; business logic evaluation and status rules remain unmocked in tests.
-- **Story Coverage Integrity**: Functional requirements map to existing stories with no orphan scope items (US1 auth/recovery, US2 submission/listing query, US3 evaluation/audit, US4 shell/ux/a11y).
+- **Story Coverage Integrity**: Functional requirements map to existing stories with no orphan scope items (US1 auth/recovery, US2 submission/listing query, US3 evaluation/audit, US4 shell/navigation/profile, US5 feedback/submission safety, US6 accessibility/interaction quality).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -93,13 +93,13 @@ As an admin, I can review submitted ideas, move them through review states, and 
 
 ---
 
-### User Story 4 - Post-Login Workspace and Global UX Feedback (Priority: P2)
+### User Story 4 - Post-Login Workspace Shell and Role Dashboard (Priority: P2)
 
-As an authenticated employee, I can land on a clear dashboard and navigate with persistent account context, while all form/API failures are shown as visible red UI alerts.
+As an authenticated employee, I can land on a role-appropriate dashboard and navigate protected routes inside a consistent shell with persistent identity context.
 
-**Why this priority**: Functional workflows are complete, but usability and clarity are not sufficient for day-to-day adoption without a post-login home and explicit UI feedback.
+**Why this priority**: A coherent post-login shell is the first daily touchpoint and is required before deeper UX improvements can be reliably experienced.
 
-**Independent Test**: Can be fully tested by logging in, verifying redirect to dashboard, confirming persistent header with signed-in email/logout, validating keyboard-only flow completion, and provoking validation failures to confirm visible red alerts with managed focus.
+**Independent Test**: Can be fully tested by authenticating, validating dashboard redirect + role widgets, checking shared layout/header/nav behavior across protected routes, and verifying profile/logout flows.
 
 **Acceptance Scenarios**:
 
@@ -110,19 +110,45 @@ As an authenticated employee, I can land on a clear dashboard and navigate with 
 5. **Given** an authenticated user with `submitter` role opens `/dashboard`, **When** dashboard widgets load, **Then** they see a prominent `Submit New Idea` CTA and a `My Ideas` summary widget showing counts for their own ideas.
 6. **Given** an authenticated user with admin role opens `/dashboard`, **When** dashboard widgets load, **Then** they see an `Evaluation Queue` summary count and `Recent Decisions` quick links.
 7. **Given** dashboard shell and role widgets are implemented in the frontend, **When** TypeScript strict mode checks component contracts, **Then** props for layout and dashboard widgets are defined with explicit strict TypeScript interfaces/types and pass compilation without unsafe typing shortcuts.
-8. **Given** a form/API request fails validation or authorization, **When** the response returns an error, **Then** a visible red alert with actionable message is shown in-page (not console-only).
-9. **Given** a user submits a form, **When** request is pending, **Then** submit action is disabled and loading state is visible to prevent duplicate submits.
-10. **Given** a user double-clicks a form submit action, **When** the first click starts a pending request, **Then** only one network request is sent and no duplicate action is created.
-11. **Given** a protected-page API call returns HTTP 500, **When** the UI receives the error response, **Then** a visible red error alert is rendered in-page and not only logged to browser console.
-12. **Given** a state-changing action succeeds, **When** the success response is rendered, **Then** a green success alert is displayed using the shared alert component and may auto-dismiss.
-13. **Given** a keyboard-only user (Tab/Enter/Space) executes Login, Submit Idea, or Evaluate flows, **When** controls are operated without mouse input, **Then** each flow is fully completable with correct focus order and actionable controls.
-14. **Given** a form submission fails, **When** the error alert is rendered, **Then** keyboard focus moves to the visible alert region so screen-reader and keyboard users are notified immediately.
-15. **Given** form inputs and alerts are rendered, **When** assistive technologies inspect semantics, **Then** inputs expose proper labels and alerts expose appropriate ARIA roles.
-16. **Given** an authenticated user views protected-shell identity context, **When** dashboard and header identity labels render, **Then** user-facing identity uses account `fullName` (not raw internal GUID values) with fallback-safe formatting.
-17. **Given** an authenticated user clicks their header email identity link, **When** profile view opens, **Then** the UI shows full name, email, and role plus a dedicated logout action.
-18. **Given** an authenticated user logs out from shell header or profile view, **When** logout succeeds, **Then** the user is redirected to public landing page `/`.
-19. **Given** `My Ideas` or `Evaluation Queue` has zero results, **When** page content renders, **Then** a visible empty-state message and a context-appropriate CTA are shown.
-20. **Given** users interact with primary/secondary buttons, **When** pointer hover or active press occurs, **Then** controls show visible hover and active feedback states.
+8. **Given** an authenticated user views protected-shell identity context, **When** dashboard and header identity labels render, **Then** user-facing identity uses account `fullName` (not raw internal GUID values) with fallback-safe formatting.
+9. **Given** an authenticated user clicks their header email identity link, **When** profile view opens, **Then** the UI shows full name, email, and role plus a dedicated logout action.
+10. **Given** an authenticated user logs out from shell header or profile view, **When** logout succeeds, **Then** the user is redirected to public landing page `/`.
+11. **Given** `My Ideas` or `Evaluation Queue` has zero results, **When** page content renders, **Then** a visible empty-state message and a context-appropriate CTA are shown.
+
+---
+
+### User Story 5 - Standardized Feedback and Submission Safety (Priority: P2)
+
+As an authenticated employee, I receive clear in-page success/error feedback and protected form submission behavior that prevents duplicate actions.
+
+**Why this priority**: Reliable feedback and submit safety directly reduce user confusion and accidental duplicate requests in high-frequency workflows.
+
+**Independent Test**: Can be fully tested by provoking form/API errors and success states, validating red/green shared alerts, and confirming pending-state duplicate prevention under rapid submit interactions.
+
+**Acceptance Scenarios**:
+
+1. **Given** a form/API request fails validation or authorization, **When** the response returns an error, **Then** a visible red alert with actionable message is shown in-page (not console-only).
+2. **Given** a user submits a form, **When** request is pending, **Then** submit action is disabled and loading state is visible to prevent duplicate submits.
+3. **Given** a user double-clicks a form submit action, **When** the first click starts a pending request, **Then** only one network request is sent and no duplicate action is created.
+4. **Given** a protected-page API call returns HTTP 500, **When** the UI receives the error response, **Then** a visible red error alert is rendered in-page and not only logged to browser console.
+5. **Given** a state-changing action succeeds, **When** the success response is rendered, **Then** a green success alert is displayed using the shared alert component and may auto-dismiss.
+
+---
+
+### User Story 6 - Accessibility and Interaction Quality Baseline (Priority: P3)
+
+As a keyboard-only or assistive-technology user, I can complete core workflows with proper focus behavior, semantic announcements, and clear interactive control states.
+
+**Why this priority**: Accessibility and interaction quality ensure all employees can use the portal reliably and safely across core workflows.
+
+**Independent Test**: Can be fully tested via keyboard-only walkthroughs, focus-management assertions on failure paths, accessibility-semantic checks for labels/alerts, and interaction-state checks for actionable controls.
+
+**Acceptance Scenarios**:
+
+1. **Given** a keyboard-only user (Tab/Enter/Space) executes Login, Submit Idea, or Evaluate flows, **When** controls are operated without mouse input, **Then** each flow is fully completable with correct focus order and actionable controls.
+2. **Given** a form submission fails, **When** the error alert is rendered, **Then** keyboard focus moves to the visible alert region so screen-reader and keyboard users are notified immediately.
+3. **Given** form inputs and alerts are rendered, **When** assistive technologies inspect semantics, **Then** inputs expose proper labels and alerts expose appropriate ARIA roles.
+4. **Given** users interact with primary/secondary buttons, **When** pointer hover or active press occurs, **Then** controls show visible hover and active feedback states.
 
 ---
 

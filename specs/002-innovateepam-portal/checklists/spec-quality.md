@@ -1,6 +1,6 @@
 # Requirements Quality Checklist: InnovatEPAM Portal
 
-**Purpose**: Validate whether the requirements are complete, clear, consistent, measurable, and implementation-ready across US1-US4 for reviewer gate use.
+**Purpose**: Validate whether the requirements are complete, clear, consistent, measurable, and implementation-ready across US1-US6 for reviewer gate use.
 **Created**: 2026-02-25
 **Feature**: [Feature Specification](../spec.md)
 
@@ -17,7 +17,7 @@
 
 ## Requirement Clarity
 
-- [x] CHK007 Is the role model unambiguous across the spec (only `submitter` and `admin`) with no conflicting synonyms? [Clarity, Spec §FR-020, Spec §US1-US4]
+- [x] CHK007 Is the role model unambiguous across the spec (only `submitter` and `admin`) with no conflicting synonyms? [Clarity, Spec §FR-020, Spec §US1-US6]
 - [x] CHK008 Are attachment constraints clearly quantified (allowed types and exact size limit in bytes) with no interpretation ambiguity? [Clarity, Spec §FR-025, Spec §FR-026]
 - [x] CHK009 Is "server-side pagination" defined with enough specificity (page size semantics/metadata expectations) to avoid divergent implementations? [Ambiguity, Spec §FR-054]
 - [x] CHK010 Is "role-appropriate dashboard" defined with explicit widget/CTA requirements per role rather than general wording? [Clarity, Spec §US4 Acceptance, Spec §FR-050, Spec §FR-051]
@@ -40,7 +40,7 @@
 
 ## Scenario Coverage
 
-- [x] CHK021 Are primary scenarios covered across auth, submit/list, evaluate, and dashboard/shell workflows? [Coverage, Spec §US1-US4]
+- [x] CHK021 Are primary scenarios covered across auth, submit/list, evaluate, dashboard/shell, feedback safety, and accessibility workflows? [Coverage, Spec §US1-US6]
 - [x] CHK022 Are alternate scenarios defined for role-based dashboard divergence and shared-idea comment visibility? [Coverage, Spec §US4 Acceptance, Spec §US3 Acceptance]
 - [x] CHK023 Are exception scenarios covered for invalid/expired sessions, invalid tokens, throttling, and optimistic concurrency conflicts? [Coverage, Spec §US1 Acceptance, Spec §US3 Acceptance, Spec §Edge Cases]
 - [x] CHK024 Are recovery scenarios defined after failures (retry after stale write, re-enabled controls after failed submit, focus recovery path)? [Coverage, Spec §FR-036, Spec §FR-042, Spec §FR-061]

@@ -20,7 +20,7 @@ test('submitter can submit and list an idea', async ({ page }) => {
   await page.goto('/ideas/new');
   await page.getByLabel('Title').fill('Idea A');
   await page.getByLabel('Description').fill('Description A');
-  await page.getByLabel('Category').fill('DX');
+  await page.getByLabel('Category').selectOption('Other');
   await page.getByRole('button', { name: 'Submit Idea' }).click();
 
   await expect(page.getByText('Idea submitted').first()).toBeVisible();
