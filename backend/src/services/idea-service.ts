@@ -38,6 +38,13 @@ const createIdea = (input: {
   title: string;
   description: string;
   category: string;
+  dynamicFields?: {
+    currentPainPoints?: string;
+    targetUserPersona?: string;
+    estimatedAnnualSavings?: number;
+    targetDepartment?: string;
+    proposedSoftwareHardware?: string;
+  };
   isShared?: boolean;
   file?: Express.Multer.File;
 }) => {

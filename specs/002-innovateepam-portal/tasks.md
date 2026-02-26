@@ -336,3 +336,22 @@
 - [X] T110 [US3-US6] Update idea details comment/evaluation rendering for highlighted decision block, rejected-status comment lock, submitter read-only message removal, and retained attachment card behavior in frontend/src/features/ideas/pages/IdeaDetailsPage.tsx
 - [X] T111 [US4-US6] Update idea list and evaluation queue vote/status presentation to net-vote + status-pill parity in frontend/src/features/ideas/pages/IdeaListPage.tsx and frontend/src/features/evaluation/pages/EvaluationQueuePage.tsx
 - [X] T112 [US4-US6] Remove unused evaluation detail page artifact and related exports/tests references in frontend/src/features/evaluation/pages/EvaluationDetailPage.tsx and frontend/src/features/evaluation/pages/index.ts
+
+---
+
+## Phase 11: Change Request 2026-02-26 (Wave 4 - Dynamic Submission Forms and Draft Continuation)
+
+**Purpose**: Add category-driven dynamic submission fields, persisted drafts with dashboard resume affordance, and left-aligned dashboard layout split.
+
+### Tests for Change Request (MANDATORY)
+
+- [X] T113 [P] [US2-US6] Add/update frontend unit tests for category enum expansion, dynamic field visibility, stale-value clearing, and create payload integration in frontend/tests/unit/idea-submit-page-refactor.test.tsx
+- [X] T114 [P] [US2-US6] Add backend validator unit tests for dynamic field/category validation and expanded query categories in backend/tests/unit/idea-validator-dynamic-fields.test.ts
+- [X] T115 [P] [US4-US6] Add/update dashboard unit tests for left/middle panel layout, draft pill visibility, and draft resume link behavior in frontend/tests/unit/dashboard-shared-ideas.test.tsx
+
+### Implementation for Change Request
+
+- [X] T116 [US2-US6] Implement submission form dynamic fields and stale-state reset behavior in frontend/src/features/ideas/pages/IdeaSubmitPage.tsx
+- [X] T117 [US2-US6] Implement dynamic follow-up payload contract + backend validation for create requests in frontend/src/services/contracts.ts, frontend/src/features/ideas/services/idea-service.ts, backend/src/validators/idea-validator.ts, and backend/src/validators/idea-query-validator.ts
+- [X] T118 [US4-US6] Implement per-user draft persistence and resume flow in frontend/src/features/ideas/services/idea-draft-storage.ts and frontend/src/features/ideas/pages/IdeaSubmitPage.tsx
+- [X] T119 [US4-US6] Refactor dashboard to left-aligned split layout with combined own/shared idea list and draft pill rendering in frontend/src/features/auth/pages/DashboardPage.tsx

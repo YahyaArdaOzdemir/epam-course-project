@@ -5,7 +5,7 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Select } from '../../../components/ui/Select';
-import { IdeaDetails } from '../../../services/contracts';
+import { IdeaCategory, IdeaDetails } from '../../../services/contracts';
 import { useAuth } from '../../auth/hooks/useAuth';
 import {
   formatAttachmentSize,
@@ -30,7 +30,7 @@ export const IdeaDetailsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editCategory, setEditCategory] = useState<'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other'>('Other');
+  const [editCategory, setEditCategory] = useState<IdeaCategory>('Other');
   const [comments, setComments] = useState<Array<{
     id: string;
     ideaId: string;
@@ -423,10 +423,12 @@ export const IdeaDetailsPage = () => {
             </label>
             <label className="block text-sm font-medium text-slate-700">
               Category
-              <Select value={editCategory} onChange={(event) => setEditCategory(event.target.value as 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other')}>
+              <Select value={editCategory} onChange={(event) => setEditCategory(event.target.value as IdeaCategory)}>
                 <option value="Process Improvement">Process Improvement</option>
                 <option value="Product Feature">Product Feature</option>
                 <option value="Cost Saving">Cost Saving</option>
+                <option value="Workplace Wellness">Workplace Wellness</option>
+                <option value="Technology/IT">Technology/IT</option>
                 <option value="Other">Other</option>
               </Select>
             </label>

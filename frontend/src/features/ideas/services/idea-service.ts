@@ -20,6 +20,9 @@ export const ideaApi = {
     formData.append('description', payload.description);
     formData.append('category', payload.category);
     formData.append('isShared', payload.isShared ? 'true' : 'false');
+    if (payload.dynamicFields) {
+      formData.append('dynamicFields', JSON.stringify(payload.dynamicFields));
+    }
     if (payload.file) {
       formData.append('file', payload.file);
     }

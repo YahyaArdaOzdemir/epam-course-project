@@ -71,7 +71,113 @@ describe('idea submission page refactor', () => {
     expect(select).not.toBeNull();
 
     const optionTexts = Array.from(select?.querySelectorAll('option') ?? []).map((option) => option.textContent?.trim());
-    expect(optionTexts).toEqual(['Select category', 'Process Improvement', 'Product Feature', 'Cost Saving', 'Other']);
+    expect(optionTexts).toEqual([
+      'Select category',
+      'Process Improvement',
+      'Product Feature',
+      'Cost Saving',
+      'Workplace Wellness',
+      'Technology/IT',
+      'Other',
+    ]);
+  });
+
+  test('renders category-specific dynamic fields and clears stale values when switching to Other', async () => {
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    const categorySelect = container.querySelector('select[aria-label="Category"]') as HTMLSelectElement;
+
+    await act(async () => {
+      categorySelect.value = 'Process Improvement';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const painPointsInput = container.querySelector('textarea[aria-label="Current Pain Points"]') as HTMLTextAreaElement;
+    expect(painPointsInput).not.toBeNull();
+
+    await act(async () => {
+      painPointsInput.value = 'Manual approvals delay releases';
+      painPointsInput.dispatchEvent(new Event('input', { bubbles: true }));
+      categorySelect.value = 'Other';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(container.querySelector('textarea[aria-label="Current Pain Points"]')).toBeNull();
+  });
+
+  test('submits dynamic field payload for cost saving category', async () => {
+    mockedIdeaCreate.mockResolvedValue({
+      id: 'idea-cost-1',
+      title: 'Cut cloud spend',
+      category: 'Cost Saving',
+      status: 'Submitted',
+      isShared: false,
+      rowVersion: 0,
+      ownerUserId: 'u-1',
+      latestEvaluationComment: null,
+    });
+
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    const titleInput = container.querySelector('input[aria-label="Title"]') as HTMLInputElement;
+    const descriptionInput = container.querySelector('textarea[aria-label="Description"]') as HTMLTextAreaElement;
+    const categorySelect = container.querySelector('select[aria-label="Category"]') as HTMLSelectElement;
+
+    await act(async () => {
+      titleInput.value = 'Cut cloud spend';
+      titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+      descriptionInput.value = 'Autoscale non-prod clusters overnight.';
+      descriptionInput.dispatchEvent(new Event('input', { bubbles: true }));
+      categorySelect.value = 'Cost Saving';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const savingsInput = container.querySelector('input[aria-label="Estimated Annual Savings ($)"]') as HTMLInputElement;
+    expect(savingsInput).not.toBeNull();
+
+    await act(async () => {
+      savingsInput.value = '50000';
+      savingsInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    const form = container.querySelector('form') as HTMLFormElement;
+    await act(async () => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(mockedIdeaCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: 'Cost Saving',
+        dynamicFields: {
+          estimatedAnnualSavings: 50000,
+        },
+      }),
+      'csrf-token',
+    );
+  });
+
+  test('supports technology and wellness follow-up fields', async () => {
+    await act(async () => {
+      renderSubmitPage(root);
+    });
+
+    const categorySelect = container.querySelector('select[aria-label="Category"]') as HTMLSelectElement;
+
+    await act(async () => {
+      categorySelect.value = 'Workplace Wellness';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    expect(container.querySelector('input[aria-label="Target Department"]')).not.toBeNull();
+
+    await act(async () => {
+      categorySelect.value = 'Technology/IT';
+      categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    expect(container.querySelector('input[aria-label="Proposed Software/Hardware"]')).not.toBeNull();
   });
 
   test('renders standardized red alert when submission fails', async () => {

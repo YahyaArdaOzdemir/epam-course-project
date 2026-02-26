@@ -9,7 +9,14 @@ import { ideaApi } from '../services/idea-service';
 import { getStatusBadgeClassName } from '../utils/idea-display';
 
 const statusOptions: Array<IdeaStatus> = ['Submitted', 'Under Review', 'Accepted', 'Rejected'];
-const categoryOptions: Array<IdeaCategory> = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'];
+const categoryOptions: Array<IdeaCategory> = [
+  'Process Improvement',
+  'Product Feature',
+  'Cost Saving',
+  'Workplace Wellness',
+  'Technology/IT',
+  'Other',
+];
 
 export const IdeaListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

@@ -1,6 +1,12 @@
 export type Role = 'submitter' | 'admin';
 export type IdeaStatus = 'Submitted' | 'Under Review' | 'Accepted' | 'Rejected';
-export type IdeaCategory = 'Process Improvement' | 'Product Feature' | 'Cost Saving' | 'Other';
+export type IdeaCategory =
+  | 'Process Improvement'
+  | 'Product Feature'
+  | 'Cost Saving'
+  | 'Workplace Wellness'
+  | 'Technology/IT'
+  | 'Other';
 
 export type IdeaSortBy = 'date' | 'status';
 export type IdeaSortDirection = 'Newest' | 'Oldest';
@@ -97,6 +103,13 @@ export type IdeaCreateRequest = {
   title: string;
   description: string;
   category: IdeaCategory;
+  dynamicFields?: {
+    currentPainPoints?: string;
+    targetUserPersona?: string;
+    estimatedAnnualSavings?: number;
+    targetDepartment?: string;
+    proposedSoftwareHardware?: string;
+  };
   isShared?: boolean;
   file?: File;
 };

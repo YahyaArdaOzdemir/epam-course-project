@@ -74,6 +74,22 @@ describe('dashboard shared ideas and onboarding copy', () => {
   });
 
   it('renders welcome guidance and shared ideas list for submitter', async () => {
+    window.localStorage.setItem(
+      'innovateepam.ideaDrafts.u-1',
+      JSON.stringify([
+        {
+          id: 'draft-1',
+          userId: 'u-1',
+          title: 'Draft: Reduce onboarding friction',
+          description: 'Draft body',
+          category: 'Other',
+          dynamicFields: {},
+          isShared: false,
+          updatedAt: new Date().toISOString(),
+        },
+      ]),
+    );
+
     await act(async () => {
       root.render(
         <MemoryRouter>
@@ -88,10 +104,18 @@ describe('dashboard shared ideas and onboarding copy', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(container.textContent).toContain('Welcome Arda User');
-    expect(container.textContent).toContain('here you can');
-    expect(container.textContent).toContain('Shared ideas');
+    const leftPanel = container.querySelector('[data-testid="dashboard-left-panel"]');
+    const middlePanel = container.querySelector('[data-testid="dashboard-middle-panel"]');
+
+    expect(leftPanel).not.toBeNull();
+    expect(middlePanel).not.toBeNull();
+    expect(container.textContent).toContain('Welcome Arda User,');
+    expect(container.textContent).toContain('Here you can submit ideas, track your progress, and collaborate through shared idea discussions.');
+    expect(container.textContent).toContain('Idea List');
     expect(container.textContent).toContain('Shared innovation');
+    expect(container.textContent).toContain('Draft: Reduce onboarding friction');
+    expect(container.textContent).toContain('Draft');
+    expect(container.querySelector('a[href="/ideas/new?draftId=draft-1"]')).not.toBeNull();
     expect(container.textContent ?? '').not.toContain('Signed in as Arda User');
   });
 });

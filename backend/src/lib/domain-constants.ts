@@ -4,7 +4,14 @@ export type UserRole = (typeof USER_ROLES)[number];
 export const USER_STATUSES = ['active', 'suspended'] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-export const IDEA_CATEGORIES = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'] as const;
+export const IDEA_CATEGORIES = [
+	'Process Improvement',
+	'Product Feature',
+	'Cost Saving',
+	'Workplace Wellness',
+	'Technology/IT',
+	'Other',
+] as const;
 export type IdeaCategory = (typeof IDEA_CATEGORIES)[number];
 
 export const IDEA_STATUSES = ['Submitted', 'Under Review', 'Accepted', 'Rejected'] as const;

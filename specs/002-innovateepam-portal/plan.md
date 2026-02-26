@@ -150,3 +150,18 @@ No constitution violations or justified exceptions required at plan stage.
 - Keep unified detail route/component (`/ideas/:ideaId` and alias routes) and remove dead evaluation-detail page artifact from exports to avoid ghost imports.
 - Implement comment-lock policy as UI capability gating derived from idea status + role, without altering existing comment data contracts.
 - Reuse existing badge primitives for status-pill parity in `My Ideas` rows.
+
+## Change Addendum (2026-02-26, Wave 4 - Dynamic Submission and Draft Continuation)
+
+### Scope Propagation
+
+- Extend category enum contract across frontend/backend to include `Workplace Wellness` and `Technology/IT`.
+- Add category-specific dynamic follow-up fields on submission with strict hide/reset behavior when category changes to `Other` or empty.
+- Persist in-progress submission drafts in frontend storage and expose dashboard resume workflow with `Draft` pill indicator.
+- Re-layout submitter dashboard body to left-aligned overview panel plus middle combined own/shared ideas list while keeping existing role-based widgets.
+
+### Architecture Notes
+
+- Keep dynamic follow-up fields payload as optional structured object attached to create request (`dynamicFields`) with backend validation by category.
+- Implement drafts as per-user local persistence (`localStorage`) keyed by authenticated `userId` to avoid schema/migration churn in this phase.
+- Reuse existing dashboard queries (`owner` and `all` visibility scopes) to build middle-panel combined list and avoid introducing new backend endpoints.

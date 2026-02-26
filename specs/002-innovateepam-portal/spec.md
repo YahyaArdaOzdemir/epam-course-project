@@ -36,6 +36,13 @@
 - Q: Can rejected ideas receive discussion comments? → A: Rejected ideas are comment-locked for regular users; comments may resume only after a subsequent admin evaluation update re-opens interaction context.
 - Q: What dashboard identity copy is required? → A: Dashboard header should show personalized welcome guidance only; separate signed-in identity line is not rendered on dashboard body.
 
+### Session 2026-02-26 (Change Request Wave 4)
+
+- Q: Which additional categories are supported in submission dropdown? → A: Category dropdown MUST include `Workplace Wellness` and `Technology/IT` in addition to baseline options.
+- Q: How should category-specific follow-up inputs behave? → A: Submission form MUST render one category-specific follow-up field based on selected category and MUST clear/hide prior dynamic field values when switching category to `Other` or empty.
+- Q: How should unfinished submissions behave across refresh/navigation? → A: Unsubmitted idea forms MUST persist as per-user drafts, and dashboard MUST list drafts with a `Draft` pill and resume link to the form.
+- Q: How should dashboard body be laid out for submitters? → A: Dashboard content card stays left-aligned with welcome summary on the left panel and combined own/shared idea list in the middle panel.
+
 ## Constitution Alignment *(mandatory)*
 
 - **Referenced User Story IDs**: US1, US2, US3, US4, US5, US6
@@ -84,7 +91,9 @@ As a submitter, I can create ideas with title, description, category, and one op
 1. **Given** an authenticated submitter on the idea form, **When** they provide title, description, category selected from the category dropdown, and optionally one file, **Then** the idea is saved with status `Submitted` and appears in the list.
 2. **Given** an authenticated submitter, **When** they upload more than one file for a single idea, **Then** submission is rejected with a clear validation message.
 3. **Given** an authenticated submitter, **When** they upload an unsupported file type or a file larger than 10 MiB (10,485,760 bytes), **Then** submission is rejected with a clear validation message.
-4. **Given** an authenticated submitter, **When** they attempt to submit category input outside the allowed dropdown values (`Process Improvement`, `Product Feature`, `Cost Saving`, `Other`), **Then** submission is rejected with a clear validation message.
+4. **Given** an authenticated submitter, **When** they attempt to submit category input outside the allowed dropdown values (`Process Improvement`, `Product Feature`, `Cost Saving`, `Workplace Wellness`, `Technology/IT`, `Other`), **Then** submission is rejected with a clear validation message.
+8. **Given** an authenticated submitter chooses a category with follow-up requirements, **When** they switch category to `Other` or clear the category selection, **Then** previously shown dynamic follow-up fields are hidden and stale values are cleared from submission payload.
+9. **Given** a submitter leaves an unfinished submission and returns later, **When** they open dashboard and resume from draft list, **Then** the draft restores form state and continues editing without stale category-specific values from unrelated categories.
 5. **Given** an authenticated submitter with many ideas, **When** they browse listing pages, **Then** results are returned via server-side pagination with deterministic page size and navigation controls.
 6. **Given** an authenticated submitter on idea listing, **When** they apply filters for status, category, and date range, **Then** only matching ideas are returned.
 7. **Given** an authenticated submitter on idea listing, **When** they sort by date (`Newest`/`Oldest`) or status, **Then** list order updates correctly and consistently.
@@ -247,7 +256,7 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-044**: System MUST deny non-owners from accessing owner-only listing/detail routes in user-facing idea views.
 - **FR-045**: System MUST preserve submitted title/description/category/owner/time and attachment metadata when attachment is present.
 - **FR-046**: System MUST require registration confirm-password input to exactly match the password before account creation succeeds.
-- **FR-047**: System MUST enforce category enumeration for idea submission as exactly: `Process Improvement`, `Product Feature`, `Cost Saving`, `Other`.
+- **FR-047**: System MUST enforce category enumeration for idea submission as exactly: `Process Improvement`, `Product Feature`, `Cost Saving`, `Workplace Wellness`, `Technology/IT`, `Other`.
 - **FR-048**: System MUST render a persistent protected-layout header containing product name, authenticated user email, role badge (`Submitter` or `Admin`), and logout action.
 - **FR-049**: System MUST visually indicate the active protected-page navigation item corresponding to the current route.
 - **FR-050**: System MUST provide submitter dashboard view with a prominent `Submit New Idea` CTA and a `My Ideas` summary widget scoped to the current user.
@@ -307,6 +316,10 @@ As a keyboard-only or assistive-technology user, I can complete core workflows w
 - **FR-105**: System MUST suppress submitter-only read-only warning text on idea details and instead rely on omission of admin-only controls.
 - **FR-106**: System MUST lock comment creation and reply actions for non-admin users while idea status is `Rejected`, unless and until a subsequent admin evaluation update re-enables commenting context.
 - **FR-107**: System MUST display status in `My Ideas` list rows using the same badge-style status pill treatment used across other idea views.
+- **FR-108**: System MUST render category-specific follow-up inputs on idea submission as: `Current Pain Points` (Process Improvement), `Target User Persona` (Product Feature), `Estimated Annual Savings ($)` (Cost Saving), `Target Department` (Workplace Wellness), and `Proposed Software/Hardware` (Technology/IT).
+- **FR-109**: System MUST clear and omit dynamic follow-up values from payload when category changes to `Other` or no category is selected.
+- **FR-110**: System MUST persist in-progress submission drafts per authenticated submitter across refresh/navigation and MUST surface those drafts on dashboard with a visible `Draft` pill and resume action.
+- **FR-111**: System MUST render dashboard body as a left-aligned container where welcome summary remains in a left panel and combined own/shared idea list is presented in a middle panel.
 
 ### Assumptions
 

@@ -9,7 +9,14 @@ import { ideaApi } from '../../ideas/services/idea-service';
 import { formatRelativeTime, getStatusBadgeClassName, getWaitTimeDays } from '../../ideas/utils/idea-display';
 
 const statusFilterOptions: Array<IdeaStatus> = ['Submitted', 'Under Review'];
-const categoryFilterOptions: Array<IdeaCategory> = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'];
+const categoryFilterOptions: Array<IdeaCategory> = [
+  'Process Improvement',
+  'Product Feature',
+  'Cost Saving',
+  'Workplace Wellness',
+  'Technology/IT',
+  'Other',
+];
 
 export const EvaluationQueuePage = () => {
   const [ideas, setIdeas] = useState<IdeaListItem[]>([]);

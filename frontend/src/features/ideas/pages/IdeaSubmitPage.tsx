@@ -1,25 +1,83 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert } from '../../../components/ui/Alert';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { IdeaCategory } from '../../shared/domain-types';
 import { focusErrorAlert } from '../../shared/focus-error-alert';
 import { useSubmissionGuard } from '../../shared/useSubmissionGuard';
 import { ideaApi } from '../services/idea-service';
+import { loadDraftById, removeDraft, upsertDraft } from '../services/idea-draft-storage';
 
-const IDEA_CATEGORIES: IdeaCategory[] = ['Process Improvement', 'Product Feature', 'Cost Saving', 'Other'];
+const IDEA_CATEGORIES: IdeaCategory[] = [
+  'Process Improvement',
+  'Product Feature',
+  'Cost Saving',
+  'Workplace Wellness',
+  'Technology/IT',
+  'Other',
+];
 const IDEA_SUBMIT_ERROR_ALERT_ID = 'idea-submit-error-alert';
+
+const buildDynamicPayload = (
+  category: IdeaCategory,
+  fields: {
+    currentPainPoints: string;
+    targetUserPersona: string;
+    estimatedAnnualSavings: string;
+    targetDepartment: string;
+    proposedSoftwareHardware: string;
+  },
+) => {
+  if (category === 'Process Improvement' && fields.currentPainPoints.trim()) {
+    return { currentPainPoints: fields.currentPainPoints.trim() };
+  }
+
+  if (category === 'Product Feature' && fields.targetUserPersona.trim()) {
+    return { targetUserPersona: fields.targetUserPersona.trim() };
+  }
+
+  if (category === 'Cost Saving' && fields.estimatedAnnualSavings.trim()) {
+    return { estimatedAnnualSavings: Number(fields.estimatedAnnualSavings) };
+  }
+
+  if (category === 'Workplace Wellness' && fields.targetDepartment.trim()) {
+    return { targetDepartment: fields.targetDepartment.trim() };
+  }
+
+  if (category === 'Technology/IT' && fields.proposedSoftwareHardware.trim()) {
+    return { proposedSoftwareHardware: fields.proposedSoftwareHardware.trim() };
+  }
+
+  return undefined;
+};
+
+const createDraftId = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `draft-${Date.now()}`;
+};
 
 export const IdeaSubmitPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<IdeaCategory | ''>('');
+  const [dynamicFields, setDynamicFields] = useState({
+    currentPainPoints: '',
+    targetUserPersona: '',
+    estimatedAnnualSavings: '',
+    targetDepartment: '',
+    proposedSoftwareHardware: '',
+  });
   const [isShared, setIsShared] = useState(false);
   const [file, setFile] = useState<File | undefined>();
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const { csrfToken } = useAuth();
+  const [activeDraftId, setActiveDraftId] = useState(() => searchParams.get('draftId') ?? createDraftId());
+  const { csrfToken, session } = useAuth();
   const { isSubmitting, runGuarded } = useSubmissionGuard();
 
   useEffect(() => {
@@ -27,6 +85,76 @@ export const IdeaSubmitPage = () => {
       focusErrorAlert(IDEA_SUBMIT_ERROR_ALERT_ID);
     }
   }, [errorMessage]);
+
+  useEffect(() => {
+    const draftIdFromQuery = searchParams.get('draftId');
+    if (!session || !draftIdFromQuery) {
+      return;
+    }
+
+    const draft = loadDraftById(session.userId, draftIdFromQuery);
+    if (!draft) {
+      return;
+    }
+
+    setActiveDraftId(draft.id);
+    setTitle(draft.title);
+    setDescription(draft.description);
+    setCategory(draft.category);
+    setDynamicFields({
+      currentPainPoints: draft.dynamicFields.currentPainPoints ?? '',
+      targetUserPersona: draft.dynamicFields.targetUserPersona ?? '',
+      estimatedAnnualSavings: draft.dynamicFields.estimatedAnnualSavings ?? '',
+      targetDepartment: draft.dynamicFields.targetDepartment ?? '',
+      proposedSoftwareHardware: draft.dynamicFields.proposedSoftwareHardware ?? '',
+    });
+    setIsShared(draft.isShared);
+  }, [searchParams, session]);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    const hasContent = Boolean(
+      title.trim()
+      || description.trim()
+      || category
+      || dynamicFields.currentPainPoints.trim()
+      || dynamicFields.targetUserPersona.trim()
+      || dynamicFields.estimatedAnnualSavings.trim()
+      || dynamicFields.targetDepartment.trim()
+      || dynamicFields.proposedSoftwareHardware.trim()
+      || isShared,
+    );
+
+    if (!hasContent) {
+      removeDraft(session.userId, activeDraftId);
+      return;
+    }
+
+    upsertDraft({
+      id: activeDraftId,
+      userId: session.userId,
+      title,
+      description,
+      category,
+      dynamicFields,
+      isShared,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [activeDraftId, category, description, dynamicFields, isShared, session, title]);
+
+  const onCategoryChange = (nextCategory: IdeaCategory | ''): void => {
+    setCategory(nextCategory);
+    setDynamicFields({
+      currentPainPoints: '',
+      targetUserPersona: '',
+      estimatedAnnualSavings: '',
+      targetDepartment: '',
+      proposedSoftwareHardware: '',
+    });
+  };
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -45,12 +173,27 @@ export const IdeaSubmitPage = () => {
     }
 
     const validatedCategory = category as IdeaCategory;
+    const payloadDynamicFields = buildDynamicPayload(validatedCategory, dynamicFields);
 
     try {
       const createdIdea =
       await runGuarded(async () => {
-        return ideaApi.create({ title, description, category: validatedCategory, isShared, file }, csrfToken);
+        return ideaApi.create(
+          {
+            title,
+            description,
+            category: validatedCategory,
+            dynamicFields: payloadDynamicFields,
+            isShared,
+            file,
+          },
+          csrfToken,
+        );
       });
+      if (session) {
+        removeDraft(session.userId, activeDraftId);
+      }
+      setActiveDraftId(createDraftId());
       navigate(`/ideas/${createdIdea.id}`);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to submit idea.');
@@ -72,6 +215,7 @@ export const IdeaSubmitPage = () => {
             aria-label="Title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
+            onInput={(event) => setTitle((event.target as HTMLInputElement).value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             required
           />
@@ -82,6 +226,7 @@ export const IdeaSubmitPage = () => {
             aria-label="Description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            onInput={(event) => setDescription((event.target as HTMLTextAreaElement).value)}
             className="mt-1 min-h-32 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             required
           />
@@ -91,7 +236,7 @@ export const IdeaSubmitPage = () => {
           <select
             aria-label="Category"
             value={category}
-            onChange={(event) => setCategory(event.target.value as IdeaCategory | '')}
+            onChange={(event) => onCategoryChange(event.target.value as IdeaCategory | '')}
             className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             required
           >
@@ -105,6 +250,68 @@ export const IdeaSubmitPage = () => {
             ))}
           </select>
         </label>
+        {category === 'Process Improvement' ? (
+          <label className="block text-sm font-medium text-slate-700">
+            Current Pain Points
+            <textarea
+              aria-label="Current Pain Points"
+              value={dynamicFields.currentPainPoints}
+              onChange={(event) => setDynamicFields((current) => ({ ...current, currentPainPoints: event.target.value }))}
+              onInput={(event) => setDynamicFields((current) => ({ ...current, currentPainPoints: (event.target as HTMLTextAreaElement).value }))}
+              className="mt-1 min-h-24 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </label>
+        ) : null}
+        {category === 'Product Feature' ? (
+          <label className="block text-sm font-medium text-slate-700">
+            Target User Persona
+            <input
+              aria-label="Target User Persona"
+              value={dynamicFields.targetUserPersona}
+              onChange={(event) => setDynamicFields((current) => ({ ...current, targetUserPersona: event.target.value }))}
+              onInput={(event) => setDynamicFields((current) => ({ ...current, targetUserPersona: (event.target as HTMLInputElement).value }))}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </label>
+        ) : null}
+        {category === 'Cost Saving' ? (
+          <label className="block text-sm font-medium text-slate-700">
+            Estimated Annual Savings ($)
+            <input
+              aria-label="Estimated Annual Savings ($)"
+              type="number"
+              min="0"
+              value={dynamicFields.estimatedAnnualSavings}
+              onChange={(event) => setDynamicFields((current) => ({ ...current, estimatedAnnualSavings: event.target.value }))}
+              onInput={(event) => setDynamicFields((current) => ({ ...current, estimatedAnnualSavings: (event.target as HTMLInputElement).value }))}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </label>
+        ) : null}
+        {category === 'Workplace Wellness' ? (
+          <label className="block text-sm font-medium text-slate-700">
+            Target Department
+            <input
+              aria-label="Target Department"
+              value={dynamicFields.targetDepartment}
+              onChange={(event) => setDynamicFields((current) => ({ ...current, targetDepartment: event.target.value }))}
+              onInput={(event) => setDynamicFields((current) => ({ ...current, targetDepartment: (event.target as HTMLInputElement).value }))}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </label>
+        ) : null}
+        {category === 'Technology/IT' ? (
+          <label className="block text-sm font-medium text-slate-700">
+            Proposed Software/Hardware
+            <input
+              aria-label="Proposed Software/Hardware"
+              value={dynamicFields.proposedSoftwareHardware}
+              onChange={(event) => setDynamicFields((current) => ({ ...current, proposedSoftwareHardware: event.target.value }))}
+              onInput={(event) => setDynamicFields((current) => ({ ...current, proposedSoftwareHardware: (event.target as HTMLInputElement).value }))}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </label>
+        ) : null}
         <label className="block text-sm font-medium text-slate-700">
           Attachment
           <input
